@@ -1,7 +1,7 @@
 ---
 title: "About this blog"
 description: |
-  Some additional details about the blog
+  I am Jun Peng, currently in my third year in the School of Computing & Information Systems at Singapore Management University.
 ---
 
 ```{r setup, include=FALSE}

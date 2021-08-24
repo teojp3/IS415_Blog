@@ -3,17 +3,17 @@
     {
       "path": "about.html",
       "title": "About this blog",
-      "description": "Some additional details about the blog",
+      "description": "I am Jun Peng, currently in my third year in the School of Computing & Information Systems at Singapore Management University.",
       "author": [],
       "contents": "\r\n\r\n\r\n\r\n",
-      "last_modified": "2021-08-23T17:59:24+08:00"
+      "last_modified": "2021-08-24T14:10:55+08:00"
     },
     {
       "path": "index.html",
       "title": "IS415 Web Blog",
       "author": [],
       "contents": "\r\n\r\n\r\n\r\n",
-      "last_modified": "2021-08-23T17:59:25+08:00"
+      "last_modified": "2021-08-24T14:03:48+08:00"
     }
   ],
   "collections": ["posts/posts.json"]
