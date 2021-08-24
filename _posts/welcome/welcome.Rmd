@@ -5,7 +5,7 @@ description: |
   reading what we have to say!
 author:
   - name: Teo Jun Peng
-    url: https://example.com/norajones
+    url: https://teojp3-is415.netlify.app/
     affiliation: School of Computing and Information Systems, Singapore Management University
     affiliation_url: https://scis.smu.edu.sg
 date: 08-23-2021

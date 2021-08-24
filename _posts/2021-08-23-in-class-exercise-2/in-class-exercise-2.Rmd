@@ -4,7 +4,7 @@ description: |
   In this hands-on exercise, I learnt how to handle geospatial data in R by using sf package.
 author:
   - name: Teo Jun Peng
-    url: https://example.com/norajones
+    url: https://teojp3-is415.netlify.app/
 date: 08-23-2021
 output:
   distill::distill_article:
