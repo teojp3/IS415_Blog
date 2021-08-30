@@ -177,7 +177,7 @@ boxmap <- function(vnam, df,
                    mult=1.5){
   var <- get.var(vnam,df)
   bb <- boxbreaks(var)
-  tm_shape(df) +
+  tm_shape(mpszpop2020) +
      tm_fill(vnam,title=legtitle,
              breaks=bb,
              palette="Blues",
@@ -213,7 +213,7 @@ mpszpop2020a <- mpszpop2020 %>%
 ```{r}
 var <- get.var("AGED%", mpszpop2020a)
 boxbreaks(var)
-boxmap("AGED%",mpszpop2020a)
+boxmap("AGED",mpszpop2020a)
 ```
 
 

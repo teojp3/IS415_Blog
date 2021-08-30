@@ -2281,7 +2281,7 @@ Take-home Exercise
                    <span class='va'>mult</span><span class='op'>=</span><span class='fl'>1.5</span><span class='op'>)</span><span class='op'>{</span>
   <span class='va'>var</span> <span class='op'>&lt;-</span> <span class='fu'>get.var</span><span class='op'>(</span><span class='va'>vnam</span>,<span class='va'>df</span><span class='op'>)</span>
   <span class='va'>bb</span> <span class='op'>&lt;-</span> <span class='fu'>boxbreaks</span><span class='op'>(</span><span class='va'>var</span><span class='op'>)</span>
-  <span class='fu'>tm_shape</span><span class='op'>(</span><span class='va'>df</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>tm_shape</span><span class='op'>(</span><span class='va'>mpszpop2020</span><span class='op'>)</span> <span class='op'>+</span>
      <span class='fu'>tm_fill</span><span class='op'>(</span><span class='va'>vnam</span>,title<span class='op'>=</span><span class='va'>legtitle</span>,
              breaks<span class='op'>=</span><span class='va'>bb</span>,
              palette<span class='op'>=</span><span class='st'>"Blues"</span>,
@@ -2329,7 +2329,7 @@ Take-home Exercise
 <pre><code>[1] -2.367018  0.000000 11.271651 16.202946 20.364098 34.002767
 [7] 95.000000</code></pre>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>boxmap</span><span class='op'>(</span><span class='st'>"AGED%"</span>,<span class='va'>mpszpop2020a</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>boxmap</span><span class='op'>(</span><span class='st'>"AGED"</span>,<span class='va'>mpszpop2020a</span><span class='op'>)</span>
 </code></pre>
 </div>
 <p><img src="in-class-exercise-3_files/figure-html5/unnamed-chunk-15-1.png" width="624" /></p>
