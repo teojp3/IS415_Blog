@@ -2,6 +2,8 @@
 title: "About this blog"
 description: |
   I am Jun Peng, currently in my third year in the School of Computing & Information Systems at Singapore Management University.
+  
+  Welcome to my personal workspace! The content listed on the blog will mainly be related to Geospatial Analytics, a module I'm currently taking this semester.
 ---
 
 ```{r setup, include=FALSE}

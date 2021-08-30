@@ -1,7 +1,7 @@
-name: "Jun Peng IS415 Blog"
-title: "IS415 Blog"
+name: "Jun Peng's Workspace"
+title: "Jun Peng's Workspace"
 description: |
-  IS415 Web Blog
+  Jun Peng's Workspace
 output_dir: "_site"
 navbar:
   right:
