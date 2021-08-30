@@ -20,7 +20,7 @@ knitr::opts_chunk$set(echo = TRUE)
 This code chunk create a list of R packages needed.
 
 ```{r}
-packages = c('sf', 'tmap', 'tidyverse')
+packages = c('sf', 'tmap', 'tidyverse', 'readr')
 for (p in packages){
   if(!require(p, character.only = T)){
     install.packages(p)
@@ -82,6 +82,10 @@ popdata2020 <- popdata2020 %>%
 ```{r}
 mpsz_pop2020 <- left_join(mpsz, popdata2020,
                           by = c("SUBZONE_N" = "SZ"))
+```
+
+```{r}
+mpszpop2020 <- write_rds(mpsz_pop2020, "data/handson3data/rds/mpszpop2020.rds")
 ```
 
 ## Examples of Choropleth Mapping with Geospatial Data Using tmap
