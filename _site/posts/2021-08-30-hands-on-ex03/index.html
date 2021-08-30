@@ -117,7 +117,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <!--/radix_placeholder_rmarkdown_metadata-->
   
   <script type="text/json" id="radix-resource-manifest">
-  {"type":"character","attributes":{},"value":["data/aspatial/respopagesexfa2011to2020.csv","data/geospatial/MP14_SUBZONE_WEB_PL.dbf","data/geospatial/MP14_SUBZONE_WEB_PL.prj","data/geospatial/MP14_SUBZONE_WEB_PL.sbn","data/geospatial/MP14_SUBZONE_WEB_PL.sbx","data/geospatial/MP14_SUBZONE_WEB_PL.shp","data/geospatial/MP14_SUBZONE_WEB_PL.shp.xml","data/geospatial/MP14_SUBZONE_WEB_PL.shx","hands-on-ex03_files/anchor-4.2.2/anchor.min.js","hands-on-ex03_files/bowser-1.9.3/bowser.min.js","hands-on-ex03_files/distill-2.2.21/template.v2.js","hands-on-ex03_files/figure-html5/unnamed-chunk-10-1.png","hands-on-ex03_files/figure-html5/unnamed-chunk-11-1.png","hands-on-ex03_files/figure-html5/unnamed-chunk-12-1.png","hands-on-ex03_files/figure-html5/unnamed-chunk-13-1.png","hands-on-ex03_files/figure-html5/unnamed-chunk-14-1.png","hands-on-ex03_files/figure-html5/unnamed-chunk-15-1.png","hands-on-ex03_files/figure-html5/unnamed-chunk-17-1.png","hands-on-ex03_files/figure-html5/unnamed-chunk-18-1.png","hands-on-ex03_files/figure-html5/unnamed-chunk-19-1.png","hands-on-ex03_files/figure-html5/unnamed-chunk-20-1.png","hands-on-ex03_files/figure-html5/unnamed-chunk-21-1.png","hands-on-ex03_files/figure-html5/unnamed-chunk-22-1.png","hands-on-ex03_files/figure-html5/unnamed-chunk-24-1.png","hands-on-ex03_files/figure-html5/unnamed-chunk-25-1.png","hands-on-ex03_files/figure-html5/unnamed-chunk-26-1.png","hands-on-ex03_files/figure-html5/unnamed-chunk-27-1.png","hands-on-ex03_files/figure-html5/unnamed-chunk-28-1.png","hands-on-ex03_files/figure-html5/unnamed-chunk-8-1.png","hands-on-ex03_files/figure-html5/unnamed-chunk-9-1.png","hands-on-ex03_files/header-attrs-2.10/header-attrs.js","hands-on-ex03_files/jquery-1.11.3/jquery.min.js","hands-on-ex03_files/popper-2.6.0/popper.min.js","hands-on-ex03_files/tippy-6.2.7/tippy-bundle.umd.min.js","hands-on-ex03_files/tippy-6.2.7/tippy-light-border.css","hands-on-ex03_files/tippy-6.2.7/tippy.css","hands-on-ex03_files/tippy-6.2.7/tippy.umd.min.js","hands-on-ex03_files/webcomponents-2.0.0/webcomponents.js"]}
+  {"type":"character","attributes":{},"value":["hands-on-ex03_files/anchor-4.2.2/anchor.min.js","hands-on-ex03_files/bowser-1.9.3/bowser.min.js","hands-on-ex03_files/distill-2.2.21/template.v2.js","hands-on-ex03_files/figure-html5/unnamed-chunk-10-1.png","hands-on-ex03_files/figure-html5/unnamed-chunk-11-1.png","hands-on-ex03_files/figure-html5/unnamed-chunk-12-1.png","hands-on-ex03_files/figure-html5/unnamed-chunk-13-1.png","hands-on-ex03_files/figure-html5/unnamed-chunk-14-1.png","hands-on-ex03_files/figure-html5/unnamed-chunk-15-1.png","hands-on-ex03_files/figure-html5/unnamed-chunk-17-1.png","hands-on-ex03_files/figure-html5/unnamed-chunk-18-1.png","hands-on-ex03_files/figure-html5/unnamed-chunk-19-1.png","hands-on-ex03_files/figure-html5/unnamed-chunk-20-1.png","hands-on-ex03_files/figure-html5/unnamed-chunk-21-1.png","hands-on-ex03_files/figure-html5/unnamed-chunk-22-1.png","hands-on-ex03_files/figure-html5/unnamed-chunk-24-1.png","hands-on-ex03_files/figure-html5/unnamed-chunk-25-1.png","hands-on-ex03_files/figure-html5/unnamed-chunk-26-1.png","hands-on-ex03_files/figure-html5/unnamed-chunk-27-1.png","hands-on-ex03_files/figure-html5/unnamed-chunk-28-1.png","hands-on-ex03_files/figure-html5/unnamed-chunk-8-1.png","hands-on-ex03_files/figure-html5/unnamed-chunk-9-1.png","hands-on-ex03_files/header-attrs-2.10/header-attrs.js","hands-on-ex03_files/jquery-1.11.3/jquery.min.js","hands-on-ex03_files/popper-2.6.0/popper.min.js","hands-on-ex03_files/tippy-6.2.7/tippy-bundle.umd.min.js","hands-on-ex03_files/tippy-6.2.7/tippy-light-border.css","hands-on-ex03_files/tippy-6.2.7/tippy.css","hands-on-ex03_files/tippy-6.2.7/tippy.umd.min.js","hands-on-ex03_files/webcomponents-2.0.0/webcomponents.js"]}
   </script>
   <!--radix_placeholder_navigation_in_header-->
 <meta name="distill:offset" content="../.."/>
@@ -2126,12 +2126,12 @@ Take-home Exercise
 <p>The code chunk below uses the <em>st_read()</em> function of <strong>sf</strong> package to import “MP14_SUBZONE_WEB_PL” shapefile into R as a simple feature data frame called <strong>mpsz</strong>.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>mpsz</span> <span class='op'>&lt;-</span> <span class='fu'>st_read</span><span class='op'>(</span>dsn <span class='op'>=</span> <span class='st'>"data/geospatial"</span>, 
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>mpsz</span> <span class='op'>&lt;-</span> <span class='fu'>st_read</span><span class='op'>(</span>dsn <span class='op'>=</span> <span class='st'>"data/handson3data/geospatial"</span>, 
                 layer <span class='op'>=</span> <span class='st'>"MP14_SUBZONE_WEB_PL"</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>Reading layer `MP14_SUBZONE_WEB_PL&#39; from data source 
-  `C:\teojp3\IS415_blog\_posts\2021-08-30-hands-on-ex03\data\geospatial&#39; 
+  `C:\teojp3\IS415_blog\data\handson3data\geospatial&#39; 
   using driver `ESRI Shapefile&#39;
 Simple feature collection with 323 features and 15 fields
 Geometry type: MULTIPOLYGON
@@ -2201,7 +2201,7 @@ First 10 features:
 </ul>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>popdata</span> <span class='op'>&lt;-</span> <span class='fu'>read_csv</span><span class='op'>(</span><span class='st'>"data/aspatial/respopagesexfa2011to2020.csv"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>popdata</span> <span class='op'>&lt;-</span> <span class='fu'>read_csv</span><span class='op'>(</span><span class='st'>"data/handson3data/aspatial/respopagesexfa2011to2020.csv"</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>

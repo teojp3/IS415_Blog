@@ -34,7 +34,7 @@ for (p in packages){
 The code chunk below uses the *st_read()* function of **sf** package to import "MP14_SUBZONE_WEB_PL" shapefile into R as a simple feature data frame called __mpsz__.
 
 ```{r}
-mpsz <- st_read(dsn = "data/geospatial", 
+mpsz <- st_read(dsn = "data/handson3data/geospatial", 
                 layer = "MP14_SUBZONE_WEB_PL")
 ```
 
@@ -46,7 +46,7 @@ mpsz
 - The *read_csv()* function will change the imported .csv file into an R dataframe
 
 ```{r}
-popdata <- read_csv("data/aspatial/respopagesexfa2011to2020.csv")
+popdata <- read_csv("data/handson3data/aspatial/respopagesexfa2011to2020.csv")
 ```
 # Data Preparation and Wrangling
 
