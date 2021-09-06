@@ -1,0 +1,605 @@
+---
+title: "Take Home Exercise 1"
+description: |
+  Analysing and Visualising Spatio-temporal Patterns of COVID-19 in DKI Jakarta, Indonesia.
+author:
+  - name: Teo Jun Peng
+    url: https://teojp3-is415.netlify.app/
+date: 08-27-2021
+output:
+  distill::distill_article:
+    self_contained: false
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 1. Introduction
+
+This analysis aims to analyse and visualise spatio-temporal patterns of COVID-19 in DKI Jakarta, Indonesia. Out of 34 provinces in Indonesia, DKI Jakarta was the province affected most by the pandemic, with close to 24% of cumulative confirmed cases. However, the cumulative confirmed cases were not evenly distributed, therefore this analysis intends to unravel which sub-districts had the highest number of cases and how time has changed the overall distribution.
+
+## THE DATA
+
+For this analysis, the following data are used:
+
+- [Open Data Covid-19 Provinsi DKI Jakarta](https://riwayat-file-covid-19-dki-jakarta-jakartagis.hub.arcgis.com/). This portal provides daily update of COVID-19 measures at both sub-district and district level. For the purpose of this analysis, data at the sub-district level is used. The datasets are in .CSV format, and monthly datasets from March 2020 to July 2021 will be used.
+
+- [Indonesia Geospatial](https://www.indonesia-geospasial.com/). This portal provides a comprehensive collection of geospatial data mainly in ESRI shapefile format at different geographical levels. For the purpose of this analysis, the Shapefile (SHP) Batas Desa Provinsi DKI Jakarta provided at PODES 2019 geospatial layer is used.
+
+# 2. Setting up the environment
+
+- R packages will be used for efficiency and a more comprehensive analysis, such as *tidyverse* and *sf* etc.
+
+```{r eval=FALSE}
+packages = c('tidyverse', 'sf', 'readxl', 'readr', 'stringr', 'tmap')
+for (p in packages)
+  {
+  if(!require(p, character.only = T))
+    {
+    install.packages(p)
+  }
+  library(p,character.only = T)
+}
+```
+# Prevent values from showing as exponential
+
+```{r echo=FALSE}
+options(scipen = 999)
+```
+
+
+# 3. Data Wrangling
+
+# Importing aspatial Data
+
+## List.files helps to create a list from the imported data files. The files are also imported all at once using a pattern to match the file names, ensuring full efficiency as compared to importing the files individually. The R function lapply is also complementary for this process, as well as adding the file names as an additional column to the dataframes (So as to display the data by month later on).
+
+```{r eval=FALSE}
+file_list <- list.files(path = "data/the1data/COVID-DATA" , pattern = "*.xlsx",  full.names = T)
+df_list <- lapply(seq_along(file_list), function(x) transform(read_xlsx(file_list[x]), MonthYear = file_list[x]))
+```
+
+## To help visualise the combined list of data. From here we can then manually check which Meninggal column is the correct one for each file, for referencing the coalesce process later on in the next few steps (E.g. For February 2021, Meninggal...1 is the correct column to use since it is the Meninggal column with no NA values.) The inspection tells us that *Meninggal...23 to Meninggal...25* is not used so we can skip those columns later on in the coalesce process.
+
+```{r}
+df_list
+```
+
+## We will now combine df_list into a real dataframe using *Idlpy* function. 
+
+```{r}
+library(plyr)
+df <- ldply(df_list, data.frame)
+
+df
+```
+
+## To combine/integrate values from the various *Meninggal* columns, we will have to convert *Meninggal...26* column's data type so we can use coalesce function later on (because it originally is a *chr* type and *chr* type cannot combine with *double* type). July 2020 is using *Meninggal...26* as the correct column, so we have to carry out the conversion.
+
+```{r}
+
+df$Meninggal...26 = as.double(df$Meninggal...26)
+
+df <- df %>%
+  na_if("N/A")
+```
+
+## In this step we aim to combine ID_KEL into one main column, since some of the files have different layouts. Coalesce is a function to take in values from another column, (So if ID_KEL has NA values while ID_KEL...1 has values, we will take from ID_KEL...1 and add them into ID_KEL)
+
+```{r}
+df <- df %>% 
+  mutate(ID_KEL = coalesce(ID_KEL, ID_KEL...1, ID_KEL...2))
+```
+
+## COMBINE MENNINGGAL TGT AS ONE COLUMN, SINCE SOME OF THE FILES HAVE DIFFERENT LAYOUTS, only 28,29,30,31 is used after checking the dataset earlier on during "df_list". So only combining those columns
+
+```{r}
+df <- df %>% 
+  mutate(Meninggal = coalesce(Meninggal, Meninggal...28, Meninggal...29, Meninggal...30, Meninggal...31, Meninggal...26))
+```
+
+## To get only the required columns from the dataframe
+
+```{r}
+library(dplyr)
+
+df2 <- df %>%
+  select("MonthYear", "ID_KEL", "Nama_provinsi", "nama_kota", "nama_kecamatan", "nama_kelurahan", "POSITIF", "Meninggal")
+```
+
+## So df2 is the final dataframe, and currently this is the output. 
+
+```{r}
+df2 %>% print(n = Inf)
+```
+## As shown above, we need to clean up the *MonthYear* column as it is very messy. We will clean up the *MonthYear* column using *Str_replace* function, to replace unnecessary characters in the values.
+
+```{r}
+df2 <- df2 %>% 
+  mutate_at("MonthYear", str_replace, "data/the1data/COVID-DATA/Standar Kelurahan Data Corona", "")
+
+df2 <- df2 %>% 
+  mutate_at("MonthYear", str_replace, "[(]", "")
+
+df2 <- df2 %>% 
+  mutate_at("MonthYear", str_replace, "[)]", "")
+
+df2 <- df2 %>% 
+  mutate_at("MonthYear", str_replace, ".xlsx", "")
+
+```
+
+## Turning MonthYear column into legit date type and removing Date from the MonthYear values (e.g. 2021-02-28 into 2021-02)
+
+```{r}
+Sys.setlocale(locale="ind")
+df2$MonthYear <- c(df2$MonthYear) %>%
+as.Date(df2$MonthYear, format ="%d %B %Y")
+```
+```{r}
+df2
+```
+## DELETE AWAY WRONG/UNNECESSARY ROWS (NA values in ID_KEL, THE TOTALS, SUBDISTRICT NAME AS ID_KEL ETC)
+
+```{r}
+df2[!is.na(df2$ID_KEL),]
+
+df2 <- subset(df2, grepl('^\\d+$', df2$ID_KEL))
+
+```
+# Order Dataframe by *MonthYear* and reset index
+
+```{r}
+df2 <- df2[order(df2$MonthYear),]
+final_df <- df2
+row.names(final_df) <- 1:nrow(final_df)
+```
+
+```{r}
+final_df
+```
+
+# Writing out a .rds file from *final_df*, so as to ensure the data will take up lesser storage space.
+
+```{r}
+aspatial_df <- write_rds(final_df, "data/the1data/rds/aspatial_df.rds")
+```
+
+```{r}
+aspatial_df <- read_rds("data/the1data/rds/aspatial_df.rds")
+```
+
+
+# 3. Importing Geospatial Data
+
+The following code cunk imports the *DKI Jakarta* geospatial data into R as a simple feature dataframe.
+
+```{r}
+geospatial_df <- st_read(dsn = "data/the1data/BATAS DESA DESEMBER 2019 DUKCAPIL DKI JAKARTA", 
+                layer = "BATAS_DESA_DESEMBER_2019_DUKCAPIL_DKI_JAKARTA")
+```
+# To take a quick look at the output dataframe
+
+```{r}
+glimpse(geospatial_df)
+```
+
+```{r}
+st_crs(geospatial_df)
+```
+
+## From the above output, we see that the Projected Coordinates System iS WGS84 which is wrong, therefore we'll Change the Projected Coordinates Systems to DGN95 (which is the national Projeted Coordinates Systems of Indonesia).
+
+```{r}
+jakarta_DGN95 <- st_transform(geospatial_df, 23845)
+
+jakarta_DGN95
+```
+
+## Outer Islands are also known as KEPULAUAN SERIBU, we will exclude them as they are detached from the mainland.
+
+```{r}
+jakarta_DGN95 <- subset(jakarta_DGN95, KAB_KOTA != "KEPULAUAN SERIBU")
+```
+
+## For the analysis, we will only keep the first nine fields, whereby the last field is JUMLAH_PEN (Total Population).
+
+```{r}
+jakarta_DGN95 <- jakarta_DGN95[, 0:9]
+```
+
+```{r}
+jakarta_DGN95
+```
+## Cleaning data from jakarta_df, uncovered some inaccuracy between identification keys from aspatial and geospatial after manually checking through their data. If data cleaning is not done, there will be data missing from some states, so the map will have missing values.
+
+```{r}
+jakarta_DGN95$DESA_KELUR[jakarta_DGN95$DESA == 'BALEKAMBANG'] <- 'BALE KAMBANG'
+jakarta_DGN95$DESA_KELUR[jakarta_DGN95$DESA == 'HALIM PERDANA KUSUMA'] <- 'HALIM PERDANA KUSUMAH'
+jakarta_DGN95$DESA_KELUR[jakarta_DGN95$DESA == 'JATIPULO'] <- 'JATI PULO'
+jakarta_DGN95$DESA_KELUR[jakarta_DGN95$DESA == 'KALIBARU'] <- 'KALI BARU'
+jakarta_DGN95$DESA_KELUR[jakarta_DGN95$DESA == 'KRAMATJATI'] <- 'KRAMAT JATI'
+jakarta_DGN95$DESA_KELUR[jakarta_DGN95$DESA == 'PALMERIAM'] <- 'PAL MERIAM'
+jakarta_DGN95$DESA_KELUR[jakarta_DGN95$DESA == 'PINANGRANTI'] <- 'PINANG RANTI'
+jakarta_DGN95$DESA_KELUR[jakarta_DGN95$DESA == 'PAL MERAH'] <- 'PALMERAH'
+jakarta_DGN95$DESA_KELUR[jakarta_DGN95$DESA == 'TENGAH'] <- 'KAMPUNG TENGAH'
+jakarta_DGN95$DESA_KELUR[jakarta_DGN95$DESA == 'PULOGADUNG'] <- 'PULO GADUNG'
+jakarta_DGN95$DESA_KELUR[jakarta_DGN95$DESA == 'KALI DERES'] <- 'KALIDERES'
+jakarta_DGN95$DESA_KELUR[jakarta_DGN95$DESA == 'RAWAJATI'] <- 'RAWA JATI'
+jakarta_DGN95$DESA_KELUR[jakarta_DGN95$DESA == 'KRENDANG'] <- 'KERENDANG'
+```
+
+## Function to test out the identifier keys
+
+```{r eval=FALSE}
+a <-c(aspatial_df$nama_kelurahan)
+b <-c(jakarta_DGN95$DESA_KELUR)
+
+a[!(a %in% b)]
+
+```
+
+```{r}
+jakarta_DGN95
+```
+
+## We will drop NA value rows
+
+```{r}
+jakarta_DGN95 <- jakarta_DGN95 %>% drop_na(OBJECT_ID)
+```
+
+## DATA PREPARATION FOR CUML CASE RATE
+
+```{r}
+Case_Rate <- aspatial_df %>%
+  inner_join(jakarta_DGN95, by=c("nama_kelurahan" = "DESA_KELUR")) %>%
+  group_by(nama_kelurahan, MonthYear) %>%
+  dplyr::summarise(`Covid_Cases_Per_10000_Pop` = (((sum(`POSITIF`)) / (`JUMLAH_PEN`)) / 10000)) %>%
+  ungroup() %>%
+  pivot_wider(names_from = MonthYear,
+              values_from = Covid_Cases_Per_10000_Pop)
+```
+
+## DATA PREPARATION FOR CUML DEATH RATE
+
+```{r}
+Death_Rate <- aspatial_df %>%
+  inner_join(jakarta_DGN95, by=c("nama_kelurahan" = "DESA_KELUR")) %>%
+  group_by(nama_kelurahan, MonthYear) %>%
+  dplyr::summarise(`Death_Rate_Per_10000` = (sum(Meninggal) / (JUMLAH_PEN / 10000))) %>%
+  ungroup() %>%
+  pivot_wider(names_from = MonthYear,
+              values_from = Death_Rate_Per_10000)
+```
+```{r}
+Positive_Cases <- aspatial_df %>%
+  select('MonthYear', 'nama_kelurahan', 'POSITIF', 'Meninggal')
+```
+
+```{r}
+Positive_Cases <- Positive_Cases[Positive_Cases$MonthYear == "2021-07-31",]
+  
+```
+
+```{r}
+Death_Rate <- left_join(Positive_Cases, Death_Rate, by= c("nama_kelurahan" = "nama_kelurahan"))
+
+Death_Rate <- subset(Death_Rate, select = -c(MonthYear))
+
+Death_Rate
+```
+
+## Renaming of Columns
+
+```{r}
+colnames(Case_Rate) <- c('SUB_DISTRICT', '03-2020', '04-2020', '05-2020', '06-2020', '07-2020', '08-2020', '09-2020', '10-2020', '11-2020', '12-2020', '01-2021', '02-2021', '03-2021', '04-2021', '05-2021', '06-2021', '07-2021')
+
+colnames(Death_Rate) <- c('SUB_DISTRICT', 'POSITIVE_CASES', 'DEATHS', '03-2020', '04-2020', '05-2020', '06-2020', '07-2020', '08-2020', '09-2020', '10-2020', '11-2020', '12-2020', '01-2021', '02-2021', '03-2021', '04-2021', '05-2021', '06-2021', '07-2021')
+
+Case_Rate
+Death_Rate
+```
+
+# Quick check to ensure there are no NA values
+
+```{r eval=FALSE}
+Case_Rate[rowSums(is.na(Case_Rate))!=0,]
+```
+
+## Death_Rate has NA rows, deleted them using na.omit() function
+
+```{r eval=FALSE}
+Death_Rate[rowSums(is.na(Death_Rate))!=0,]
+
+Death_Rate <- na.omit(Death_Rate)
+
+Death_Rate
+```
+
+# Using rds files instead
+
+```{r}
+Case_Rate_rds <- write_rds(Case_Rate, "data/the1data/rds/Case_Rate_rds.rds")
+Death_Rate_rds <- write_rds(Death_Rate, "data/the1data/rds/Death_Rate_rds.rds")
+```
+
+```{r}
+Case_Rate_rds <- read_rds("data/the1data/rds/Case_Rate_rds.rds")
+Death_Rate_rds <- read_rds("data/the1data/rds/Death_Rate_rds.rds")
+```
+
+```{r}
+Case_Rate_rds
+```
+
+```{r}
+Death_Rate_rds
+```
+
+# GEOSPATIAL ANALYSIS
+
+# Georelational join (Geospatial data with Aspatial data)
+
+```{r}
+Case_Rate_Final <- left_join(jakarta_DGN95, Case_Rate_rds, by= c("DESA_KELUR" = "SUB_DISTRICT"))
+
+Case_Rate_Final
+```
+
+```{r}
+Death_Rate_Final <- left_join(jakarta_DGN95, Death_Rate_rds, by= c("DESA_KELUR" = "SUB_DISTRICT"))
+
+Death_Rate_Final[rowSums(is.na(Death_Rate_Final))!=0,]
+```
+
+## GEOSPATIAL MAPPING
+
+```{r}
+summary(Case_Rate_Final$`03-2020`)
+```
+# Plotting multiple small choropleth maps (KAB = District Level, Kota = Subdistrict). So March 2020 is the first month that we have data on. From the plotted map, we can see that there is an even distribution throughout the different districts (no particular district with outlandish number of cases)
+
+```{r}
+tm_shape(Case_Rate_Final) +
+  tm_fill("03-2020",
+          style = 'quantile',
+          palette = "Blues",
+          thres.poly = 0) + 
+  tm_facets(by="KAB_KOTA", 
+            free.coords=TRUE, 
+            drop.shapes=TRUE) +
+  tm_layout(legend.show = TRUE,
+            main.title = 'Distribution of cumulative confirmed cases\nrate per 10,000 Population (March 2020)',
+            main.title.position = "centre", 
+            title.size = 12) +
+  tm_borders(alpha = 0.5)
+```
+```{r}
+summary(Death_Rate_Final$`03-2020`)
+```
+```{r}
+tm_shape(Death_Rate_Final) +
+  tm_fill("03-2020",
+          style = "jenks",
+          palette = "Blues",
+          thres.poly = 0) + 
+  tm_facets(by="KAB_KOTA", 
+            free.coords=TRUE, 
+            drop.shapes=TRUE) +
+  tm_layout(legend.show = TRUE,
+            main.title = 'Distribution of cumulative death rate\nper 10,000 Population (March 2020)',
+            main.title.position = "centre", 
+            title.size = 12) +
+  tm_borders(alpha = 0.5)
+```
+
+## NORMAL MAINLAND MAP 
+
+```{r}
+tm_shape(Case_Rate_Final)+
+  tm_fill("07-2021", 
+          style = "quantile", 
+          palette = "Blues",
+          title = "Cumulative Case Rate") +
+  tm_layout(main.title = "Cumulative Confirmed Case Rate in July 2021",
+            main.title.position = "center",
+            main.title.size = 1.2,
+            legend.outside = TRUE,
+            legend.height = 0.45, 
+            legend.width = 0.35,
+            frame = TRUE) +
+  tm_borders(alpha = 0.5) +
+  tm_compass(type="8star", size = 2, position = c( 'left','bottom')) +
+  tm_scale_bar(position = c( 'left','bottom')) +
+  tm_grid(alpha =0.2) 
+```
+## TO PLOTT MAPS SIDE BY SIDE FOR COMPARISON
+
+```{r}
+tm_shape(Case_Rate_Final)+ 
+  tm_polygons(c("03-2020","07-2021"),
+          style = "quantile", 
+          palette = "Blues") +
+  tm_layout(legend.position = c("left", "bottom"))
+```
+
+# THEMATIC MAPPING
+
+
+# PERCENTILE MAP????
+
+```{r}
+percent <- c(0,.01,.1,.5,.9,.99,1)
+var <- Case_Rate_Final["07-2021"] %>%
+  st_set_geometry(NULL)
+quantile(var[,1], percent)
+```
+```{r}
+get.var <- function(vname,df) {
+  v <- df[vname] %>% 
+    st_set_geometry(NULL)
+  v <- unname(v[,1])
+  return(v)
+}
+```
+
+```{r}
+percent <- c(0,.01,.1,.5,.9,.99,1)
+var <- get.var("07-2021", Case_Rate_Final)
+bperc <- quantile(var,percent)
+tm_shape(jakarta_DGN95) +
+  tm_polygons() +
+tm_shape(Case_Rate_Final) +
+  tm_fill("07-2021",
+          title="07-2021",
+          breaks=bperc,
+          palette="Blues",
+          labels=c("< 1%", "1% - 10%",
+                   "10% - 50%", 
+                   "50% - 90%",
+                   "90% - 99%", 
+                   "> 99%"))  +
+  tm_borders() +
+  tm_layout(title = "Percentile Map", 
+            title.position = c("right",
+                               "bottom"))
+```
+
+```{r}
+percentmap <- function(vnam, df, legtitle=NA, mtitle="Percentile Map"){
+  percent <- c(0,.01,.1,.5,.9,.99,1)
+  var <- get.var(vnam,df)
+  bperc <- quantile(var,percent)
+  tm_shape(jakarta_DGN95) +
+  tm_polygons() +
+  tm_shape(df) +
+     tm_fill(vnam,
+             title=legtitle,
+             breaks=bperc,
+             palette="Blues",
+          labels=c("< 1%", "1% - 10%", "10% - 50%", "50% - 90%", "90% - 99%", "> 99%"))  +
+  tm_borders() +
+  tm_layout(main.title = "Cumulative Confirmed Case Rate in July 2021",
+            main.title.position = "center",
+            main.title.size = 1.2,
+            legend.outside = TRUE,
+            legend.height = 0.45, 
+            legend.width = 0.35,
+            frame = TRUE) +
+  tm_compass(type="8star", size = 2, position = c( 'left','bottom')) +
+  tm_scale_bar(position = c( 'left','bottom'))
+}
+```
+
+```{r}
+CR_July2021_percentmap <- percentmap("07-2021", Case_Rate_Final)
+CR_March2020_percentmap <- percentmap("03-2020", Case_Rate_Final)
+```
+
+```{r}
+CR_March2020_percentmap
+```
+## BOXBREAKS BOX MAP????
+
+```{r}
+boxbreaks <- function(v,mult=1.5) {
+  qv <- unname(quantile(v))
+  iqr <- qv[4] - qv[2]
+  upfence <- qv[4] + mult * iqr
+  lofence <- qv[2] - mult * iqr
+  # initialize break points vector
+  bb <- vector(mode="numeric",length=7)
+  # logic for lower and upper fences
+  if (lofence < qv[1]) {  # no lower outliers
+    bb[1] <- lofence
+    bb[2] <- floor(qv[1])
+  } else {
+    bb[2] <- lofence
+    bb[1] <- qv[1]
+  }
+  if (upfence > qv[5]) { # no upper outliers
+    bb[7] <- upfence
+    bb[6] <- ceiling(qv[5])
+  } else {
+    bb[6] <- upfence
+    bb[7] <- qv[5]
+  }
+  bb[3:5] <- qv[2:4]
+  return(bb)
+}
+```
+
+```{r}
+get.var <- function(vname,df) {
+  v <- df[vname] %>% st_set_geometry(NULL)
+  v <- unname(v[,1])
+  return(v)
+}
+```
+
+```{r}
+July2021_No_Zero <- Case_Rate_Final %>%
+  filter('07-2021' >= 0)
+var <- get.var("07-2021", Case_Rate_Final)  
+boxbreaks(var)
+```
+```{r}
+boxmap <- function(vnam, df, 
+                   legtitle=NA,
+                   mtitle="Box Map",
+                   mult=1.5){
+  var <- get.var(vnam,df)
+  bb <- boxbreaks(var)
+  tm_shape(df) +
+     tm_fill(vnam,title=legtitle,
+             breaks=bb,
+             palette="Blues",
+          labels = c("lower outlier", 
+                     "< 25%", 
+                     "25% - 50%", 
+                     "50% - 75%",
+                     "> 75%", 
+                     "upper outlier"))  +
+  tm_borders() +
+  tm_layout(main.title = "Cumulative Confirmed Case Rate in July 2021",
+            main.title.position = "center",
+            main.title.size = 1.2,
+            legend.outside = TRUE,
+            legend.height = 0.45, 
+            legend.width = 0.35,
+            frame = TRUE) +
+  tm_compass(type="8star", size = 2, position = c( 'left','bottom')) +
+  tm_scale_bar(position = c( 'left','bottom'))
+}
+```
+
+```{r}
+boxmap("07-2021", Case_Rate_Final)
+```
+# Relative Risk
+
+```{r}
+Death_Rate_Final <- Death_Rate_Final %>%
+  mutate(`EXPECTED_DEATH` = `POSITIVE_CASES` * `07-2021`)
+
+Death_Rate_Final <- Death_Rate_Final %>%
+  mutate(`SMR` = `DEATHS` / `EXPECTED_DEATH`)
+```
+
+```{r}
+Death_Rate_Final
+```
+# Data Prepartion for Relative Risk Mapping
+
+```{r}
+# 
+# Jakarta_Death_Final   <- Jakarta_Death_Final %>%  group_by('Expected_Death',Sub_District)  %>% dplyr::summarise(`SMR` = (Death)/(Expected_Death)) %>% ungroup()
+# 
+# Jakarta_Death_Final   <- Jakarta_Death_Final %>%  group_by(Sub_District,SMR)  %>% dplyr::summarise(`SMR_Avg` = sum(SMR)/15)
+```
+
+
+

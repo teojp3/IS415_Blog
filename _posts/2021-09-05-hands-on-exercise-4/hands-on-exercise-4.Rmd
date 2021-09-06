@@ -35,6 +35,8 @@ library(p,character.only = T)
 ```{r}
 childcare_sf <- st_read("data/handson4data/child-care-services-geojson.geojson") %>%
   st_transform(crs = 3414)
+
+
 ```
 ```{r}
 sg_sf <- st_read(dsn = "data/handson4data", layer="CostalOutline")

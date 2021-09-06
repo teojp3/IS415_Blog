@@ -47,6 +47,8 @@ mpsz
 
 ```{r}
 popdata <- read_csv("data/handson3data/aspatial/respopagesexfa2011to2020.csv")
+
+popdata
 ```
 # Data Preparation and Wrangling
 
@@ -68,10 +70,51 @@ mutate(`AGED`=rowSums(.[16:21])) %>%
 mutate(`TOTAL`=rowSums(.[3:21])) %>%  
 mutate(`DEPENDENCY` = (`YOUNG` + `AGED`)
 /`ECONOMY ACTIVE`) %>%
-  select(`PA`, `SZ`, `YOUNG`, 
+    select(`PA`, `SZ`, `YOUNG`, 
        `ECONOMY ACTIVE`, `AGED`, 
        `TOTAL`, `DEPENDENCY`)
+
 ```
+
+```{r}
+popdata2020
+```
+```{r}
+popdata2020
+```
+```{r}
+popdata2020
+```
+```{r}
+popdata2020
+```
+
+## MUTATE YOUNG
+
+```{r}
+popdata2020
+```
+
+```{r}
+popdata2020
+```
+
+```{r}
+popdata2020
+```
+
+```{r}
+popdata2020
+```
+
+```{r}
+popdata2020
+```
+
+
+
+
+
 ```{r}
 popdata2020 <- popdata2020 %>%
   mutate_at(.vars = vars(PA, SZ), 
