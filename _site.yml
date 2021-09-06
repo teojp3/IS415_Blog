@@ -1,7 +1,7 @@
 name: "Jun Peng's Workspace"
 title: "Jun Peng's Workspace"
 description: |
-  Jun Peng's Workspace
+  Jun Peng's Workspace 
 output_dir: "_site"
 navbar:
   right:
