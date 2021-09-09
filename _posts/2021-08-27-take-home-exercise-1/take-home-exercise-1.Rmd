@@ -8,21 +8,21 @@ author:
 date: 09-09-2021
 output:
   distill::distill_article:
-    self_contained: false
-    theme: darkly
-    highlight: espresso
+      self_contained: false
+      toc: true
+      toc_depth: 2
+      toc_float: true
 ---
 
-
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, fig.align = "center", tidy.opts=list(width.cutoff=80),tidy=TRUE)
 ```
 
 # 1. Introduction
 
 This analysis aims to analyse and visualise spatio-temporal patterns of COVID-19 in DKI Jakarta, Indonesia. Out of 34 provinces in Indonesia, DKI Jakarta was the province affected most by the pandemic, with close to 24% of cumulative confirmed cases. However, the cumulative confirmed cases were not evenly distributed, therefore this analysis intends to unravel which sub-districts had the highest number of cases and how time has changed the overall distribution.
 
-### THE DATA
+## 1.1 The Data
 
 For this analysis, the following data are used:
 
@@ -30,13 +30,15 @@ For this analysis, the following data are used:
 
 - [Indonesia Geospatial](https://www.indonesia-geospasial.com/). This portal provides a comprehensive collection of geospatial data mainly in ESRI shapefile format at different geographical levels. For the purpose of this analysis, the Shapefile (SHP) Batas Desa Provinsi DKI Jakarta provided at PODES 2019 geospatial layer is used.
 
+**P.S.** *March 2020 Dataset only started from* **25 March 2020** *as per the source, so the dataset might not be a true representative of March 2020. Similarly for January 2021 Dataset,* **30 January 2021** *is the most updated data, the link to access 31 January 2021 is broken so this may not be a true representation of January 2021.* 
+
 # 2. Setting up the environment
 
-- R packages will be used for efficiency and a more comprehensive analysis, such as *tidyverse* and *sf* etc.
+R packages will be used for efficiency and a more comprehensive analysis, such as *tidyverse* and *sf* etc.
 
 ```{r results='hide'}
 load("THE1_workspace.Rdata")
-packages = c('tidyverse', 'sf', 'readxl', 'readr', 'stringr', 'tmap')
+packages = c('tidyverse', 'sf', 'readxl', 'readr', 'stringr', 'tmap', 'lemon', 'formatR')
 for (p in packages)
   {
   if(!require(p, character.only = T))
@@ -55,6 +57,8 @@ for (p in packages)
 options(scipen = 999)
 
 save.image(file = "THE1_workspace.Rdata")
+
+knit_print.data.frame <- lemon_print
 ```
 
 ```{r include=FALSE}
@@ -63,25 +67,34 @@ library(knitr)
 # knit('_posts/2021-08-27-take-home-exercise-1/take-home-exercise-1.Rmd')
 ```
 
-
 # 3. Data Wrangling
 
-## Importing aspatial Data
+## 3.1 Aspatial Data
 
-List.files helps to create a list from the imported data files. The files are also imported all at once using a pattern to match the file names, ensuring full efficiency as compared to importing the files individually. The R function lapply is also complementary for this process, as well as adding the file names as an additional column to the dataframes (So as to display the data by month later on).
+### 3.1.1 Importing and creating a list 
+
+*list.files* function helps to create a list from the imported data files. The files are also imported all at once using a pattern to match the file names, ensuring full efficiency as compared to importing the files individually. 
+
+The R function *lapply* is also complementary for this process, as well as adding the file names as an additional column to the dataframes (So as to display the data by month later on).
 
 ```{r results='hide'}
 file_list <- list.files(path = "data/the1data/COVID-DATA" , pattern = "*.xlsx",  full.names = T)
 df_list <- lapply(seq_along(file_list), function(x) transform(read_xlsx(file_list[x]), MonthYear = file_list[x]))
 ```
+### 3.1.2 Looking through the data and initial data cleaning  
 
-From here we then manually check through *df_list* to find which Meninggal column is the correct one for each file, for referencing the coalesce process later on in the next few steps (E.g. For February 2021, Meninggal...1 is the correct column to use since it is the Meninggal column with no NA values.) The inspection tells us that *Meninggal...23 to Meninggal...25* is not used so we can skip those columns later on in the coalesce process.
+From here we then manually check through *df_list* to find which Meninggal column is the correct one for each file, for referencing the coalesce process later on in the next few steps (E.g. For February 2021, Meninggal...1 is the correct column to use since it is the Meninggal column with no NA values.)
+
+The inspection tells us that *Meninggal...23 to Meninggal...25* is not used so we can skip those columns later on in the coalesce process.
 
 ```{r results='hide'}
 df_list
 ```
+![Visualisation of df_list, where we checked through the correct Meninggal columns to use](dflist.jpg)
 
-- We will now combine df_list into a real dataframe using *Idlpy* function from the *plyr* package. 
+### 3.1.3 Combine df_list into a dataframe  
+
+We will then combine df_list into a real dataframe using *Idlpy* function from the *plyr* package. 
 
 ```{r}
 library(plyr)
@@ -89,7 +102,13 @@ df <- ldply(df_list, data.frame)
 
 ```
 
-- To combine/integrate values from the various *Meninggal* columns, we will have to convert *Meninggal...26* column's data type so we can use coalesce function later on (because it originally is a *chr* type and *chr* type cannot combine with *double* type). July 2020 is using *Meninggal...26* as the correct column, so we have to carry out the conversion.
+![Visualisation of df dataframe](df.jpg)
+
+### 3.1.4 Conversion of data types for certain columns
+
+To combine/integrate values from the various *Meninggal* columns, we will have to convert *Meninggal...26* column's data type so we can use coalesce function later on (because it originally is a *chr* type and *chr* type cannot combine with *double* type). 
+
+July 2020 is using *Meninggal...26* as the correct column, so we have to carry out the conversion.
 
 ```{r}
 
@@ -99,21 +118,25 @@ df <- df %>%
   na_if("N/A")
 ```
 
-- In this step we aim to combine ID_KEL into one main column, since some of the files have different layouts. Coalesce is a function to take in values from another column, (So if ID_KEL has NA values while ID_KEL...1 has values, we will take from ID_KEL...1 and add them into ID_KEL)
+### 3.1.5 Coalesce process for NA/missing values
+
+In this step we aim to combine *ID_KEL* into one main column, since some of the files have different layouts. Coalesce is a function to take in values from another column (So if ID_KEL has NA values while ID_KEL...1 has values, we will take from ID_KEL...1 and add them into ID_KEL)
 
 ```{r}
 df <- df %>% 
   mutate(ID_KEL = coalesce(ID_KEL, ID_KEL...1, ID_KEL...2))
 ```
 
-- COMBINE MENNINGGAL TGT AS ONE COLUMN, SINCE SOME OF THE FILES HAVE DIFFERENT LAYOUTS, only 28,29,30,31 is used after checking the dataset earlier on during "df_list". So only combining those columns
+Similarly, we want to combine menninggal together as one column, since some of the files have different layout. We know that only 28,29,30,31 is used after checking the dataset earlier on during "df_list", so we will only integrate those columns together.
 
 ```{r}
 df <- df %>% 
   mutate(Meninggal = coalesce(Meninggal, Meninggal...28, Meninggal...29, Meninggal...30, Meninggal...31, Meninggal...26))
 ```
 
-- To get only the required columns from the dataframe
+### 3.1.6 Subsetting the necessary columns from dataframe
+
+Next, we will get only the required columns out from the dataframe.
 
 ```{r}
 library(dplyr)
@@ -122,13 +145,16 @@ df2 <- df %>%
   select("MonthYear", "ID_KEL", "Nama_provinsi", "nama_kota", "nama_kecamatan", "nama_kelurahan", "POSITIF", "Meninggal")
 ```
 
-```{r include=FALSE}
+So df2 is the modified dataframe, and currently this is the output. *lemon_print* is used for a more aesthetically pleasing dataframe.
 
-## So df2 is the final dataframe, and currently this is the output. 
+```{r caption= "Modified dataframe df2 (Rendered with lemon_print)", render = lemon_print}
 
-df2
+head(df2)
 ```
-As shown above, we need to clean up the *MonthYear* column as it is very messy. We will clean up the *MonthYear* column using *Str_replace* function, to replace unnecessary characters in the values.
+
+### 3.1.7 Cleaning up *MonthYear* column so as to sort the values by month
+
+As shown above, we need to clean up the *MonthYear* column as it is very messy. We will clean up the *MonthYear* column using *str_replace* function, to replace unnecessary characters in the values.
 
 ```{r}
 df2 <- df2 %>% 
@@ -145,7 +171,7 @@ df2 <- df2 %>%
 
 ```
 
-- Turning MonthYear column into legit date type and removing Date from the MonthYear values (e.g. 2021-02-28 into 2021-02)
+We will then turn MonthYear column into *date* data type using *Sys.setlocale* and *as.Date* functions.
 
 ```{r}
 Sys.setlocale(locale="ind")
@@ -155,7 +181,8 @@ as.Date(df2$MonthYear, format ="%d %B %Y")
 ```{r include=FALSE}
 df2
 ```
-- DELETE AWAY WRONG/UNNECESSARY ROWS (NA values in ID_KEL, THE TOTALS, SUBDISTRICT NAME AS ID_KEL ETC)
+
+Next, deleting away wrong/unnecessary rows (NA values in *ID_KEL*, subdistrict name as rows in *ID_KEL* column etc).
 
 ```{r results='hide'}
 df2[!is.na(df2$ID_KEL),]
@@ -163,19 +190,23 @@ df2[!is.na(df2$ID_KEL),]
 df2 <- subset(df2, grepl('^\\d+$', df2$ID_KEL))
 
 ```
-- Order Dataframe by *MonthYear* and reset index
+
+Sorting the modified dataframe by *MonthYear* and resetting of index.
 
 ```{r}
 df2 <- df2[order(df2$MonthYear),]
 final_df <- df2
 row.names(final_df) <- 1:nrow(final_df)
 ```
+![Visualisation of final_df, with the modified MonthYear column and index reset](finaldf.jpg)
 
 ```{r include=FALSE}
 final_df
 ```
 
-- Writing out a .rds file from *final_df*, so as to ensure the data will take up lesser storage space.
+### 3.1.8 Exporting *.rds* files out from the final dataframe
+
+With all the data cleaning done, we will end out with writing out a .rds file from *final_df* and utilising it further on in the analysis, so as to ensure minimum data storage space.
 
 ```{r}
 aspatial_df <- write_rds(final_df, "data/the1data/rds/aspatial_df.rds")
@@ -185,8 +216,9 @@ aspatial_df <- write_rds(final_df, "data/the1data/rds/aspatial_df.rds")
 aspatial_df <- read_rds("data/the1data/rds/aspatial_df.rds")
 ```
 
+## 3.2 Geospatial Data
 
-# 3. Importing Geospatial Data
+### 3.2.1 Importing shapefile data into a simple feature dataframe
 
 The following code cunk imports the *DKI Jakarta* geospatial data into R as a simple feature dataframe.
 
@@ -200,23 +232,27 @@ geospatial_df <- st_read(dsn = "data/the1data/BATAS DESA DESEMBER 2019 DUKCAPIL 
 glimpse(geospatial_df)
 ```
 
-Checking if the CRS is correct or wrong
+### 3.2.2 Checking and ensuring Projected Coordinates Systems of the data is correct
 
 ```{r}
 st_crs(geospatial_df)
 ```
 
-From the above output, we see that the Projected Coordinates System iS WGS84 which is wrong, therefore we'll Change the Projected Coordinates Systems to DGN95 (which is the national Projeted Coordinates Systems of Indonesia).
+From the above output, we see that the Projected Coordinates System is WGS84 which is **wrong**, therefore we'll Change the Projected Coordinates Systems to DGN95 (which is the national Projected Coordinates Systems of Indonesia).
 
 ```{r}
 jakarta_DGN95 <- st_transform(geospatial_df, 23845)
 ```
 
-Outer Islands are also known as KEPULAUAN SERIBU, we will exclude them as they are detached from the mainland.
+### 3.2.3 Excluding the outer islands from the sf dataframe
+
+Outer Islands are also known as **Kepulauan Seribu**, we will exclude them as they are detached from the mainland.
 
 ```{r}
 jakarta_DGN95 <- subset(jakarta_DGN95, KAB_KOTA != "KEPULAUAN SERIBU")
 ```
+
+### 3.2.4 Subsetting necessary columns from the sf dataframe
 
 For the analysis, we will only keep the first nine fields, whereby the last field is JUMLAH_PEN (Total Population).
 
@@ -224,7 +260,11 @@ For the analysis, we will only keep the first nine fields, whereby the last fiel
 jakarta_DGN95 <- jakarta_DGN95[, 0:9]
 ```
 
-Cleaning data from jakarta_df, uncovered some inaccuracy between identification keys from aspatial and geospatial after manually checking through their data. If data cleaning is not done, there will be data missing from some states, so the map will have missing values.
+### 3.2.5 Data cleaning and amended some inaccuracies between the datasets
+
+Some inaccuracies in the data were discovered between identification keys from aspatial and geospatial after manually checking through their data. Therefore, necessary amendments were made to the data.
+
+If data cleaning process is not done, there will be data missing from some states (Plotted maps will have missing values).
 
 ```{r}
 jakarta_DGN95$DESA_KELUR[jakarta_DGN95$DESA == 'BALEKAMBANG'] <- 'BALE KAMBANG'
@@ -242,7 +282,7 @@ jakarta_DGN95$DESA_KELUR[jakarta_DGN95$DESA == 'RAWAJATI'] <- 'RAWA JATI'
 jakarta_DGN95$DESA_KELUR[jakarta_DGN95$DESA == 'KRENDANG'] <- 'KERENDANG'
 ```
 
-Function to help us check if the identifier keys between the aspatial and geospatial data are correct
+Function to help us check if the identifier keys between the aspatial and geospatial data are correct.
 
 ```{r eval=FALSE}
 a <-c(aspatial_df$nama_kelurahan)
@@ -256,46 +296,64 @@ a[!(a %in% b)]
 jakarta_DGN95
 ```
 
-We will drop NA value rows
+### 3.2.6 Removing NA value rows from dataframe
+
+We will drop NA value rows, as they will only affect our analysis results.
 
 ```{r}
 jakarta_DGN95 <- jakarta_DGN95 %>% drop_na(OBJECT_ID)
 ```
 
-DATA PREPARATION FOR CUML CASE RATE
+## 3.3 Geospatial Data Integration
+
+### 3.3.1 Data preparation for *Cumulative Case Rate* by month (per 10,000 Population)
+
+Functions from various packages will be used: e.g. *pivot_wider()* of **tidyr** package and *group_by* of **dplyr** package.
+
+The formula we are using is: 
+              
+    COVID-19 Cases Rate per 10,000 population (Monthly) = (Total Cumulative Cases / Total Population) x 10000
 
 ```{r}
 Case_Rate <- aspatial_df %>%
   inner_join(jakarta_DGN95, by=c("nama_kelurahan" = "DESA_KELUR")) %>%
   group_by(nama_kelurahan, MonthYear) %>%
-  dplyr::summarise(`Covid_Cases_Per_10000_Pop` = (((sum(`POSITIF`)) / (`JUMLAH_PEN`)) / 10000)) %>%
+  dplyr::summarise(`Covid_Cases_Per_10000_Pop` = ((sum(`POSITIF`) / `JUMLAH_PEN`) * 10000)) %>%
   ungroup() %>%
   pivot_wider(names_from = MonthYear,
               values_from = Covid_Cases_Per_10000_Pop)
 ```
 
-DATA PREPARATION FOR CUML DEATH RATE
+### 3.3.2 Data preparation for *Cumulative Death Rate* by month (per 10,000 Population)
+
+Functions from various packages will be used: e.g. *pivot_wider()* of **tidyr** package and *group_by* of **dplyr** package.
+
+The formula we are using is: 
+              
+    COVID-19 Death Rate per 10,000 population (Monthly) = (Total Cumulative Deaths / Total Population) x 10000
 
 ```{r}
 Death_Rate <- aspatial_df %>%
   inner_join(jakarta_DGN95, by=c("nama_kelurahan" = "DESA_KELUR")) %>%
   group_by(nama_kelurahan, MonthYear) %>%
-  dplyr::summarise(`Death_Rate_Per_10000` = (sum(Meninggal) / (JUMLAH_PEN / 10000))) %>%
+  dplyr::summarise(`Death_Rate_Per_10000` = ((sum(Meninggal) / JUMLAH_PEN) * 10000)) %>%
   ungroup() %>%
   pivot_wider(names_from = MonthYear,
               values_from = Death_Rate_Per_10000)
 ```
-Data Preparation for Relative Risk mapping later on
+
+### 3.3.3 Data Preparation for *Relative Risk* mapping (with regards to Cumulative Death Rate)
+
+Preparing another dataframe *Positive_Cases* to join *Death_Rate* dataframe in the upcoming processes, to add the additional columns needed for relative risk mapping later on (E.g. POSITIF and Meninggal).
 
 ```{r}
 Positive_Cases <- aspatial_df %>%
   select('MonthYear', 'nama_kelurahan', 'POSITIF', 'Meninggal')
+
+Positive_Cases <- Positive_Cases[Positive_Cases$MonthYear == "2021-07-31",]
 ```
 
-```{r}
-Positive_Cases <- Positive_Cases[Positive_Cases$MonthYear == "2021-07-31",]
-  
-```
+*Positive_Cases* dataframe will now be integrated within *Death_Rate* dataframe.
 
 ```{r}
 Death_Rate <- left_join(Positive_Cases, Death_Rate, by= c("nama_kelurahan" = "nama_kelurahan"))
@@ -304,7 +362,9 @@ Death_Rate <- subset(Death_Rate, select = -c(MonthYear))
 
 ```
 
-Renaming of Columns
+### 3.3.4 Renaming the columns for both dataframes for easier identification during analysis
+
+The columns will be renamed and simplified for easier identification, such as removing Date value from the MonthYear values (e.g. "2021-02-28" into "02-2021").
 
 ```{r}
 colnames(Case_Rate) <- c('SUB_DISTRICT', '03-2020', '04-2020', '05-2020', '06-2020', '07-2020', '08-2020', '09-2020', '10-2020', '11-2020', '12-2020', '01-2021', '02-2021', '03-2021', '04-2021', '05-2021', '06-2021', '07-2021')
@@ -313,13 +373,15 @@ colnames(Death_Rate) <- c('SUB_DISTRICT', 'POSITIVE_CASES', 'DEATHS', '03-2020',
 
 ```
 
-Quick check to ensure there are no NA values
+### 3.3.5 Additional data cleaning to ensure cleaned data is used for analysis 
+
+A code to quickly check and ensure there are no NA values.
 
 ```{r eval=FALSE}
 Case_Rate[rowSums(is.na(Case_Rate))!=0,]
 ```
 
-Death_Rate has NA rows, deleted them using na.omit() function
+*Death_Rate* dataframe is found to have NA rows, therefore we deleted them using *na.omit()* function.
 
 ```{r eval=FALSE}
 Death_Rate[rowSums(is.na(Death_Rate))!=0,]
@@ -327,7 +389,9 @@ Death_Rate[rowSums(is.na(Death_Rate))!=0,]
 Death_Rate <- na.omit(Death_Rate)
 ```
 
-Using rds files instead
+### 3.3.6 Exporting *.rds* files and using them for efficient data storage 
+
+Rds files are used as a form of best practice, so as to lessen the amount of data storage for the required data.
 
 ```{r}
 Case_Rate_rds <- write_rds(Case_Rate, "data/the1data/rds/Case_Rate_rds.rds")
@@ -347,70 +411,84 @@ Case_Rate_rds
 Death_Rate_rds
 ```
 
-# GEOSPATIAL ANALYSIS
+# 4.Geospatial Analysis
 
-Georelational join (Geospatial data with Aspatial data)
+## 4.1 Data Preparation for Thematic Mapping
+
+### 4.1.1 Joining Geospatial data (jakarta_DGN95) with Aspatial data (Case Rate and Death Rate)
+
+*left_join* of **dplyr** is used to join the geospatial data and attributes from the aspatial data using the names of sub-districts as a common identifier ("DESA_KELUR for jakarta_DGN95, and "SUB_DISTRICT" for Case/Death_Rate_rds)
 
 ```{r}
 Case_Rate_Final <- left_join(jakarta_DGN95, Case_Rate_rds, by= c("DESA_KELUR" = "SUB_DISTRICT"))
+
+Death_Rate_Final <- left_join(jakarta_DGN95, Death_Rate_rds, by= c("DESA_KELUR" = "SUB_DISTRICT"))
 ```
 
+### 4.1.2 Checking for NA rows in the combined dataframes
+
+Once again, checking for NA rows to ensure substantial analysis results will be attained.
+
 ```{r}
-Death_Rate_Final <- left_join(jakarta_DGN95, Death_Rate_rds, by= c("DESA_KELUR" = "SUB_DISTRICT"))
+Case_Rate_Final[rowSums(is.na(Case_Rate_Final))!=0,]
 
 Death_Rate_Final[rowSums(is.na(Death_Rate_Final))!=0,]
 ```
 
-## GEOSPATIAL MAPPING
+## 4.2 Thematic Mapping
 
 ```{r}
-summary(Case_Rate_Final$`03-2020`)
 ```
-Plotting multiple small choropleth maps (KAB = District Level, Kota = Subdistrict). So March 2020 is the first month that we have data on. From the plotted map, we can see that there is an even distribution throughout the different districts (no particular district with outlandish number of cases)
+
+
+### 4.2.1 Small multiples choropleth maps to see the distribution of COVID Cases and Deaths: **March 2020** (First Month)
+
+Plotting small multiples choropleth maps using *KAB_KOTA* field (KAB = District Level, Kota = Subdistrict). So March 2020 is the first month that we have data on. From the plotted map, we can see that there is an even distribution throughout the different districts (no particular district with outlandish number of cases). But if we were strict, Jakarta Pusat and Jakarta Selatan has slightly more cases than the other districts.
 
 ```{r}
 tm_shape(Case_Rate_Final) +
   tm_fill("03-2020",
-          style = 'quantile',
+          style = 'jenks',
           palette = "Blues",
           thres.poly = 0) + 
   tm_facets(by="KAB_KOTA", 
             free.coords=TRUE, 
             drop.shapes=TRUE) +
   tm_layout(legend.show = TRUE,
-            main.title = 'Distribution of cumulative confirmed cases\nrate per 10,000 Population (March 2020)',
+            main.title = 'Distribution of cumulative confirmed Case\nRate per 10,000 Population (March 2020)',
             main.title.position = "centre", 
             title.size = 12) +
   tm_borders(alpha = 0.5)
 ```
-```{r}
-summary(Death_Rate_Final$`03-2020`)
-```
+Similar to case rate, we can see that there is a seemingly even distribution throughout the different districts (no particular district with outlandish number of cases). Jakarta Pusat and Jakarta Selatan has slightly more death cases than the other districts as well.
+
 ```{r}
 tm_shape(Death_Rate_Final) +
   tm_fill("03-2020",
           style = "jenks",
-          palette = "Blues",
+          palette = "Greens",
           thres.poly = 0) + 
   tm_facets(by="KAB_KOTA", 
             free.coords=TRUE, 
             drop.shapes=TRUE) +
   tm_layout(legend.show = TRUE,
-            main.title = 'Distribution of cumulative death rate\nper 10,000 Population (March 2020)',
+            main.title = 'Distribution of cumulative Death Rate\nper 10,000 Population (March 2020)',
             main.title.position = "centre", 
             title.size = 12) +
   tm_borders(alpha = 0.5)
 ```
+
+### 4.2.2 Small multiples choropleth maps to see the distribution of COVID Cases and Deaths: **July 2021** (Last Month)
 
 ## NORMAL MAINLAND MAP 
 
 ```{r}
 tm_shape(Case_Rate_Final)+
-  tm_fill("07-2021", 
-          style = "quantile", 
-          palette = "Blues",
+  tm_fill("03-2020", 
+          breaks = c(0, 4, 13, 53, 119, 270, 395, 3808), 
+          palette = "Reds",
           title = "Cumulative Case Rate") +
-  tm_layout(main.title = "Cumulative Confirmed Case Rate in July 2021",
+  tm_layout(main.title = "Cumulative Confirmed Case Rate in March 2020",
             main.title.position = "center",
             main.title.size = 1.2,
             legend.outside = TRUE,
@@ -422,14 +500,78 @@ tm_shape(Case_Rate_Final)+
   tm_scale_bar(position = c( 'left','bottom')) +
   tm_grid(alpha =0.2) 
 ```
-## TO PLOT MAPS SIDE BY SIDE FOR COMPARISON
+
+### 4.2.3 Time-series choropleth map of *Positive Cases* throughout March 2020 to July 2021
+
+To find the minimum and highest value from Case_Rate_Final "07-2021" (AKA column with the most updated number of cumulative positive cases).
 
 ```{r}
+summary(Case_Rate_Final$`07-2021`)
+```
+Plotting small multiple maps to see how the distribution of COVID cases has changed on a monthly basis from March 2020 to July 2021. 
+
+```{r fig.asp = 1,fig.width = 15, fig.height=6}
+
 tm_shape(Case_Rate_Final)+ 
-  tm_polygons(c("03-2020","07-2021"),
-          style = "quantile", 
-          palette = "Blues") +
-  tm_layout(legend.position = c("left", "bottom"))
+  tm_polygons(c("03-2020", "04-2020", "05-2020", "06-2020", "07-2020", "08-2020", "09-2020", "10-2020", "11-2020", "12-2020", "01-2021", "02-2021", "03-2021", "04-2021", "05-2021", "06-2021", "07-2021"),
+          breaks = c(0, 500, 1000, 1500, 2000, 2500, 3000), 
+          palette = "Reds") +
+  tm_layout(panel.show = TRUE, 
+            panel.labels = c("03-2020", "04-2020", "05-2020", "06-2020", "07-2020", "08-2020", "09-2020", "10-2020", "11-2020", "12-2020", "01-2021", "02-2021", "03-2021", "04-2021", "05-2021", "06-2021", "07-2021"),
+            panel.label.size = 3,
+            asp = NA,
+            legend.show = FALSE)
+```
+Similar to the above visualisation, but with an estimated 5-month change in time period (Splitting the 17 months into 4 parts, which equals ~5) to see how the distribution of COVID cases has changed from March 2020 to July 2021.
+
+```{r fig.asp = 1,fig.width = 15, fig.height=6}
+
+tm_shape(Case_Rate_Final)+ 
+  tm_polygons(c("03-2020", "08-2020", "02-2021", "07-2021"),
+          breaks = c(0, 500, 1000, 1500, 2000, 2500, 3000), 
+          palette = "Reds") +
+  tm_layout(panel.show = TRUE, 
+            panel.labels = c("03-2020", "08-2020", "02-2021", "07-2021"),
+            panel.label.size = 3,
+            asp = NA,
+            legend.show = FALSE)
+```
+
+### 4.2.X Analysing the change in distribution of *Death Cases* throughout March 2020 to July 2021
+
+To find the minimum and highest value from Death_Rate_Final "07-2021" (AKA column with the most updated number of cumulative death cases).
+
+```{r}
+summary(Death_Rate_Final$`07-2021`)
+```
+
+Plotting small multiple maps to see how the distribution of deaths has changed on a monthly basis from March 2020 to July 2021. 
+
+```{r fig.asp = 1,fig.width = 15, fig.height=6}
+
+tm_shape(Death_Rate_Final)+ 
+  tm_polygons(c("03-2020", "04-2020", "05-2020", "06-2020", "07-2020", "08-2020", "09-2020", "10-2020", "11-2020", "12-2020", "01-2021", "02-2021", "03-2021", "04-2021", "05-2021", "06-2021", "07-2021"),
+          breaks = c(0, 5, 10, 15, 20, 25, 30, 35, 40), 
+          palette = "Purples") +
+  tm_layout(panel.show = TRUE, 
+            panel.labels = c("03-2020", "04-2020", "05-2020", "06-2020", "07-2020", "08-2020", "09-2020", "10-2020", "11-2020", "12-2020", "01-2021", "02-2021", "03-2021", "04-2021", "05-2021", "06-2021", "07-2021"),
+            panel.label.size = 3,
+            asp = NA,
+            legend.show = FALSE)
+```
+
+Similar to the above visualisation, but with an estimated 5-month change in time period (Splitting the 17 months into 4 parts, which equals ~5) to see how the distribution of deaths from COVID has changed from March 2020 to July 2021.
+
+```{r fig.asp = 1,fig.width = 15, fig.height=6}
+
+tm_shape(Death_Rate_Final)+ 
+  tm_polygons(c("03-2020", "08-2020", "02-2021", "07-2021"),
+          breaks = c(0, 5, 10, 15, 20, 25, 30, 35, 40), 
+          palette = "Purples") +
+  tm_layout(panel.show = TRUE, 
+            panel.labels = c("03-2020", "08-2020", "02-2021", "07-2021"),
+            panel.label.size = 3,
+            legend.show = FALSE)
 ```
 
 # THEMATIC MAPPING
@@ -585,11 +727,11 @@ boxmap <- function(vnam, df,
 ```{r}
 boxmap("07-2021", Case_Rate_Final)
 ```
-# Relative Risk
+# Relative Risk, Either No. of Cases or Population
 
 ```{r}
 Death_Rate_Final <- Death_Rate_Final %>%
-  mutate(`EXPECTED_DEATH` = `POSITIVE_CASES` * `07-2021`)
+  mutate(`EXPECTED_DEATH` = (`POSITIVE_CASES` * `07-2021`) / 10000)
 
 Death_Rate_Final <- Death_Rate_Final %>%
   mutate(`SMR` = `DEATHS` / `EXPECTED_DEATH`)
