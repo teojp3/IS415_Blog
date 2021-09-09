@@ -259,6 +259,7 @@ For the analysis, we will only keep the first nine fields, whereby the last fiel
 ```{r}
 jakarta_DGN95 <- jakarta_DGN95[, 0:9]
 ```
+![Visualisation of jakarta_DGN95 sf dataframe, with only the required 9 columns](jakartaDGN95.jpg)
 
 ### 3.2.5 Data cleaning and amended some inaccuracies between the datasets
 
@@ -434,16 +435,13 @@ Case_Rate_Final[rowSums(is.na(Case_Rate_Final))!=0,]
 
 Death_Rate_Final[rowSums(is.na(Death_Rate_Final))!=0,]
 ```
+No NA rows were found, so we are good to proceed on.
 
 ## 4.2 Thematic Mapping
 
-```{r}
-```
-
-
 ### 4.2.1 Small multiples choropleth maps to see the distribution of COVID Cases and Deaths: **March 2020** (First Month)
 
-Plotting small multiples choropleth maps using *KAB_KOTA* field (KAB = District Level, Kota = Subdistrict). So March 2020 is the first month that we have data on. From the plotted map, we can see that there is an even distribution throughout the different districts (no particular district with outlandish number of cases). But if we were strict, Jakarta Pusat and Jakarta Selatan has slightly more cases than the other districts.
+Plotting small multiples choropleth maps using *KAB_KOTA* field (Municipality Level, e.g. West Jakarta, North Jakarta etc). March 2020 is the first month that we have data on so we will be using March 2020 data to start this study. 
 
 ```{r}
 tm_shape(Case_Rate_Final) +
@@ -456,11 +454,13 @@ tm_shape(Case_Rate_Final) +
             drop.shapes=TRUE) +
   tm_layout(legend.show = TRUE,
             main.title = 'Distribution of cumulative confirmed Case\nRate per 10,000 Population (March 2020)',
-            main.title.position = "centre", 
+            main.title.position = "left", 
             title.size = 12) +
   tm_borders(alpha = 0.5)
 ```
-Similar to case rate, we can see that there is a seemingly even distribution throughout the different districts (no particular district with outlandish number of cases). Jakarta Pusat and Jakarta Selatan has slightly more death cases than the other districts as well.
+From the plotted map, we can see that there is an even distribution throughout the different municipalities (no particular municipality with outlandish number of cases). 
+
+But **Gelora** in *Tanah Abang, Jakarta Pusat*, and the area surrounding **Senayan** in *Kebayoran Baru, Jakarta Selatan* seemingly has slightly more cases than the other sub-districts as shown by their darker blue shading.
 
 ```{r}
 tm_shape(Death_Rate_Final) +
@@ -473,45 +473,77 @@ tm_shape(Death_Rate_Final) +
             drop.shapes=TRUE) +
   tm_layout(legend.show = TRUE,
             main.title = 'Distribution of cumulative Death Rate\nper 10,000 Population (March 2020)',
-            main.title.position = "centre", 
+            main.title.position = "left", 
+            title.size = 12) +
+  tm_borders(alpha = 0.5)
+```
+Similar to case rate, we can see that there is a seemingly even distribution throughout the different districts (no particular district with outlandish number of death cases). 
+
+However, the sub-districts of **Gondangdia** in *Mentang, Jakarta Pusat* and **Karet Semanggi** of *Setiabudi, Jakarta Selatan* has slightly more death cases than the other sub-districts.
+
+### 4.2.2 Small multiples choropleth maps to see the distribution of COVID Cases and Deaths: **July 2021** (Last Month)
+
+July 2021 is the last month that we have data on, so we will be using it to see the change in distribution from the first to the last month.
+
+```{r}
+tmap_mode("plot")
+
+tm_shape(Case_Rate_Final) +
+  tm_fill("07-2021",
+          style = 'jenks',
+          palette = "Blues",
+          thres.poly = 0) + 
+  tm_facets(by="KAB_KOTA", 
+            free.coords=TRUE, 
+            drop.shapes=TRUE) +
+  tm_layout(legend.show = TRUE,
+            main.title = 'Distribution of cumulative confirmed Case\nRate per 10,000 Population (July 2021)',
+            main.title.position = "left", 
+            title.size = 12) +
+  tm_borders(alpha = 0.5)
+```
+We won't be without taking into account the difference in number of cases from March 2020 to July 2020, this visualisation simply serves as a mean for comparing the distribution of cases across Jakarta.
+
+Similar to the first month, an even distribution is seen throughout the different districts. 
+
+However, there is a concentrated subdistrict **Gambir** in *Gambir, Jakarta Pusat* with a much higher number of cases than the other sub-districts as shown by the darker blue shading.
+
+```{r}
+tm_shape(Death_Rate_Final) +
+  tm_fill("07-2021",
+          style = "jenks",
+          palette = "Greens",
+          thres.poly = 0) + 
+  tm_facets(by="KAB_KOTA", 
+            free.coords=TRUE, 
+            drop.shapes=TRUE) +
+  tm_layout(legend.show = TRUE,
+            main.title = 'Distribution of cumulative Death Rate\nper 10,000 Population (July 2021)',
+            main.title.position = "left", 
             title.size = 12) +
   tm_borders(alpha = 0.5)
 ```
 
-### 4.2.2 Small multiples choropleth maps to see the distribution of COVID Cases and Deaths: **July 2021** (Last Month)
+Similar to case rate, we can see that there is a seemingly even distribution throughout the different sub-districts of Jakarta. 
 
-## NORMAL MAINLAND MAP 
+However, the subdistrict of **Gambir** in *Gambir, Jakarta Pusat* is an outlier as well, with a much higher number of death cases than the other sub-districts as shown by the darker green shading.
 
-```{r}
-tm_shape(Case_Rate_Final)+
-  tm_fill("03-2020", 
-          breaks = c(0, 4, 13, 53, 119, 270, 395, 3808), 
-          palette = "Reds",
-          title = "Cumulative Case Rate") +
-  tm_layout(main.title = "Cumulative Confirmed Case Rate in March 2020",
-            main.title.position = "center",
-            main.title.size = 1.2,
-            legend.outside = TRUE,
-            legend.height = 0.45, 
-            legend.width = 0.35,
-            frame = TRUE) +
-  tm_borders(alpha = 0.5) +
-  tm_compass(type="8star", size = 2, position = c( 'left','bottom')) +
-  tm_scale_bar(position = c( 'left','bottom')) +
-  tm_grid(alpha =0.2) 
-```
+*P.S. As mentioned earlier on, these visualisations does not take into account the difference in number of cases from March 2020 to July 2020, we are only comparing the change in distribution of cases across Jakarta.* 
 
-### 4.2.3 Time-series choropleth map of *Positive Cases* throughout March 2020 to July 2021
+### 4.2.3 Time-series choropleth map of *Positive Cases* Rate throughout March 2020 to July 2021
 
-To find the minimum and highest value from Case_Rate_Final "07-2021" (AKA column with the most updated number of cumulative positive cases).
+To take into account the increase in total cases, time-series choropleth maps will be used to do this analysis.
+
+Firstly, *summary* function is used to find the minimum and highest value from Case_Rate_Final "07-2021" (AKA column with the most updated number of cumulative positive cases), so as to determine the appropriate category breakpoints.
 
 ```{r}
 summary(Case_Rate_Final$`07-2021`)
 ```
-Plotting small multiple maps to see how the distribution of COVID cases has changed on a monthly basis from March 2020 to July 2021. 
+With reference to the results above, the breakpoints for our breaks vector will be c(0, 500, 1000, 1500, 2000, 2500, 3000). 
+
+We will plot small multiple maps to see how the distribution of COVID cases has changed on a monthly basis from March 2020 to July 2021. 
 
 ```{r fig.asp = 1,fig.width = 15, fig.height=6}
-
 tm_shape(Case_Rate_Final)+ 
   tm_polygons(c("03-2020", "04-2020", "05-2020", "06-2020", "07-2020", "08-2020", "09-2020", "10-2020", "11-2020", "12-2020", "01-2021", "02-2021", "03-2021", "04-2021", "05-2021", "06-2021", "07-2021"),
           breaks = c(0, 500, 1000, 1500, 2000, 2500, 3000), 
@@ -522,7 +554,9 @@ tm_shape(Case_Rate_Final)+
             asp = NA,
             legend.show = FALSE)
 ```
-Similar to the above visualisation, but with an estimated 5-month change in time period (Splitting the 17 months into 4 parts, which equals ~5) to see how the distribution of COVID cases has changed from March 2020 to July 2021.
+![](redlegend2.png){height=100px width=100px}
+
+Similar to the above visualisation, but now we will look at an estimated 5-month change in time period (Splitting the 17 months into 4 parts, which equals ~5) to see how the distribution of COVID cases has changed from March 2020 to July 2021.
 
 ```{r fig.asp = 1,fig.width = 15, fig.height=6}
 
@@ -536,8 +570,9 @@ tm_shape(Case_Rate_Final)+
             asp = NA,
             legend.show = FALSE)
 ```
+![](redlegend2.png){height=100px width=100px}
 
-### 4.2.X Analysing the change in distribution of *Death Cases* throughout March 2020 to July 2021
+### 4.2.4 Time-series choropleth map of *Death Rate* throughout March 2020 to July 2021
 
 To find the minimum and highest value from Death_Rate_Final "07-2021" (AKA column with the most updated number of cumulative death cases).
 
@@ -572,6 +607,28 @@ tm_shape(Death_Rate_Final)+
             panel.labels = c("03-2020", "08-2020", "02-2021", "07-2021"),
             panel.label.size = 3,
             legend.show = FALSE)
+```
+## NORMAL MAINLAND MAP 
+
+```{r}
+tmap_mode("view")
+
+tm_shape(Death_Rate_Final)+
+  tm_fill("03-2020", 
+          breaks = c(0, 4, 13, 53, 119, 270, 395, 3808), 
+          palette = "Reds",
+          title = "Cumulative Case Rate") +
+  tm_layout(main.title = "Cumulative Confirmed Case Rate in March 2020",
+            main.title.position = "center",
+            main.title.size = 1.2,
+            legend.outside = TRUE,
+            legend.height = 0.45, 
+            legend.width = 0.35,
+            frame = TRUE) +
+  tm_borders(alpha = 0.5) +
+  tm_compass(type="8star", size = 2, position = c( 'left','bottom')) +
+  tm_scale_bar(position = c( 'left','bottom')) +
+  tm_grid(alpha =0.2) 
 ```
 
 # THEMATIC MAPPING
