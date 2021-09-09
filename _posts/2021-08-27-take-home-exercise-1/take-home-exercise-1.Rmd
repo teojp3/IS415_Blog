@@ -301,6 +301,8 @@ jakarta_DGN95
 
 We will drop NA value rows, as they will only affect our analysis results.
 
+*P.S. 2 sub-districts (DANAU SUNTER and DANAU SUNTER DLL) will be dropped through this process as most of their values fall under NA values, only their OBJECT_ID and Sub-district names were present, population data and positive cases data were missing/NA.* 
+
 ```{r}
 jakarta_DGN95 <- jakarta_DGN95 %>% drop_na(OBJECT_ID)
 ```
@@ -412,9 +414,9 @@ Case_Rate_rds
 Death_Rate_rds
 ```
 
-# 4.Geospatial Analysis
+# 4. Geospatial Analysis
 
-## 4.1 Data Preparation for Thematic Mapping
+## 4.1 Data Preparation for Mapping
 
 ### 4.1.1 Joining Geospatial data (jakarta_DGN95) with Aspatial data (Case Rate and Death Rate)
 
@@ -486,8 +488,6 @@ However, the sub-districts of **Gondangdia** in *Mentang, Jakarta Pusat* and **K
 July 2021 is the last month that we have data on, so we will be using it to see the change in distribution from the first to the last month.
 
 ```{r}
-tmap_mode("plot")
-
 tm_shape(Case_Rate_Final) +
   tm_fill("07-2021",
           style = 'jenks',
@@ -554,7 +554,7 @@ tm_shape(Case_Rate_Final)+
             asp = NA,
             legend.show = FALSE)
 ```
-![](redlegend2.png){height=100px width=150px}
+![](redlegend3.png)
 
 Similar to the above visualisation, but now we will look at an estimated 5-month change in time period (Splitting the 17 months into 4 parts, which equals ~5) to see how the distribution of COVID cases has changed from March 2020 to July 2021.
 
@@ -569,69 +569,69 @@ tm_shape(Case_Rate_Final)+
             asp = NA,
             legend.show = FALSE)
 ```
-![](redlegend2.png){height=100px width=150px}
+![](redlegend4.png)
+
+Based on the 2 visualisations above, here are some of the observations made about *Positive Cases Rate*:
+
+- The first significant outbreak originated from the subdistrict of **Gambir** in *Gambir, Jakarta Pusat* in September 2020
+- The outbreak then started to affect some of the neighbouring subdistricts in the following months (Oct 2020 to Feb 2021), mainly below *Gambir*, such as *Senayan* and *Halim Perdan Kusumah*
+- As the virus spread to more subdistricts, **50% of districts** started to suffer from significant outbreaks as seen in *June 2021's small multiple map*
+- By the time data was collected at the end of July 2021, we can see that the COVID outbreak has reached around **80% of Jakarta**. This is evident from the wider spread of deeper red in *July 2021's small multiple map*, which is **a stark difference from** *June 2021's map*.
+- The subdistricts affected most seemed to cluster around the initial origin district of **Gambir**, with a seemingly dispersed pattern for the subdistricts with higher number of cases.
 
 ### 4.2.4 Time-series choropleth map of *Death Rate* throughout March 2020 to July 2021
 
-To find the minimum and highest value from Death_Rate_Final "07-2021" (AKA column with the most updated number of cumulative death cases).
+Utilising the same method as Case Rate, we will use time-series choropleth maps to see the change in distribution for deaths in the region. 
+
+Firstly, summary function is used to find the minimum and highest value from Death_Rate_Final “07-2021” (AKA column with the most updated number of cumulative positive cases), so as to determine the appropriate category breakpoints.
 
 ```{r}
 summary(Death_Rate_Final$`07-2021`)
 ```
+With reference to the results above, the breakpoints for our breaks vector will be c(0, 5, 10, 15, 20, 25, 30, 35, 40).
 
-Plotting small multiple maps to see how the distribution of deaths has changed on a monthly basis from March 2020 to July 2021. 
+Small multiple maps will be plotted to see how the distribution of deaths has changed on a monthly basis from March 2020 to July 2021. 
 
 ```{r fig.asp = 1,fig.width = 15, fig.height=6}
 tm_shape(Death_Rate_Final)+ 
   tm_polygons(c("03-2020", "04-2020", "05-2020", "06-2020", "07-2020", "08-2020", "09-2020", "10-2020", "11-2020", "12-2020", "01-2021", "02-2021", "03-2021", "04-2021", "05-2021", "06-2021", "07-2021"),
           breaks = c(0, 5, 10, 15, 20, 25, 30, 35, 40), 
-          palette = "Purples") +
+          palette = "Oranges") +
   tm_layout(panel.show = TRUE, 
             panel.labels = c("03-2020", "04-2020", "05-2020", "06-2020", "07-2020", "08-2020", "09-2020", "10-2020", "11-2020", "12-2020", "01-2021", "02-2021", "03-2021", "04-2021", "05-2021", "06-2021", "07-2021"),
             panel.label.size = 3,
             asp = NA,
             legend.show = FALSE)
 ```
+![](orangelegend2.png)
 
-Similar to the above visualisation, but with an estimated 5-month change in time period (Splitting the 17 months into 4 parts, which equals ~5) to see how the distribution of deaths from COVID has changed from March 2020 to July 2021.
+Similar to the above visualisation, but now we will look at an estimated 5-month change in time period (Splitting the 17 months into 4 parts, which equals ~5) to see how the distribution of deaths from COVID has changed from March 2020 to July 2021.
 
 ```{r fig.asp = 1,fig.width = 15, fig.height=6}
 tm_shape(Death_Rate_Final)+ 
   tm_polygons(c("03-2020", "08-2020", "02-2021", "07-2021"),
           breaks = c(0, 5, 10, 15, 20, 25, 30, 35, 40), 
-          palette = "Purples") +
+          palette = "Oranges") +
   tm_layout(panel.show = TRUE, 
             panel.labels = c("03-2020", "08-2020", "02-2021", "07-2021"),
             panel.label.size = 3,
             legend.show = FALSE)
 ```
-## NORMAL MAINLAND MAP 
+![](orangelegend1.png)
 
-```{r}
-tmap_mode("view")
+Based on the 2 visualisations above, here are some of the observations made about *Death Cases Rate*:
 
-tm_shape(Death_Rate_Final)+
-  tm_fill("03-2020", 
-          breaks = c(0, 4, 13, 53, 119, 270, 395, 3808), 
-          palette = "Reds",
-          title = "Cumulative Case Rate") +
-  tm_layout(main.title = "Cumulative Confirmed Case Rate in March 2020",
-            main.title.position = "center",
-            main.title.size = 1.2,
-            legend.outside = TRUE,
-            legend.height = 0.45, 
-            legend.width = 0.35,
-            frame = TRUE) +
-  tm_borders(alpha = 0.5) +
-  tm_compass(type="8star", size = 2, position = c( 'left','bottom')) +
-  tm_scale_bar(position = c( 'left','bottom')) +
-  tm_grid(alpha =0.2) 
-```
+- Same as *Positive Cases Rate*, the first sub-district with concerning number of deaths was the same subdistrict of **Gambir** in *Gambir, Jakarta Pusat*, however it was only more significant in January 2021 as compared to September 2020 for *Cases Rate*
+- The number of deaths then started to increase around the neighbouring subdistricts in the following months (Feb 2021 to July 2021)
+- **> 50% of districts** started to suffer from significant number of deaths from March 2021 onwards, as seen in *March 2021 to June 2021’s small multiple maps*
+- Similar to *Case Rate*, by the time data was collected at the end of July 2021, we can see that deaths from COVID cases has reached ***around 75% of Jakarta**. This is evident from the wider spread of deeper orange in July 2021’s small multiple map, which is quite a drastic difference from June 2021’s map
+- The end result in July 2021 looked similar to *Case Rate's July 2021 map*, with subdistricts affected most seemingly clustered around the initial origin district of *Gambir*
 
-# THEMATIC MAPPING
+## 4.3 Analytical Mapping
 
+### 4.3.1 Plotting Percentile Map to visualise extreme values
 
-PERCENTILE MAP????
+Firstly, we will extract **07-2021** as a vector out of an sf data frame.
 
 ```{r}
 percent <- c(0,.01,.1,.5,.9,.99,1)
@@ -639,6 +639,9 @@ var <- Case_Rate_Final["07-2021"] %>%
   st_set_geometry(NULL)
 quantile(var[,1], percent)
 ```
+
+The extraction will need the following code chunk (a function) to run.  
+
 ```{r}
 get.var <- function(vname,df) {
   v <- df[vname] %>% 
@@ -648,6 +651,8 @@ get.var <- function(vname,df) {
 }
 ```
 
+#### Percentile Map for **Positive Cases Rate**
+
 ```{r}
 percent <- c(0,.01,.1,.5,.9,.99,1)
 var <- get.var("07-2021", Case_Rate_Final)
@@ -656,55 +661,67 @@ tm_shape(jakarta_DGN95) +
   tm_polygons() +
 tm_shape(Case_Rate_Final) +
   tm_fill("07-2021",
-          title="07-2021",
+          title="Percentile",
           breaks=bperc,
-          palette="Blues",
+          palette="Reds",
           labels=c("< 1%", "1% - 10%",
                    "10% - 50%", 
                    "50% - 90%",
                    "90% - 99%", 
                    "> 99%"))  +
   tm_borders() +
-  tm_layout(title = "Percentile Map", 
-            title.position = c("right",
-                               "bottom"))
-```
-
-```{r}
-percentmap <- function(vnam, df, legtitle=NA, mtitle="Percentile Map"){
-  percent <- c(0,.01,.1,.5,.9,.99,1)
-  var <- get.var(vnam,df)
-  bperc <- quantile(var,percent)
-  tm_shape(jakarta_DGN95) +
-  tm_polygons() +
-  tm_shape(df) +
-     tm_fill(vnam,
-             title=legtitle,
-             breaks=bperc,
-             palette="Blues",
-          labels=c("< 1%", "1% - 10%", "10% - 50%", "50% - 90%", "90% - 99%", "> 99%"))  +
-  tm_borders() +
-  tm_layout(main.title = "Cumulative Confirmed Case Rate in July 2021",
-            main.title.position = "center",
+  tm_layout(main.title = "Percentile Map for Cumulative Cases Rate in July 2021", 
+            main.title.position = "left",
             main.title.size = 1.2,
             legend.outside = TRUE,
-            legend.height = 0.45, 
-            legend.width = 0.35,
             frame = TRUE) +
   tm_compass(type="8star", size = 2, position = c( 'left','bottom')) +
-  tm_scale_bar(position = c( 'left','bottom'))
-}
+  tm_scale_bar(position = c( 'left','bottom')) 
 ```
+From the above percentile map, we can see:
+
+- The various sub-districts actually fall across all 5 classes of Percentile
+- Majority of them falls under the *1% - 10%* and *50% - 90%* class
+- For the extreme ends,only around 3-4 sub-districts falls under **>99%** class and 2 sub-districts falls under **<1%** class
+- This means that there are a small number of outliers
+
+#### Percentile Map for **Death Rate**
 
 ```{r}
-CR_July2021_percentmap <- percentmap("07-2021", Case_Rate_Final)
-CR_March2020_percentmap <- percentmap("03-2020", Case_Rate_Final)
+percent <- c(0,.01,.1,.5,.9,.99,1)
+var <- get.var("07-2021", Death_Rate_Final)
+bperc <- quantile(var,percent)
+tm_shape(jakarta_DGN95) +
+  tm_polygons() +
+tm_shape(Death_Rate_Final) +
+  tm_fill("07-2021",
+          title="Percentile",
+          breaks=bperc,
+          palette="Oranges",
+          labels=c("< 1%", "1% - 10%",
+                   "10% - 50%", 
+                   "50% - 90%",
+                   "90% - 99%", 
+                   "> 99%"))  +
+  tm_borders() +
+  tm_layout(main.title = "Percentile Map for Cumulative Death Rate in July 2021", 
+            main.title.position = "left",
+            main.title.size = 1.2,
+            legend.outside = TRUE,
+            frame = TRUE) +
+  tm_compass(type="8star", size = 2, position = c( 'left','bottom')) +
+  tm_scale_bar(position = c( 'left','bottom')) 
 ```
+From the above percentile map, we can see:
 
-```{r}
-CR_March2020_percentmap
-```
-## BOXBREAKS BOX MAP????
+- The various sub-districts actually fall across all 5 classes of Percentile
+- Majority of them falls under the *1% - 10%* and *50% - 90%* class
+- For the extreme ends, only around 2-3 sub-districts falls under **>99%** class and 2 sub-districts falls under **<1%** class
+- This means that there are a small number of outliers, but they are not significant
+
+### 4.3.2 Plotting BoxMap to visualise outliers
+
+The following code chunk will be used to create the appropriate break points for plotting a box map.
 
 ```{r}
 boxbreaks <- function(v,mult=1.5) {
@@ -734,6 +751,8 @@ boxbreaks <- function(v,mult=1.5) {
 }
 ```
 
+The following code chunk creates an R function that will help extract a variable as a vector from a chosen sf data frame.
+
 ```{r}
 get.var <- function(vname,df) {
   v <- df[vname] %>% st_set_geometry(NULL)
@@ -742,12 +761,8 @@ get.var <- function(vname,df) {
 }
 ```
 
-```{r}
-July2021_No_Zero <- Case_Rate_Final %>%
-  filter('07-2021' >= 0)
-var <- get.var("07-2021", Case_Rate_Final)  
-boxbreaks(var)
-```
+Next, we will be creating a function that will help us churn out box maps whenever needed. 
+
 ```{r}
 boxmap <- function(vnam, df, 
                    legtitle=NA,
@@ -766,8 +781,8 @@ boxmap <- function(vnam, df,
                      "> 75%", 
                      "upper outlier"))  +
   tm_borders() +
-  tm_layout(main.title = "Cumulative Confirmed Case Rate in July 2021",
-            main.title.position = "center",
+  tm_layout(main.title = "Box Map Visualisation",
+            main.title.position = "left",
             main.title.size = 1.2,
             legend.outside = TRUE,
             legend.height = 0.45, 
@@ -778,30 +793,96 @@ boxmap <- function(vnam, df,
 }
 ```
 
+#### Box Map for **Case Rate**
+
 ```{r}
 boxmap("07-2021", Case_Rate_Final)
 ```
-# Relative Risk, Either No. of Cases or Population
+From the above box map, we can see for *Positive Cases Rate*:
+
+- A difference in results as compared to the results we got from the earlier Percentile Map
+- Most of the sub-districts fall into the *25% to the upper outlier* classes.
+- Earlier on, we noticed there were only a small number of outliers but through this box map visualisation, we could see that there are actually quite a significant number of sub-districts that fall into the *lower outlier* and *upper outlier* classes
+- This means that there would be a stark difference in the number of cases between sub-districts, especially when comparing one that falls under lower outlier and another from upper outlier
+- But the difference in results may have also arose from the Percentile Map's classes, as their *lower and upper outliers* equivalents were *<1% and >99%* respectively, which are more extreme than this box map's classes.
+
+#### Box Map for **Death Rate**
 
 ```{r}
-Death_Rate_Final <- Death_Rate_Final %>%
-  mutate(`EXPECTED_DEATH` = (`POSITIVE_CASES` * `07-2021`) / 10000)
-
-Death_Rate_Final <- Death_Rate_Final %>%
-  mutate(`SMR` = `DEATHS` / `EXPECTED_DEATH`)
+boxmap("07-2021", Death_Rate_Final)
 ```
+From the above box map, we can see for *Death Rate*:
+
+- Similar results to what we got from the earlier Percentile Map
+- Most of the sub-districts fall into the *25% to >75* classes.
+- Earlier on, we noticed there were only a small number of outliers but through this box map visualisation, we could see that there are actually quite a significant number of sub-districts that fall into the *lower outlier* classes
+- However, this may be a positive thing actually. More sub-districts falling into the *lower outlier* means that there are lesser deaths, which is definitely something we hope to maintain during this pandemic, mimimise the amount of deaths caused by the COVID-19 virus. 
+
+### 4.3.3 Plotting Relative Risk Maps
+
+The concept of a Standardised Mortality Rate (SMR) or also known as Relative Risk, is a commonly used metric in public health analysis. Through this SMR, we can see the various indicated risk levels the sub-districts of Jakarta are parked under, based on the data we analysed.  
+
+To prepare the required data for relative risk map, we will start off with computing the reference rate, which is the **total sum of deaths** over the **total sum of the population**.
+
+```{r}
+Sum_deaths <- sum(Death_Rate_Final$DEATHS)
+Sum_population <- sum(Death_Rate_Final$JUMLAH_PEN)
+
+reference_rate <- Sum_deaths / Sum_population
+```
+
+After that, we will compute the **expected number of deaths** based on the *reference rate* of the whole province and the *individual sub-district population (JUMLAH_PEN)*.
+
+```{r}
+Expected_Deaths <- reference_rate * Death_Rate_Final$JUMLAH_PEN
+```
+
+Finally, we will divide the *No. of Deaths per sub-district* over the *expected number of deaths* to get the **SMR**. The SMR will then give us a quick analysis of which sub-districts have higher than expected number of deaths, and which sub-districts have lower than expected deaths.
+
+```{r}
+Death_Rate_Final$SMR <- Death_Rate_Final$DEATHS / Expected_Deaths
+```
+
+#### Plotting Relative Risk Map
+
+In this map visualisation, sub-districts highlighted in **blue** indicates a **risk lower than the province average**, or SMR < 1. On the other hand, those highlighted in **red** indicates a **higher risk than the province average**, or SMR > 1.
+
+```{r}
+RR_Map <- tm_shape(Death_Rate_Final) +
+     tm_fill("SMR", title="Excess Risk", breaks=c(-100,.25,.5,1,2,4,1000), 
+             labels = c("<.25", ".25 - .50", ".50 - 1.00","1.00 - 2.00", "2.00 - 4.00", "> 4.00" ), 
+             palette = "-RdBu")  +
+  tm_borders() +
+  tm_layout(legend.outside = TRUE, legend.outside.position = "right") +
+  tm_compass(type="8star", size = 2, position = c( 'left','bottom')) +
+  tm_scale_bar(position = c( 'left','bottom'))
+
+RR_Map
+```
+Results from the Relative Risk Map:
+
+- As expected, the sub-district of **Gambir** has the highest risk amongst the sub-districts, with a SMR of > 4. This is not surprising as **Gambir** has been identified during the earlier analyses as the origin of where the COVID-19 virus actually broke out significantly.
+- The sub-district of **Karet Kuningan** in *Setiabudi, Jakarta Seletan* is also identified as a significant high risk sub-district, with a SMR of 2.0 to 4.0, which is still higher than the cut off of high risk SMR > 1. This was unforeseen because this particular sub-district wasn't distinctive during the earlier analyses. 
+- The rest of the sub-districts are distributed almost equally, half being high risk with SMR of 1.0 - 2.0, and another half being low risk, as highlighted in blue with a SMR of < 1. 
+- This phenomenon is not the most favourable, hopefully the situation will become better over time and we hope to see more blue than red in the following months.
+
 
 ```{r include=FALSE}
-Death_Rate_Final
-```
-# Data Prepartion for Relative Risk Mapping
-
-```{r}
-# 
-# Jakarta_Death_Final   <- Jakarta_Death_Final %>%  group_by('Expected_Death',Sub_District)  %>% dplyr::summarise(`SMR` = (Death)/(Expected_Death)) %>% ungroup()
-# 
-# Jakarta_Death_Final   <- Jakarta_Death_Final %>%  group_by(Sub_District,SMR)  %>% dplyr::summarise(`SMR_Avg` = sum(SMR)/15)
+# RR_Map_Box <- boxmap("SMR", Death_Rate_Final)
+# RR_Map_Box
 ```
 
+# 5. Conclusion
 
+This spatio-temporal analysis of COVID-19 patterns in DKI Jakarta, Indonesia has been a substantial one, with certain spatial patterns being discovered throughout the months of data. 
+
+The most concerning sub-district would definitely be **Gambir**, which stood out multiple times throughout the various analyses. It was also the origin of the first outbreak, which led to other sub-districts being affected greatly as well, especially those in its immediate surroundings. 
+
+The COVID-19 pandemic has undoubtedly affected the whole world, we need to be strong and work together as one during this uncertain time. 
+
+I shall end this study with a positive quote; 
+
+*"You can't stop the waves, but you can learn to surf"*
+
+-- Jon Kabat-Zinn
 
