@@ -38,7 +38,7 @@ To begin the study, R packages will be used for efficiency and a more comprehens
 
 ```{r results='hide'}
 load("THE1_workspace.Rdata")
-packages = c('tidyverse', 'sf', 'readxl', 'readr', 'stringr', 'tmap', 'lemon', 'formatR')
+packages = c('tidyverse', 'sf', 'readxl', 'readr', 'stringr', 'tmap', 'lemon', 'formatR', 'ggplot2')
 for (p in packages)
   {
   if(!require(p, character.only = T))
@@ -408,6 +408,9 @@ Case_Rate_rds <- read_rds("data/the1data/rds/Case_Rate_rds.rds")
 Death_Rate_rds <- read_rds("data/the1data/rds/Death_Rate_rds.rds")
 ```
 
+![Visualisation of Case_Rate_Rds](CaseRateRds.png)
+![Visualisation of Death_Rate_Rds](DeathRateRds.png)
+
 ```{r include=FALSE}
 Case_Rate_rds
 ```
@@ -430,6 +433,17 @@ Case_Rate_Final <- left_join(jakarta_DGN95, Case_Rate_rds, by= c("DESA_KELUR" = 
 Death_Rate_Final <- left_join(jakarta_DGN95, Death_Rate_rds, by= c("DESA_KELUR" = "SUB_DISTRICT"))
 ```
 
+Taking a look at the **Finalised Dataframes**
+
+```{r}
+head(Case_Rate_Final)
+```
+
+```{r}
+head(Death_Rate_Final)
+```
+
+
 ### 4.1.2 Checking for NA rows in the combined dataframes
 
 Once again, checking for NA rows to ensure substantial analysis results will be attained.
@@ -439,6 +453,7 @@ Case_Rate_Final[rowSums(is.na(Case_Rate_Final))!=0,]
 
 Death_Rate_Final[rowSums(is.na(Death_Rate_Final))!=0,]
 ```
+
 No NA rows were found, so we are good to proceed on.
 
 ## 4.2 Thematic Mapping
