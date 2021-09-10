@@ -2142,9 +2142,9 @@ Take-home Exercise
 <li><p><a href="https://riwayat-file-covid-19-dki-jakarta-jakartagis.hub.arcgis.com/">Open Data Covid-19 Provinsi DKI Jakarta</a>. This portal provides daily update of COVID-19 measures at both sub-district and district level. For the purpose of this analysis, data at the sub-district level is used. The datasets are in .CSV format, and monthly datasets from March 2020 to July 2021 will be used.</p></li>
 <li><p><a href="https://www.indonesia-geospasial.com/">Indonesia Geospatial</a>. This portal provides a comprehensive collection of geospatial data mainly in ESRI shapefile format at different geographical levels. For the purpose of this analysis, the Shapefile (SHP) Batas Desa Provinsi DKI Jakarta provided at PODES 2019 geospatial layer is used.</p></li>
 </ul>
-<p><strong>P.S.</strong> <em>March 2020 Dataset only started from</em> <strong>25 March 2020</strong> <em>as per the source, so the dataset might not be a true representative of March 2020. Similarly for January 2021 Dataset,</em> <strong>30 January 2021</strong> <em>is the most updated data, the link to access 31 January 2021 is broken so this may not be a true representation of January 2021.</em></p>
+<p><strong>P.S.</strong> For <strong>Open Data Covid-19 Provinsi DKI Jakarta</strong>, <em>March 2020 Dataset only started from</em> <strong>25 March 2020</strong> <em>as per the source, so the dataset might not be a true representative of March 2020. Similarly for January 2021 Dataset,</em> <strong>30 January 2021</strong> <em>is the most updated data, the link to access 31 January 2021 is broken so this may not be a true representation of January 2021.</em></p>
 <h1 id="setting-up-the-environment">2. Setting up the environment</h1>
-<p>R packages will be used for efficiency and a more comprehensive analysis, such as <em>tidyverse</em> and <em>sf</em> etc.</p>
+<p>To begin the study, R packages will be used for efficiency and a more comprehensive analysis, such as <em>tidyverse</em> and <em>sf</em> etc.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/load.html'>load</a></span><span class='op'>(</span><span class='st'>"THE1_workspace.Rdata"</span><span class='op'>)</span>
@@ -2161,6 +2161,7 @@ Take-home Exercise
 <h1 id="data-wrangling">3. Data Wrangling</h1>
 <h2 id="aspatial-data">3.1 Aspatial Data</h2>
 <h3 id="importing-and-creating-a-list">3.1.1 Importing and creating a list</h3>
+<p>Datasets will now be imported into Rstudio.</p>
 <p><em>list.files</em> function helps to create a list from the imported data files. The files are also imported all at once using a pattern to match the file names, ensuring full efficiency as compared to importing the files individually.</p>
 <p>The R function <em>lapply</em> is also complementary for this process, as well as adding the file names as an additional column to the dataframes (So as to display the data by month later on).</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2172,7 +2173,7 @@ Take-home Exercise
 </div>
 </div>
 <h3 id="looking-through-the-data-and-initial-data-cleaning">3.1.2 Looking through the data and initial data cleaning</h3>
-<p>From here we then manually check through <em>df_list</em> to find which Meninggal column is the correct one for each file, for referencing the coalesce process later on in the next few steps (E.g. For February 2021, Meninggal…1 is the correct column to use since it is the Meninggal column with no NA values.)</p>
+<p>From here we then manually check through <em>df_list</em> to find which Meninggal(english translation: <strong>Deaths</strong>) column is the correct one for each file, for referencing the coalesce process later on in the next few steps (E.g. For February 2021, Meninggal…1 is the correct column to use since it is the Meninggal column with no NA values.)</p>
 <p>The inspection tells us that <em>Meninggal…23 to Meninggal…25</em> is not used so we can skip those columns later on in the coalesce process.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
@@ -2208,7 +2209,7 @@ Take-home Exercise
 </div>
 </div>
 <h3 id="coalesce-process-for-namissing-values">3.1.5 Coalesce process for NA/missing values</h3>
-<p>In this step we aim to combine <em>ID_KEL</em> into one main column, since some of the files have different layouts. Coalesce is a function to take in values from another column (So if ID_KEL has NA values while ID_KEL…1 has values, we will take from ID_KEL…1 and add them into ID_KEL)</p>
+<p>In this step we aim to combine <em>ID_KEL</em> into one main column, since some of the files have different layouts, which led to NA values in some rows. <strong>Coalesce</strong> is a function to take in values from another column (So if ID_KEL has NA values while ID_KEL…1 has values, we will take from ID_KEL…1 and add them into ID_KEL)</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>df</span> <span class='op'>&lt;-</span> <span class='va'>df</span> <span class='op'>%&gt;%</span>
@@ -2216,7 +2217,7 @@ Take-home Exercise
 </code></pre>
 </div>
 </div>
-<p>Similarly, we want to combine menninggal together as one column, since some of the files have different layout. We know that only 28,29,30,31 is used after checking the dataset earlier on during “df_list”, so we will only integrate those columns together.</p>
+<p>Similarly, we want to combine Meninggal together as one column, since some of the files have different layouts. We know that only <strong>Meninggal 28,29,30,31</strong> is used after checking the datasets earlier on during <strong>df_list</strong>, so we will only integrate those columns together.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>df</span> <span class='op'>&lt;-</span> <span class='va'>df</span> <span class='op'>%&gt;%</span>
@@ -2237,7 +2238,7 @@ Take-home Exercise
 </code></pre>
 </div>
 </div>
-<p>So df2 is the modified dataframe, and currently this is the output. <em>lemon_print</em> is used for a more aesthetically pleasing dataframe.</p>
+<p>So df2 is the modified dataframe, and currently this is the output. <em>lemon_print</em> from <strong>lemon</strong> R Package is used for a more aesthetically pleasing dataframe.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>df2</span><span class='op'>)</span>
@@ -2332,7 +2333,7 @@ Take-home Exercise
 </table>
 </div>
 <h3 id="cleaning-up-monthyear-column-so-as-to-sort-the-values-by-month">3.1.7 Cleaning up <em>MonthYear</em> column so as to sort the values by month</h3>
-<p>As shown above, we need to clean up the <em>MonthYear</em> column as it is very messy. We will clean up the <em>MonthYear</em> column using <em>str_replace</em> function, to replace unnecessary characters in the values.</p>
+<p>As shown above, we will need to clean up the <em>MonthYear</em> column as it is very messy. We will clean up the <em>MonthYear</em> column using <em>str_replace</em> function, to replace unnecessary characters in the values.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>df2</span> <span class='op'>&lt;-</span> <span class='va'>df2</span> <span class='op'>%&gt;%</span>
@@ -2363,7 +2364,7 @@ Take-home Exercise
 </code></pre>
 </div>
 </div>
-<p>Next, deleting away wrong/unnecessary rows (NA values in <em>ID_KEL</em>, subdistrict name as rows in <em>ID_KEL</em> column etc).</p>
+<p>Next, we will remove any wrong/unnecessary rows (NA values in <em>ID_KEL</em>, subdistrict name as rows in <em>ID_KEL</em> column etc).</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>df2</span><span class='op'>[</span><span class='op'>!</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>df2</span><span class='op'>$</span><span class='va'>ID_KEL</span><span class='op'>)</span>, <span class='op'>]</span>
@@ -2372,7 +2373,7 @@ Take-home Exercise
 </code></pre>
 </div>
 </div>
-<p>Sorting the modified dataframe by <em>MonthYear</em> and resetting of index.</p>
+<p>Then, sorting the modified dataframe by <em>MonthYear</em> and resetting of index.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>df2</span> <span class='op'>&lt;-</span> <span class='va'>df2</span><span class='op'>[</span><span class='fu'><a href='https://rdrr.io/r/base/order.html'>order</a></span><span class='op'>(</span><span class='va'>df2</span><span class='op'>$</span><span class='va'>MonthYear</span><span class='op'>)</span>, <span class='op'>]</span>
@@ -2400,7 +2401,7 @@ Take-home Exercise
 </div>
 <h2 id="geospatial-data">3.2 Geospatial Data</h2>
 <h3 id="importing-shapefile-data-into-a-simple-feature-dataframe">3.2.1 Importing shapefile data into a simple feature dataframe</h3>
-<p>The following code cunk imports the <em>DKI Jakarta</em> geospatial data into R as a simple feature dataframe.</p>
+<p>The following code cunk imports the <strong>DKI Jakarta</strong> geospatial data into R as a simple feature dataframe.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>geospatial_df</span> <span class='op'>&lt;-</span> <span class='fu'>st_read</span><span class='op'>(</span>dsn <span class='op'>=</span> <span class='st'>"data/the1data/BATAS DESA DESEMBER 2019 DUKCAPIL DKI JAKARTA"</span>,
@@ -2439,7 +2440,7 @@ GEOGCRS[&quot;WGS 84&quot;,
             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
     ID[&quot;EPSG&quot;,4326]]</code></pre>
 </div>
-<p>From the above output, we see that the Projected Coordinates System is WGS84 which is <strong>wrong</strong>, therefore we’ll Change the Projected Coordinates Systems to DGN95 (which is the national Projected Coordinates Systems of Indonesia).</p>
+<p>From the above output, we see that the Projected Coordinates System is WGS84 which is <strong>wrong</strong>, therefore we’ll Change the Projected Coordinates Systems to <strong>DGN95</strong> (which is the national Projected Coordinates Systems of Indonesia).</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>jakarta_DGN95</span> <span class='op'>&lt;-</span> <span class='fu'>st_transform</span><span class='op'>(</span><span class='va'>geospatial_df</span>, <span class='fl'>23845</span><span class='op'>)</span>
@@ -2455,7 +2456,7 @@ GEOGCRS[&quot;WGS 84&quot;,
 </div>
 </div>
 <h3 id="subsetting-necessary-columns-from-the-sf-dataframe">3.2.4 Subsetting necessary columns from the sf dataframe</h3>
-<p>For the analysis, we will only keep the first nine fields, whereby the last field is JUMLAH_PEN (Total Population).</p>
+<p>For the analysis, we will only keep the first nine fields, whereby the last field is <strong>JUMLAH_PEN</strong> (Total Population).</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>jakarta_DGN95</span> <span class='op'>&lt;-</span> <span class='va'>jakarta_DGN95</span><span class='op'>[</span>, <span class='fl'>0</span><span class='op'>:</span><span class='fl'>9</span><span class='op'>]</span>
@@ -2486,7 +2487,7 @@ GEOGCRS[&quot;WGS 84&quot;,
 </code></pre>
 </div>
 </div>
-<p>Function to help us check if the identifier keys between the aspatial and geospatial data are correct.</p>
+<p>The below code chunk is to help us check if the identifier keys between the aspatial and geospatial data are correct.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>a</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>aspatial_df</span><span class='op'>$</span><span class='va'>nama_kelurahan</span><span class='op'>)</span>
@@ -2497,7 +2498,7 @@ GEOGCRS[&quot;WGS 84&quot;,
 </div>
 </div>
 <h3 id="removing-na-value-rows-from-dataframe">3.2.6 Removing NA value rows from dataframe</h3>
-<p>We will drop NA value rows, as they will only affect our analysis results.</p>
+<p>We will drop NA value rows, as they will affect our analysis results.</p>
 <p><em>P.S. 2 sub-districts (DANAU SUNTER and DANAU SUNTER DLL) will be dropped through this process as most of their values fall under NA values, only their OBJECT_ID and Sub-district names were present, population data and positive cases data were missing/NA.</em></p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
@@ -2510,7 +2511,7 @@ GEOGCRS[&quot;WGS 84&quot;,
 <h3 id="data-preparation-for-cumulative-case-rate-by-month-per-10000-population">3.3.1 Data preparation for <em>Cumulative Case Rate</em> by month (per 10,000 Population)</h3>
 <p>Functions from various packages will be used: e.g. <em>pivot_wider()</em> of <strong>tidyr</strong> package and <em>group_by</em> of <strong>dplyr</strong> package.</p>
 <p>The formula we are using is:</p>
-<pre><code>COVID-19 Cases Rate per 10,000 population (Monthly) = (Total Cumulative Cases / Total Population) x 10000</code></pre>
+<pre><code>COVID-19 Case Rate per 10,000 population (Monthly) = (Total Cumulative Cases / Total Population) x 10000</code></pre>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>Case_Rate</span> <span class='op'>&lt;-</span> <span class='va'>aspatial_df</span> <span class='op'>%&gt;%</span>
@@ -2558,7 +2559,7 @@ GEOGCRS[&quot;WGS 84&quot;,
 </div>
 </div>
 <h3 id="renaming-the-columns-for-both-dataframes-for-easier-identification-during-analysis">3.3.4 Renaming the columns for both dataframes for easier identification during analysis</h3>
-<p>The columns will be renamed and simplified for easier identification, such as removing Date value from the MonthYear values (e.g. “2021-02-28” into “02-2021”).</p>
+<p>The columns will be renamed and simplified for easier identification, such as removing Date value from the <em>MonthYear</em> values (e.g. “2021-02-28” into “02-2021”).</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/colnames.html'>colnames</a></span><span class='op'>(</span><span class='va'>Case_Rate</span><span class='op'>)</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"SUB_DISTRICT"</span>, <span class='st'>"03-2020"</span>, <span class='st'>"04-2020"</span>, <span class='st'>"05-2020"</span>, <span class='st'>"06-2020"</span>,
@@ -2573,7 +2574,7 @@ GEOGCRS[&quot;WGS 84&quot;,
 </div>
 </div>
 <h3 id="additional-data-cleaning-to-ensure-cleaned-data-is-used-for-analysis">3.3.5 Additional data cleaning to ensure cleaned data is used for analysis</h3>
-<p>A code to quickly check and ensure there are no NA values.</p>
+<p>A simple code chunk to quickly check and ensure there are no NA values.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>Case_Rate</span><span class='op'>[</span><span class='fu'><a href='https://rdrr.io/r/base/colSums.html'>rowSums</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>Case_Rate</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>!=</span> <span class='fl'>0</span>, <span class='op'>]</span>
@@ -2608,7 +2609,7 @@ GEOGCRS[&quot;WGS 84&quot;,
 <h1 id="geospatial-analysis">4. Geospatial Analysis</h1>
 <h2 id="data-preparation-for-mapping">4.1 Data Preparation for Mapping</h2>
 <h3 id="joining-geospatial-data-jakarta_dgn95-with-aspatial-data-case-rate-and-death-rate">4.1.1 Joining Geospatial data (jakarta_DGN95) with Aspatial data (Case Rate and Death Rate)</h3>
-<p><em>left_join</em> of <strong>dplyr</strong> is used to join the geospatial data and attributes from the aspatial data using the names of sub-districts as a common identifier (“DESA_KELUR for jakarta_DGN95, and”SUB_DISTRICT" for Case/Death_Rate_rds)</p>
+<p><em>left_join</em> of <strong>dplyr</strong> is used to join the geospatial data and attributes from the aspatial data using the names of sub-districts as a common identifier (“DESA_KELUR” for jakarta_DGN95, and “SUB_DISTRICT” for Case/Death_Rate_rds)</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>Case_Rate_Final</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate-joins.html'>left_join</a></span><span class='op'>(</span><span class='va'>jakarta_DGN95</span>, <span class='va'>Case_Rate_rds</span>, by <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span>DESA_KELUR <span class='op'>=</span> <span class='st'>"SUB_DISTRICT"</span><span class='op'>)</span><span class='op'>)</span>
@@ -2705,10 +2706,10 @@ Projected CRS: DGN95 / Indonesia TM-3 zone 54.1
 </div>
 <p>Similar to case rate, we can see that there is a seemingly even distribution throughout the different sub-districts of Jakarta.</p>
 <p>However, the subdistrict of <strong>Gambir</strong> in <em>Gambir, Jakarta Pusat</em> is an outlier as well, with a much higher number of death cases than the other sub-districts as shown by the darker green shading.</p>
-<p><em>P.S. As mentioned earlier on, these visualisations does not take into account the difference in number of cases from March 2020 to July 2020, we are only comparing the change in distribution of cases across Jakarta.</em></p>
-<h3 id="time-series-choropleth-map-of-positive-cases-rate-throughout-march-2020-to-july-2021">4.2.3 Time-series choropleth map of <em>Positive Cases</em> Rate throughout March 2020 to July 2021</h3>
+<p><strong>P.S.</strong> <em>As mentioned earlier on, these visualisations does not take into account the difference in number of cases from March 2020 to July 2020, we are only comparing the change in distribution of cases across Jakarta.</em></p>
+<h3 id="time-series-choropleth-maps-of-positive-cases-rate-throughout-march-2020-to-july-2021">4.2.3 Time-series choropleth maps of <em>Positive Cases</em> Rate throughout March 2020 to July 2021</h3>
 <p>To take into account the increase in total cases, time-series choropleth maps will be used to do this analysis.</p>
-<p>Firstly, <em>summary</em> function is used to find the minimum and highest value from Case_Rate_Final “07-2021” (AKA column with the most updated number of cumulative positive cases), so as to determine the appropriate category breakpoints.</p>
+<p>Firstly, <em>summary</em> function is used to find the minimum and highest value from <strong>Case_Rate_Final</strong> “07-2021” (AKA column with the most updated number of cumulative positive cases), so as to determine the appropriate category breakpoints.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>Case_Rate_Final</span><span class='op'>$</span><span class='va'>`07-2021`</span><span class='op'>)</span>
@@ -2717,8 +2718,8 @@ Projected CRS: DGN95 / Indonesia TM-3 zone 54.1
 <pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
   187.3   545.1   658.3   705.3   779.7  3808.3 </code></pre>
 </div>
-<p>With reference to the results above, the breakpoints for our breaks vector will be c(0, 500, 1000, 1500, 2000, 2500, 3000).</p>
-<p>We will plot small multiple maps to see how the distribution of COVID cases has changed on a monthly basis from March 2020 to July 2021.</p>
+<p>With reference to the results above, the <strong>breakpoints</strong> for our breaks vector will be c(0, 500, 1000, 1500, 2000, 2500, 3000).</p>
+<p>We will plot small multiple maps to see how the distribution of COVID cases has changed on a <strong>monthly basis</strong> from March 2020 to July 2021.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>tm_shape</span><span class='op'>(</span><span class='va'>Case_Rate_Final</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>tm_polygons</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"03-2020"</span>, <span class='st'>"04-2020"</span>, <span class='st'>"05-2020"</span>, <span class='st'>"06-2020"</span>,
@@ -2734,7 +2735,7 @@ Projected CRS: DGN95 / Indonesia TM-3 zone 54.1
 <p><img src="take-home-exercise-1_files/figure-html5/unnamed-chunk-48-1.png" width="1440" style="display: block; margin: auto;" /></p>
 </div>
 <p><img src="redlegend3.png" /></p>
-<p>Similar to the above visualisation, but now we will look at an estimated 5-month change in time period (Splitting the 17 months into 4 parts, which equals ~5) to see how the distribution of COVID cases has changed from March 2020 to July 2021.</p>
+<p>Similar to the above visualisation, but now we will look at an estimated <strong>5-month change</strong> in time period (Splitting the 17 months into 4 parts, which equals ~5) to see how the distribution of COVID cases has changed from March 2020 to July 2021.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>tm_shape</span><span class='op'>(</span><span class='va'>Case_Rate_Final</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>tm_polygons</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"03-2020"</span>, <span class='st'>"08-2020"</span>, <span class='st'>"02-2021"</span>, <span class='st'>"07-2021"</span><span class='op'>)</span>,
@@ -2756,7 +2757,7 @@ Projected CRS: DGN95 / Indonesia TM-3 zone 54.1
 </ul>
 <h3 id="time-series-choropleth-map-of-death-rate-throughout-march-2020-to-july-2021">4.2.4 Time-series choropleth map of <em>Death Rate</em> throughout March 2020 to July 2021</h3>
 <p>Utilising the same method as Case Rate, we will use time-series choropleth maps to see the change in distribution for deaths in the region.</p>
-<p>Firstly, summary function is used to find the minimum and highest value from Death_Rate_Final “07-2021” (AKA column with the most updated number of cumulative positive cases), so as to determine the appropriate category breakpoints.</p>
+<p>Firstly, summary function is used to find the minimum and highest value from <strong>Death_Rate_Final</strong> “07-2021” (AKA column with the most updated number of cumulative positive cases), so as to determine the appropriate category breakpoints.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>Death_Rate_Final</span><span class='op'>$</span><span class='va'>`07-2021`</span><span class='op'>)</span>
@@ -2765,8 +2766,8 @@ Projected CRS: DGN95 / Indonesia TM-3 zone 54.1
 <pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
   3.439   8.446  10.298  10.602  12.508  42.098 </code></pre>
 </div>
-<p>With reference to the results above, the breakpoints for our breaks vector will be c(0, 5, 10, 15, 20, 25, 30, 35, 40).</p>
-<p>Small multiple maps will be plotted to see how the distribution of deaths has changed on a monthly basis from March 2020 to July 2021.</p>
+<p>With reference to the results above, the <strong>breakpoints</strong> for our breaks vector will be c(0, 5, 10, 15, 20, 25, 30, 35, 40).</p>
+<p>Small multiple maps will be plotted to see how the distribution of deaths has changed on a <strong>monthly basis</strong> from March 2020 to July 2021.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>tm_shape</span><span class='op'>(</span><span class='va'>Death_Rate_Final</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>tm_polygons</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"03-2020"</span>, <span class='st'>"04-2020"</span>, <span class='st'>"05-2020"</span>, <span class='st'>"06-2020"</span>,
@@ -2803,7 +2804,7 @@ Projected CRS: DGN95 / Indonesia TM-3 zone 54.1
 <li>The end result in July 2021 looked similar to <em>Case Rate’s July 2021 map</em>, with subdistricts affected most seemingly clustered around the initial origin district of <em>Gambir</em></li>
 </ul>
 <h2 id="analytical-mapping">4.3 Analytical Mapping</h2>
-<h3 id="plotting-percentile-map-to-visualise-extreme-values">4.3.1 Plotting Percentile Map to visualise extreme values</h3>
+<h3 id="plotting-percentile-maps-to-visualise-extreme-values">4.3.1 Plotting Percentile Maps to visualise extreme values</h3>
 <p>Firstly, we will extract <strong>07-2021</strong> as a vector out of an sf data frame.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
@@ -2849,7 +2850,7 @@ Projected CRS: DGN95 / Indonesia TM-3 zone 54.1
 <li>The various sub-districts actually fall across all 5 classes of Percentile</li>
 <li>Majority of them falls under the <em>1% - 10%</em> and <em>50% - 90%</em> class</li>
 <li>For the extreme ends,only around 3-4 sub-districts falls under <strong>&gt;99%</strong> class and 2 sub-districts falls under <strong>&lt;1%</strong> class</li>
-<li>This means that there are a small number of outliers</li>
+<li>This means that there are a <strong>small number of outliers</strong></li>
 </ul>
 <h4 id="percentile-map-for-death-rate">Percentile Map for <strong>Death Rate</strong></h4>
 <div class="layout-chunk" data-layout="l-body">
@@ -2875,7 +2876,7 @@ Projected CRS: DGN95 / Indonesia TM-3 zone 54.1
 <li>For the extreme ends, only around 2-3 sub-districts falls under <strong>&gt;99%</strong> class and 2 sub-districts falls under <strong>&lt;1%</strong> class</li>
 <li>This means that there are a small number of outliers, but they are not significant</li>
 </ul>
-<h3 id="plotting-boxmap-to-visualise-outliers">4.3.2 Plotting BoxMap to visualise outliers</h3>
+<h3 id="plotting-boxmaps-to-visualise-outliers">4.3.2 Plotting BoxMaps to visualise outliers</h3>
 <p>The following code chunk will be used to create the appropriate break points for plotting a box map.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
@@ -2946,10 +2947,10 @@ Projected CRS: DGN95 / Indonesia TM-3 zone 54.1
 </div>
 <p>From the above box map, we can see for <em>Positive Cases Rate</em>:</p>
 <ul>
-<li>A difference in results as compared to the results we got from the earlier Percentile Map</li>
+<li>A difference in results as compared to the results we got from the earlier <strong>Percentile Map</strong></li>
 <li>Most of the sub-districts fall into the <em>25% to the upper outlier</em> classes.</li>
-<li>Earlier on, we noticed there were only a small number of outliers but through this box map visualisation, we could see that there are actually quite a significant number of sub-districts that fall into the <em>lower outlier</em> and <em>upper outlier</em> classes</li>
-<li>This means that there would be a stark difference in the number of cases between sub-districts, especially when comparing one that falls under lower outlier and another from upper outlier</li>
+<li>Earlier on, we noticed there were only a small number of outliers but through this box map visualisation, we could see that there are actually quite a significant number of sub-districts that fall into the <strong>lower outlier</strong> and <strong>upper outlier</strong> classes</li>
+<li>This means that there would be <strong>a stark difference</strong> in the number of cases <strong>between sub-districts</strong>, especially when comparing one that falls under lower outlier and another from upper outlier</li>
 <li>But the difference in results may have also arose from the Percentile Map’s classes, as their <em>lower and upper outliers</em> equivalents were <em>&lt;1% and &gt;99%</em> respectively, which are more extreme than this box map’s classes.</li>
 </ul>
 <h4 id="box-map-for-death-rate">Box Map for <strong>Death Rate</strong></h4>
@@ -2962,13 +2963,13 @@ Projected CRS: DGN95 / Indonesia TM-3 zone 54.1
 </div>
 <p>From the above box map, we can see for <em>Death Rate</em>:</p>
 <ul>
-<li>Similar results to what we got from the earlier Percentile Map</li>
+<li>Similar results to what we got from the earlier <strong>Percentile Map</strong></li>
 <li>Most of the sub-districts fall into the <em>25% to &gt;75</em> classes.</li>
-<li>Earlier on, we noticed there were only a small number of outliers but through this box map visualisation, we could see that there are actually quite a significant number of sub-districts that fall into the <em>lower outlier</em> classes</li>
+<li>Earlier on, we noticed there were only a small number of outliers but through this box map visualisation, we could see that there are actually quite <strong>a significant number of sub-districts</strong> that fall into the <strong>lower outlier</strong> classes</li>
 <li>However, this may be a positive thing actually. More sub-districts falling into the <em>lower outlier</em> means that there are lesser deaths, which is definitely something we hope to maintain during this pandemic, mimimise the amount of deaths caused by the COVID-19 virus.</li>
 </ul>
 <h3 id="plotting-relative-risk-maps">4.3.3 Plotting Relative Risk Maps</h3>
-<p>The concept of a Standardised Mortality Rate (SMR) or also known as Relative Risk, is a commonly used metric in public health analysis. Through this SMR, we can see the various indicated risk levels the sub-districts of Jakarta are parked under, based on the data we analysed.</p>
+<p>The concept of a Standardised Mortality Rate (SMR) or also known as Relative Risk, is a commonly used metric in public health analysis or studies of the spread of a disease. Through this SMR, we can see the various indicated risk levels the sub-districts of Jakarta are parked under, based on the data we analysed.</p>
 <p>To prepare the required data for relative risk map, we will start off with computing the reference rate, which is the <strong>total sum of deaths</strong> over the <strong>total sum of the population</strong>.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
@@ -3012,12 +3013,12 @@ Projected CRS: DGN95 / Indonesia TM-3 zone 54.1
 <ul>
 <li>As expected, the sub-district of <strong>Gambir</strong> has the highest risk amongst the sub-districts, with a SMR of &gt; 4. This is not surprising as <strong>Gambir</strong> has been identified during the earlier analyses as the origin of where the COVID-19 virus actually broke out significantly.</li>
 <li>The sub-district of <strong>Karet Kuningan</strong> in <em>Setiabudi, Jakarta Seletan</em> is also identified as a significant high risk sub-district, with a SMR of 2.0 to 4.0, which is still higher than the cut off of high risk SMR &gt; 1. This was unforeseen because this particular sub-district wasn’t distinctive during the earlier analyses.</li>
-<li>The rest of the sub-districts are distributed almost equally, half being high risk with SMR of 1.0 - 2.0, and another half being low risk, as highlighted in blue with a SMR of &lt; 1.</li>
+<li>The rest of the sub-districts are distributed almost equally, <strong>half being high risk</strong> with SMR of 1.0 - 2.0, and another <strong>half being low risk</strong>, as highlighted in blue with a SMR of &lt; 1.</li>
 <li>This phenomenon is not the most favourable, hopefully the situation will become better over time and we hope to see more blue than red in the following months.</li>
 </ul>
 <h1 id="conclusion">5. Conclusion</h1>
-<p>This spatio-temporal analysis of COVID-19 patterns in DKI Jakarta, Indonesia has been a substantial one, with certain spatial patterns being discovered throughout the months of data.</p>
-<p>The most concerning sub-district would definitely be <strong>Gambir</strong>, which stood out multiple times throughout the various analyses. It was also the origin of the first outbreak, which led to other sub-districts being affected greatly as well, especially those in its immediate surroundings.</p>
+<p>This spatio-temporal analysis of COVID-19 patterns in DKI Jakarta, Indonesia has been a substantial one, with certain <strong>spatial patterns being discovered</strong> throughout the months of data.</p>
+<p>The most concerning sub-district would definitely be <strong>Gambir</strong>, which stood out multiple times throughout the various analyses. It was also the <strong>origin of the first outbreak</strong>, which led to other sub-districts being affected greatly as well, especially those in its immediate surroundings.</p>
 <p>The COVID-19 pandemic has undoubtedly affected the whole world, we need to be strong and work together as one during this uncertain time.</p>
 <p>I shall end this study with a positive quote;</p>
 <p><em>“You can’t stop the waves, but you can learn to surf”</em></p>
