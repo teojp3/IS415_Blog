@@ -38,7 +38,7 @@ To begin the study, R packages will be used for efficiency and a more comprehens
 
 ```{r results='hide'}
 load("THE1_workspace.Rdata")
-packages = c('tidyverse', 'sf', 'readxl', 'readr', 'stringr', 'tmap', 'lemon', 'formatR', 'ggplot2')
+packages = c('tidyverse', 'sf', 'readxl', 'readr', 'stringr', 'tmap', 'lemon', 'formatR')
 for (p in packages)
   {
   if(!require(p, character.only = T))
@@ -408,8 +408,13 @@ Case_Rate_rds <- read_rds("data/the1data/rds/Case_Rate_rds.rds")
 Death_Rate_rds <- read_rds("data/the1data/rds/Death_Rate_rds.rds")
 ```
 
-![Visualisation of Case_Rate_Rds](CaseRateRds.png)
-![Visualisation of Death_Rate_Rds](DeathRateRds.png)
+#### Visualisation of **Case_Rate_Rds**
+
+![](CaseRateRds.png)
+
+#### Visualisation of **Death_Rate_Rds**
+
+![](DeathRateRds.png)
 
 ```{r include=FALSE}
 Case_Rate_rds
