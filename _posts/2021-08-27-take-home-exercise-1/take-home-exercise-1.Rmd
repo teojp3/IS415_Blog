@@ -842,51 +842,78 @@ From the above box map, we can see for *Death Rate*:
 
 ### 4.3.3 Plotting Relative Risk Maps
 
-The concept of a Standardised Mortality Rate (SMR) or also known as Relative Risk, is a commonly used metric in public health analysis or studies of the spread of a disease. Through this SMR, we can see the various indicated risk levels the sub-districts of Jakarta are parked under, based on the data we analysed.  
+The concept of a Standardised Mortality Rate (SMR) or also known as Relative Risk, is a commonly used metric in public health analysis or studies of the spread of a disease. Through this SMR, we can see the various indicated risk levels the sub-districts of Jakarta are parked under for both **Positive Cases** and **Deaths**, based on the data we analysed.  
 
-To prepare the required data for relative risk map, we will start off with computing the reference rate, which is the **total sum of deaths** over the **total sum of the population**.
+To prepare the required data for relative risk map, we will start off with computing the reference rate, which is the **total sum of cases/deaths** over the **total sum of the population**.
 
 ```{r}
 Sum_deaths <- sum(Death_Rate_Final$DEATHS)
+Sum_cases <- sum(Death_Rate_Final$POSITIVE_CASES)
 Sum_population <- sum(Death_Rate_Final$JUMLAH_PEN)
 
-reference_rate <- Sum_deaths / Sum_population
+Case_reference_rate <- Sum_cases / Sum_population
+Death_reference_rate <- Sum_deaths / Sum_population
 ```
 
-After that, we will compute the **expected number of deaths** based on the *reference rate* of the whole province and the *individual sub-district population (JUMLAH_PEN)*.
+After that, we will compute the **expected number of cases/deaths** based on the *reference rate* of the whole province and the *individual sub-district population (JUMLAH_PEN)*.
 
 ```{r}
-Expected_Deaths <- reference_rate * Death_Rate_Final$JUMLAH_PEN
+Expected_Cases <- Case_reference_rate * Death_Rate_Final$JUMLAH_PEN
+Expected_Deaths <- Death_reference_rate * Death_Rate_Final$JUMLAH_PEN
 ```
 
-Finally, we will divide the *No. of Deaths per sub-district* over the *expected number of deaths* to get the **SMR**. The SMR will then give us a quick analysis of which sub-districts have higher than expected number of deaths, and which sub-districts have lower than expected deaths.
+Finally, we will divide the *No. of Cases/Deaths per sub-district* over the *expected number of cases/deaths* to get their respective **SMR**. The SMR will then give us a quick analysis of which sub-districts have higher than expected number of cases/deaths, and which sub-districts have lower than expected cases/deaths.
 
 ```{r}
-Death_Rate_Final$SMR <- Death_Rate_Final$DEATHS / Expected_Deaths
+Death_Rate_Final$CaseSMR <- Death_Rate_Final$POSITIVE_CASES / Expected_Cases
+Death_Rate_Final$DeathSMR <- Death_Rate_Final$DEATHS / Expected_Deaths
 ```
 
-#### Plotting Relative Risk Map
+#### Plotting Relative Case Risk Map
 
-In this map visualisation, sub-districts highlighted in **blue** indicates a **risk lower than the province average**, or SMR < 1. On the other hand, those highlighted in **red** indicates a **higher risk than the province average**, or SMR > 1.
+In this map visualisation, sub-districts shaded in **lightest orange** indicates a **risk lower than the province average** of getting COVID-19, or SMR < 1. Essentially, the lighter the orange, the lower the risk for the sub-districts.
+
+On the other hand, those highlighted in **darker orange (2nd class and above)** indicates a **higher risk than the province average** of getting COVID-19, or SMR > 1. The darker the orange, the higher the risk for the sub-districts.
 
 ```{r}
-RR_Map <- tm_shape(Death_Rate_Final) +
-     tm_fill("SMR", title="Excess Risk", breaks=c(-100,.25,.5,1,2,4,1000), 
-             labels = c("<.25", ".25 - .50", ".50 - 1.00","1.00 - 2.00", "2.00 - 4.00", "> 4.00" ), 
+Case_RR_Map <- tm_shape(Death_Rate_Final) +
+     tm_fill("CaseSMR", title="Case Risk SMR", style = 'jenks', 
+             palette = "Reds")  +
+  tm_borders() +
+  tm_layout(legend.outside = TRUE, legend.outside.position = "right") +
+  tm_compass(type="8star", size = 2, position = c( 'left','bottom')) +
+  tm_scale_bar(position = c( 'left','bottom'))
+
+Case_RR_Map
+```
+Results from the Relative Case Risk Map:
+
+- As expected, the sub-district of **Gambir** has the highest risk amongst the sub-districts. This is not surprising as **Gambir** has been identified during the earlier analyses as the origin of where the COVID-19 virus actually broke out significantly.
+- For the rest of the sub-districts, only **around ~30%** of the sub-districts has a lower risk as shown by their shading in **lightest orange**, the remaining **~70%** do have a high risk of getting more COVID-19 cases than expected, with SMR > 1.  
+- This phenomenon is not the most favourable, hopefully the situation will become better over time and we hope to see lighter orange in the map in the following months.
+
+#### Plotting Relative Death Risk Map
+
+In this map visualisation, sub-districts shaded in **blue** indicates a **Death Risk lower than the province average**, or SMR < 1. Essentially, the darker the blue, the lower the risk for the sub-districts.
+
+On the other hand, those highlighted in **light blue (almost white)** or **red** indicates a **higher Death Risk than the province average**, or SMR > 1.
+
+```{r}
+Death_RR_Map <- tm_shape(Death_Rate_Final) +
+     tm_fill("DeathSMR", title="Death Risk SMR", style = 'jenks', 
              palette = "-RdBu")  +
   tm_borders() +
   tm_layout(legend.outside = TRUE, legend.outside.position = "right") +
   tm_compass(type="8star", size = 2, position = c( 'left','bottom')) +
   tm_scale_bar(position = c( 'left','bottom'))
 
-RR_Map
+Death_RR_Map
 ```
-Results from the Relative Risk Map:
+Results from the Relative Death Risk Map:
 
-- As expected, the sub-district of **Gambir** has the highest risk amongst the sub-districts, with a SMR of > 4. This is not surprising as **Gambir** has been identified during the earlier analyses as the origin of where the COVID-19 virus actually broke out significantly.
-- The sub-district of **Karet Kuningan** in *Setiabudi, Jakarta Seletan* is also identified as a significant high risk sub-district, with a SMR of 2.0 to 4.0, which is still higher than the cut off of high risk SMR > 1. This was unforeseen because this particular sub-district wasn't distinctive during the earlier analyses. 
-- The rest of the sub-districts are distributed almost equally, **half being high risk** with SMR of 1.0 - 2.0, and another **half being low risk**, as highlighted in blue with a SMR of < 1. 
-- This phenomenon is not the most favourable, hopefully the situation will become better over time and we hope to see more blue than red in the following months.
+- Similar to the **Relative Case Risk Map**, the sub-district of **Gambir** has the highest risk amongst the sub-districts. This is not surprising as **Gambir** has been identified during the earlier analyses as the origin of where the COVID-19 virus actually broke out significantly.
+- For the rest of the sub-districts, **>50%** actually has high risk (those shaded in lightest blue and orange), and the remaining **~40%** are at a low risk as highlighted in darker blue with a SMR of < 1. 
+- This phenomenon is not the most favourable as well, hopefully the situation will become better over time and we hope to see more darker blue in the map in the following months.
 
 
 ```{r include=FALSE}
