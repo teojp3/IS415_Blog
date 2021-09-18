@@ -1,5 +1,5 @@
 ---
-title: "Hands-ons Exercise 6"
+title: "Hands-on Exercise 6"
 description: |
   Learning about deriving spatial weights using functions provided by spedep package, then using those spatial weights to compute geographically referenced attributes.
 author:
