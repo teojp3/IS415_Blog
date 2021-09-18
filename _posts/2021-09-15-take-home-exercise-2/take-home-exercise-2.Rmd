@@ -56,7 +56,13 @@ for (p in packages)
 
 ## 3.1 Aspatial Data
 
-### 3.1.1 Importing Aspatial Data from 2019 AirBnb listingsdataset
+### 3.1.1 Importing in Aspatial Data 
+
+We will first import in data using the Airbnb 2019 dataset, to see the distribution of listings. The analysis aims to uncover whether the distribution of Airbnb listings are affected by location factors such as near hotels or tourist attractions. 
+
+Kernel Density Maps will be used to unravel spatial patterns between the location of listings and various location factors mentioned earlier on. The advantage of using Kernel Density over Point Density is that the results are much more spatially accurate, because Point Density usually produces more steep edges which is not desirable. On the other hand, Kernel density gives smoother results that allows for plotting nicer visuals, which is crucial for getting substantial analysis insights. 
+
+![Visual comparison of Point Density vs Kernel Density](DensityPoint.png)
 
 ```{r}
 airbnb_2019 <- read_csv("data/the2data/airbnb2019.csv") 
@@ -66,48 +72,40 @@ airbnb_2019 <- read_csv("data/the2data/airbnb2019.csv")
 sg_hotels <- read_csv("data/the2data/OneMapData/hotels.csv") 
 ```
 
-The coordinate fields of **airbnb_2019** seem to be in decimal degrees. Hence, `WGS84` referencing system is assumed.
-
-## Converting the aspatial data frame into sf object
+## Recalibrating Projected Coordinates Systems to the correct one
 
 ```{r}
-sf_2019 <- st_as_sf(airbnb_2019,
-                    coords = c("latitude", 
-                               "longitude"),
-                    crs = 3414) %>%
-  st_transform(crs = 3414)
-```
+coordinates(airbnb_2019)=c('longitude', 'latitude')
 
-```{r}
-hotels_sf <- st_as_sf(sg_hotels,
-                    coords = c("Lat",
-                               "Lng"),
-                    crs = 3414) %>%
-  st_transform(crs = 3414)
+proj4string(airbnb_2019) <- CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
+
+coordinates(sg_hotels)=c('Lng', 'Lat')
+
+proj4string(sg_hotels) <- CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
 ```
 
 Checking and ensuring Projected Coordinates Systems of the sf object is correct
 
 ```{r}
-st_crs(sf_2019)
+st_crs(airbnb_2019)
 ```
 
-
 ```{r}
-tmap_mode("plot")
-tm_shape(sf_2019) +
+tmap_mode("view")
+tm_shape(airbnb_2019) +
   tm_dots(alpha = 0.4,
           col = "blue",
           size = 0.05) +
-  tm_shape(hotels_sf) +
+  tm_shape(sg_hotels) +
   tm_dots(alpha = 0.4,
           col = "red",
-          size = 0.05)
+          size = 0.05) 
 ```
 
 
 
 # References
 
-- Short-term home sharing remains illegal in Singapore; Airbnb disappointed
-https://www.todayonline.com/singapore/short-term-home-sharing-remains-illegal-singapore-airbnb-disappointed 
+- [Short-term home sharing remains illegal in Singapore; Airbnb disappointed](https://www.todayonline.com/singapore/short-term-home-sharing-remains-illegal-singapore-airbnb-disappointed)
+
+- [Kernel vs Point Density](https://community.esri.com/t5/arcgis-spatial-analyst-questions/kernel-vs-point-density/td-p/610486)
