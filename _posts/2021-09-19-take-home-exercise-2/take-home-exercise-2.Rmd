@@ -1,4 +1,3 @@
-
 ---
 title: "Take Home Exercise 2"
 description: |
@@ -36,6 +35,8 @@ For analysis purposes, the following data are used:
 
 - Various geospatial data sets of choice extracted from SLA OneMap Service, using [OneMap.Sg API]('https://cran.r-project.org/web/packages/onemapsgapi/index.html')
 
+- Point location data of Mass Rapid Transit (MRT) Stations in Singapore from [Land Transport Authority Datamall]('https://datamall.lta.gov.sg/content/datamall/en.html')
+
 # 2. Setting up the environment
 
 To begin the study, R packages will be used for efficiency and a more comprehensive analysis, such as *tidyverse* and *sf* etc.
@@ -59,11 +60,7 @@ for (p in packages)
 
 ### 3.1.1 Importing in Aspatial Data 
 
-We will first import in data using the Airbnb 2019 dataset, to see the distribution of listings. The analysis aims to uncover whether the distribution of Airbnb listings are affected by location factors such as near hotels or tourist attractions. 
-
-Kernel Density Maps will be used to unravel spatial patterns between the location of listings and various location factors mentioned earlier on. The advantage of using Kernel Density over Point Density is that the results are much more spatially accurate, because Point Density usually produces more steep edges which is not desirable. On the other hand, Kernel density gives smoother results that allows for plotting nicer visuals, which is crucial for getting substantial analysis insights. 
-
-![Visual comparison of Point Density vs Kernel Density](DensityPoint.png)
+We will first import in data using the Airbnb (2019 and 2021) datasets, but we will only use the 2019 dataset to see the distribution of listings as we are interested in analysing the distribution **Pre and Post COVID-19**. The analysis aims to uncover whether the distribution of Airbnb listings are affected by location factors such as located near hotels or tourist attractions, so those datasets are imported in as well. 
 
 ```{r results='hide'}
 airbnb_2019 <- read_csv("data/the2data/airbnb2019.csv")
@@ -74,7 +71,7 @@ tourist_attractions <- read_csv("data/the2data/OneMapData/tourism.csv")
 
 ## Recalibrating Projected Coordinates Systems to the correct one
 
-The coordinates in the respective data frames were defined in values of Latitude and Longitude, therefore being congruent with **EPSG 4326**. However, Singapore's national Project Coordination Systems should be **EPSG 3414 (SVY21)** instead, therefore we will transform the *crs* to the correct one.
+The coordinates in the respective datasets were defined in values of Latitude and Longitude, therefore being congruent with **EPSG 4326**. However, Singapore's national Project Coordination Systems should be **EPSG 3414 (SVY21)** instead, therefore we will transform the *crs* to EPSG 3414.
 
 ```{r}
 airbnb_2019 <- st_as_sf(airbnb_2019,
@@ -112,6 +109,24 @@ Checking and ensuring Projected Coordinates Systems of the sf object is correct
 ```{r}
 st_crs(airbnb_2019)
 ```
+
+## 3.2 Spatial Data
+
+### 3.1.1 Importing in Geospatial Data 
+
+Importing shapefile of **MRT Stations locations** using *st_read*()* of **sf** package. The output object will be in tibble sf object class.
+
+```{r}
+mrt_sf <- st_read(dsn = "data/the2data/MRT", 
+                layer = "MRTLRTStnPtt")
+```
+Projection of **mrt_sf** is in SVY21, so we are good to go.
+
+# Geospatial Analysis
+
+Kernel Density Maps will be used to unravel spatial patterns between the location of listings and various location factors mentioned earlier on. The advantage of using Kernel Density over Point Density is that the results are much more spatially accurate, because Point Density usually produces more steep edges which is not desirable. On the other hand, Kernel density gives smoother results that allows for plotting nicer visuals, which is crucial for getting substantial analysis insights. 
+
+![Visual comparison of Point Density vs Kernel Density](DensityPoint.png)
 
 ```{r}
 tmap_mode("view")
