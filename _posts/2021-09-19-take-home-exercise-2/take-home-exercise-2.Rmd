@@ -90,7 +90,7 @@ Checking and ensuring Projected Coordinates Systems of the sf object is correct
 st_crs(airbnb_2019)
 ```
 
-```{r eval=FALSE}
+```{r}
 tmap_mode("view")
 tm_shape(airbnb_2019) +
   tm_dots(alpha = 0.4,
@@ -101,8 +101,6 @@ tm_shape(airbnb_2019) +
           col = "red",
           size = 0.05) 
 ```
-
-
 
 # References
 
