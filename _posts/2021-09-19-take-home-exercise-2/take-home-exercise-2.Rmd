@@ -14,8 +14,8 @@ output:
       toc_float: true
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, fig.align = "center", tidy.opts=list(width.cutoff=80),tidy=TRUE)
+```{r setup, include=FALSE, eval=TRUE, echo=TRUE, message=FALSE, error=FALSE, fig.retina=3}
+knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # 1. Introduction
@@ -126,8 +126,6 @@ tm_shape(airbnb_2019) +
   tm_dots(alpha = 0.4,
           col = "green",
           size = 0.05) 
-
-tmap_mode("plot")
 ```
 
 ```{r}
@@ -136,8 +134,6 @@ tm_shape(airbnb_2021) +
   tm_dots(alpha = 0.4,
           col = "blue",
           size = 0.05) 
-
-tmap_mode("plot")
 ```
 
 # References
