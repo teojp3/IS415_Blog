@@ -312,4 +312,3 @@ if (nrow(Lcsr_df[Lcsr_df$obs > Lcsr_df$hi,])==0){
     rangeslider()
   }
 ```
-
