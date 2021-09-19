@@ -64,24 +64,28 @@ Kernel Density Maps will be used to unravel spatial patterns between the locatio
 
 ![Visual comparison of Point Density vs Kernel Density](DensityPoint.png)
 
-```{r}
-airbnb_2019 <- read_csv("data/the2data/airbnb2019.csv") 
-```
-
-```{r}
+```{r results='hide'}
+airbnb_2019 <- read_csv("data/the2data/airbnb2019.csv")
+airbnb_2021 <- read_csv("data/the2data/airbnb2021.csv")
 sg_hotels <- read_csv("data/the2data/OneMapData/hotels.csv") 
+tourist_attractions <- read_csv("data/the2data/OneMapData/tourism.csv")
 ```
 
 ## Recalibrating Projected Coordinates Systems to the correct one
 
 ```{r}
 coordinates(airbnb_2019)=c('longitude', 'latitude')
-
 proj4string(airbnb_2019) <- CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
 
-coordinates(sg_hotels)=c('Lng', 'Lat')
+coordinates(airbnb_2021)=c('longitude', 'latitude')
+proj4string(airbnb_2021) <- CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
 
+coordinates(sg_hotels)=c('Lng', 'Lat')
 proj4string(sg_hotels) <- CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
+
+tourist_attractions <- tourist_attractions[!is.na(tourist_attractions$LATITUDE), ]
+coordinates(tourist_attractions)=c('LONGTITUDE', 'LATITUDE')
+proj4string(tourist_attractions) <- CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
 ```
 
 Checking and ensuring Projected Coordinates Systems of the sf object is correct
