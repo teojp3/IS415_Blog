@@ -73,19 +73,37 @@ tourist_attractions <- read_csv("data/the2data/OneMapData/tourism.csv")
 
 ## Recalibrating Projected Coordinates Systems to the correct one
 
+The coordinates in the respective data frames were defined in values of Latitude and Longitude, therefore being congruent with **EPSG 4326**. However, Singapore's national Project Coordination Systems should be **EPSG 3414 (SVY21)** instead, therefore we will transform the *crs* to the correct one.
+
 ```{r}
-coordinates(airbnb_2019)=c('longitude', 'latitude')
-proj4string(airbnb_2019) <- CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
+airbnb_2019 <- st_as_sf(airbnb_2019,
+                    coords = c("longitude",
+                               "latitude"),
+                    crs = 4326) %>%
+  st_transform(crs = 3414)
 
-coordinates(airbnb_2021)=c('longitude', 'latitude')
-proj4string(airbnb_2021) <- CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
+airbnb_2021 <- st_as_sf(airbnb_2021,
+                    coords = c("longitude",
+                               "latitude"),
+                    crs = 4326) %>%
+  st_transform(crs = 3414)
 
-coordinates(sg_hotels)=c('Lng', 'Lat')
-proj4string(sg_hotels) <- CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
+sg_hotels <- st_as_sf(sg_hotels,
+                    coords = c("Lng",
+                               "Lat"),
+                    crs = 4326) %>%
+  st_transform(crs = 3414)
+```
 
+For tourist attractions, an extra step is needed because there are NA values, so we have to drop them. If not, we will get an error "missing values in coordinates not allowed.".
+
+```{r}
 tourist_attractions <- tourist_attractions[!is.na(tourist_attractions$LATITUDE), ]
-coordinates(tourist_attractions)=c('LONGTITUDE', 'LATITUDE')
-proj4string(tourist_attractions) <- CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
+tourist_attractions <- st_as_sf(tourist_attractions,
+                    coords = c("LONGTITUDE",
+                               "LATITUDE"),
+                    crs = 4326) %>%
+  st_transform(crs = 3414)
 ```
 
 Checking and ensuring Projected Coordinates Systems of the sf object is correct
@@ -103,6 +121,18 @@ tm_shape(airbnb_2019) +
   tm_shape(sg_hotels) +
   tm_dots(alpha = 0.4,
           col = "red",
+          size = 0.05) +
+  tm_shape(tourist_attractions) +
+  tm_dots(alpha = 0.4,
+          col = "green",
+          size = 0.05) 
+```
+
+```{r}
+tmap_mode("view")
+tm_shape(airbnb_2021) +
+  tm_dots(alpha = 0.4,
+          col = "blue",
           size = 0.05) 
 ```
 
