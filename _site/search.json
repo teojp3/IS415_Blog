@@ -6,14 +6,14 @@
       "description": "I am Jun Peng, currently in my third year in the School of Computing & Information Systems at Singapore Management University.\n\nWelcome to my personal workspace! The content listed on the blog will mainly be related to Geospatial Analytics, a module I'm currently taking this semester.",
       "author": [],
       "contents": "\r\n\r\n\r\n\r\n",
-      "last_modified": "2021-09-20T11:53:47+08:00"
+      "last_modified": "2021-09-20T22:49:44+08:00"
     },
     {
       "path": "index.html",
       "title": "My Workspace",
       "author": [],
       "contents": "\r\n\r\n\r\n\r\n",
-      "last_modified": "2021-09-20T11:53:48+08:00"
+      "last_modified": "2021-09-20T22:49:47+08:00"
     },
     {
       "path": "take-home-exercise-1.html",
@@ -27,7 +27,7 @@
       ],
       "date": "08-27-2021",
       "contents": "\r\n1. Introduction\r\nThis analysis aims to analyse and visualise spatio-temporal patterns of COVID-19 in DKI Jakarta, Indonesia. Out of 34 provinces in Indonesia, DKI Jakarta was the province affected most by the pandemic, with close to 24% of cumulative confirmed cases. However, the cumulative confirmed cases were not evenly distributed, therefore this analysis intends to unravel which sub-districts had the highest number of cases and how time has changed the overall distribution.\r\nTHE DATA\r\nFor this analysis, the following data are used:\r\nOpen Data Covid-19 Provinsi DKI Jakarta. This portal provides daily update of COVID-19 measures at both sub-district and district level. For the purpose of this analysis, data at the sub-district level is used. The datasets are in .CSV format, and monthly datasets from March 2020 to July 2021 will be used.\r\nIndonesia Geospatial. This portal provides a comprehensive collection of geospatial data mainly in ESRI shapefile format at different geographical levels. For the purpose of this analysis, the Shapefile (SHP) Batas Desa Provinsi DKI Jakarta provided at PODES 2019 geospatial layer is used.\r\n2. Setting up the environment\r\nR packages will be used for efficiency and a more comprehensive analysis, such as tidyverse and sf etc.\r\nload(\"THE1_workspace.Rdata\")\r\npackages = c('tidyverse', 'sf', 'readxl', 'readr', 'stringr', 'tmap')\r\nfor (p in packages)\r\n  {\r\n  if(!require(p, character.only = T))\r\n    {\r\n    install.packages(p)\r\n  }\r\n  library(p,character.only = T)\r\n}\r\nPrevent values from showing as exponential\r\n\r\n\r\n",
-      "last_modified": "2021-09-20T11:53:49+08:00"
+      "last_modified": "2021-09-20T22:49:49+08:00"
     }
   ],
   "collections": ["posts/posts.json"]
