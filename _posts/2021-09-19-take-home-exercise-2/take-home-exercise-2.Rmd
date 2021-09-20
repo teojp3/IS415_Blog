@@ -75,10 +75,18 @@ Therefore, it would be interesting to see if the location of Airbnb listings wou
 
 The dataset will be imported using the One Map Api as shown in the below code chunk.
 
-```{r}
+```{r eval=FALSE}
 library(onemapsgapi)
 
 hawker_centres <- get_theme('eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjc5NTgsInVzZXJfaWQiOjc5NTgsImVtYWlsIjoianVucGVuZy50ZW8uMjAxOUBzbXUuZWR1LnNnIiwiZm9yZXZlciI6ZmFsc2UsImlzcyI6Imh0dHA6XC9cL29tMi5kZmUub25lbWFwLnNnXC9hcGlcL3YyXC91c2VyXC9zZXNzaW9uIiwiaWF0IjoxNjMxNzcyNzMzLCJleHAiOjE2MzIyMDQ3MzMsIm5iZiI6MTYzMTc3MjczMywianRpIjoiODc4OGY3NGI4Yjk5ZDZmZTI1NWFmNjExYjlkNTZiYjQifQ.N-KrWjJPHLJIQVwpBLjyDg6s0JWVNESINp7-7YjUEQI', 'hawkercentre')
+
+write.csv(hawker_centres, "data/the2data/hawker_centres.csv", row.names = FALSE)
+```
+
+Importing in the hawker_centres again
+
+```{r}
+hawker_centres <- read_csv(file = "data/the2data/hawker_centres.csv")
 ```
 
 ### 3.1.2 Recalibrating Projected Coordinates Systems to SVY21
