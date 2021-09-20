@@ -120,7 +120,6 @@ hawker_centres <- st_as_sf(hawker_centres,
                     crs = 4326) %>%
   st_transform(crs = 3414)
 ```
-
 For tourist attractions, an extra step is needed because there are NA values, so we have to drop them. If not, we will get an error "missing values in coordinates not allowed".
 
 ```{r}
@@ -243,10 +242,10 @@ airbnb2021_ppp_jit <- rjitter(airbnb_2021_ppp,
                              nsim=1, 
                              drop=TRUE)
 
-hawker_ppp_jit <- rjitter(hawker_ppp, 
-                             retry=TRUE, 
-                             nsim=1, 
-                             drop=TRUE)
+hawker_ppp_jit <- rjitter(hawker_ppp,
+                            retry=TRUE,
+                            nsim=1,
+                            drop=TRUE)
 
 tourism_ppp_jit <- rjitter(tourist_attractions_ppp, 
                              retry=TRUE, 
@@ -431,13 +430,4 @@ tm_shape(airbnb_2021) +
 - [Short-term home sharing remains illegal in Singapore; Airbnb disappointed](https://www.todayonline.com/singapore/short-term-home-sharing-remains-illegal-singapore-airbnb-disappointed)
 
 - [Kernel vs Point Density](https://community.esri.com/t5/arcgis-spatial-analyst-questions/kernel-vs-point-density/td-p/610486)
-
-
-
-
-
-
-
-
-
 
