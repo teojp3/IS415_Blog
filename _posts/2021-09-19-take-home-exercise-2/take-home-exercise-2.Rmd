@@ -361,7 +361,7 @@ spplot(gridded_kde_airbnb2019_bw, main="Airbnb Listings")
 kde_airbnb_2019_bw_raster <- raster(gridded_kde_airbnb2019_bw)
 kde_airbnb_2019_bw_raster
 ```
-
+- We need to assign the projected systems to the new Raster layer, because the crs will be lost when converting into a ppp object earlier on
 
 ```{r}
 projection(kde_airbnb_2019_bw_raster) <- CRS("+init=EPSG:3414 +datum=WGS84 +units=km")
