@@ -306,7 +306,7 @@ plot(airbnb_2019_ppp)
 ### 4.1.1 Exploratory Spatial Data Analysis
 
 ```{r}
-tmap_mode("plot")
+tmap_mode("view")
 tm_shape(airbnb_2019) +
   tm_dots(alpha = 0.4,
           col = "blue",
@@ -399,7 +399,7 @@ plot(kde_airbnb2019_bw)
 
 
 ```{r}
-tmap_mode("plot")
+tmap_mode("view")
 tm_shape(airbnb_2019) +
   tm_dots(alpha = 0.4,
           col = "blue",
@@ -415,7 +415,7 @@ tm_shape(airbnb_2019) +
 ```
 
 ```{r}
-tmap_mode("plot")
+tmap_mode("view")
 tm_shape(airbnb_2021) +
   tm_dots(alpha = 0.4,
           col = "blue",
