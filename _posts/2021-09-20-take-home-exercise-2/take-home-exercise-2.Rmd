@@ -63,10 +63,10 @@ for (p in packages)
 We will first import in data using the Airbnb (2019 and 2021) datasets, as we are interested in analysing the distribution of Airbnb listings **Pre and Post COVID-19**. For Pre-COVID context, the analysis aims to uncover whether the distribution of Airbnb listings are affected by location factors such as located near hotels or tourist attractions, so those datasets are imported in as well. 
 
 ```{r results='hide'}
-airbnb_2019 <- read_csv("_posts/2021-09-20-take-home-exercise-2/the2data/airbnb2019.csv")
-airbnb_2021 <- read_csv("_posts/2021-09-20-take-home-exercise-2/the2data/airbnb2021.csv")
-sg_hotels <- read_csv("_posts/2021-09-20-take-home-exercise-2/the2data/OneMapData/hotels.csv") 
-tourist_attractions <- read_csv("_posts/2021-09-20-take-home-exercise-2/the2data/OneMapData/tourism.csv")
+airbnb_2019 <- read_csv("the2data/airbnb2019.csv")
+airbnb_2021 <- read_csv("the2data/airbnb2021.csv")
+sg_hotels <- read_csv("the2data/OneMapData/hotels.csv") 
+tourist_attractions <- read_csv("the2data/OneMapData/tourism.csv")
 ```
 
 We will also utilise an additional dataset from **SLA OneMap**, which is the **Hawker Centres** dataset. Singapore's street food or known locally as hawker food culture has helped put the tiny country on the world map, with the hawker culture being featured in international food documentary series such as [Netflix's Street Food: Asia]('https://atta.ai/media/en/singapore-hawker-stalls-featured-on-netflixs-street-food/') and also recently being recognised as a [UNESCO heritage representative of Singapore]('https://www.nationalgeographic.com/travel/article/why-unesco-is-honoring-singapore-street-food'). 
@@ -88,7 +88,7 @@ The hawker_centres dataset is written out as a csv for easier bookkeeping purpos
 Importing in the hawker_centres from its csv file 
 
 ```{r}
-hawker_centres <- read_csv(file = "_posts/2021-09-20-take-home-exercise-2/the2data/hawker_centres.csv")
+hawker_centres <- read_csv(file = "the2data/hawker_centres.csv")
 ```
 
 ### 3.1.2 Recalibrating Projected Coordinates Systems to SVY21
@@ -151,7 +151,7 @@ Importing shapefile of **MRT Stations locations** using *st_read*()* of **sf** p
 We will be looking at the correlation between location of Airbnb listings and MRT stations in Singapore. 
 
 ```{r}
-mrt_sf <- st_read(dsn = "_posts/2021-09-20-take-home-exercise-2/the2data/MRT", 
+mrt_sf <- st_read(dsn = "the2data/MRT", 
                 layer = "MRTLRTStnPtt")
 ```
 The output of the above code chunk showed that projection of **mrt_sf** is in SVY21, so we are good to proceed on because it is the correct projected coordinates system.
@@ -274,7 +274,7 @@ any(duplicated(airbnb2019_ppp_jit))
 When doing spatial point patterns analysis, a good practice to always follow is to confine the analysis with a geographical area such as Singapore's boundary. In **spatstat**, this polygonal region is known as **owin**, an object specially designed to represent this boundary.
 
 ```{r}
-sg <- st_read(dsn = "_posts/2021-09-20-take-home-exercise-2/the2data/sgdata", layer="CostalOutline")
+sg <- st_read(dsn = "the2data/sgdata", layer="CostalOutline")
 
 sg <- st_transform(sg, crs = 3414)
 
@@ -380,7 +380,7 @@ kde_airbnb_2019_bw_raster
 ```
 
 ```{r}
-tmap_mode("plot")
+tmap_mode("view")
 
 tm_shape(sg) +
   tm_borders(col = 'black',
