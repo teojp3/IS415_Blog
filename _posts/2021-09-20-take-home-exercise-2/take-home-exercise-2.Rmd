@@ -27,7 +27,15 @@ For this particular exercise, we will utilising those data sets to generate usef
 - Analysing the distribution of Airbnb listings in Pre-COVID Singapore using 2019 dataset
 - Analysing the impact of COVID-19 on these listings based on the most updated 2021 dataset
 
-## 1.1 The Data
+## 1.1 Research Questions
+
+The specific questions we are trying to find out are:
+
+- Are the locations of Airbnb Listings spatially independent?
+
+- If they are NOT spatially independent, what location factors (Hotels, Hawker Centres, MRT Stations, Tourist Attractions) were they attracted to?
+
+## 1.2 The Data
 
 For analysis purposes, the following data are used:
 
@@ -80,7 +88,7 @@ library(onemapsgapi)
 
 hawker_centres <- get_theme('eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjc5NTgsInVzZXJfaWQiOjc5NTgsImVtYWlsIjoianVucGVuZy50ZW8uMjAxOUBzbXUuZWR1LnNnIiwiZm9yZXZlciI6ZmFsc2UsImlzcyI6Imh0dHA6XC9cL29tMi5kZmUub25lbWFwLnNnXC9hcGlcL3YyXC91c2VyXC9zZXNzaW9uIiwiaWF0IjoxNjMxNzcyNzMzLCJleHAiOjE2MzIyMDQ3MzMsIm5iZiI6MTYzMTc3MjczMywianRpIjoiODc4OGY3NGI4Yjk5ZDZmZTI1NWFmNjExYjlkNTZiYjQifQ.N-KrWjJPHLJIQVwpBLjyDg6s0JWVNESINp7-7YjUEQI', 'hawkercentre')
 
-write.csv(hawker_centres, "_posts/2021-09-20-take-home-exercise-2/the2data/hawker_centres.csv", row.names = FALSE)
+write.csv(hawker_centres, "the2data/hawker_centres.csv", row.names = FALSE)
 ```
 
 The hawker_centres dataset is written out as a csv for easier bookkeeping purposes
@@ -132,7 +140,7 @@ tourist_attractions <- st_as_sf(tourist_attractions,
   st_transform(crs = 3414)
 ```
 
-Checking and ensuring Projected Coordinates Systems of the sf objects is correct
+Code chunk to check and ensure Projected Coordinates Systems of the sf objects is correct
 
 ```{r eval=FALSE}
 st_crs(airbnb_2019)
@@ -160,7 +168,7 @@ The output of the above code chunk showed that projection of **mrt_sf** is in SV
 
 ### 3.3.1 Converting sf data frames into sp's Spatial* class
 
-The code chunk below uses *as_Spatial()* of **sf** package to convert the respective geospatial data from simple feature data frame to sp’s Spatial* class.
+The code chunk below uses *as_Spatial()* of **sf** package to convert the respective geospatial data from simple feature data frames to sp’s Spatial* class.
 
 ```{r}
 airbnb_2019_sp <- as_Spatial(airbnb_2019)
@@ -228,7 +236,7 @@ summary(airbnb_2019_ppp)
 ```
 ### 3.3.4 Handling duplicated points in ppp objects
 
-Duplicated points are commonly found in ppp objects as shown in the output above, but the presence of duplicates will affect the accuracy of the spatial point patterns analysis, therefore we have to handle these duplicates in this section. 
+Duplicated points are commonly found in ppp objects as shown in the output above, and the presence of duplicates will affect the accuracy of the spatial point patterns analysis, therefore we have to handle these duplicates in this section. 
 
 We will use the **jittering** approach, which adds a small perturbation to the duplicate points so they would not occupy the exact same space and point as their originals.
 
@@ -295,33 +303,35 @@ The output object combined both the point and polygon feature in one ppp object 
 
 ```{r}
 airbnb_2019_ppp = airbnb2019_ppp_jit[sg_owin]
+airbnb_2021_ppp = airbnb2021_ppp_jit[sg_owin]
+hawker_ppp = hawker_ppp_jit[sg_owin]
+tourist_attractions_ppp = tourism_ppp_jit[sg_owin]
+hotels_ppp = hotels_ppp_jit[sg_owin]
+mrt_ppp = mrt_ppp_jit[sg_owin]
 
 plot(airbnb_2019_ppp)
 ```
 
-# 4. Geospatial Analysis
+# 4. Section A: Distribution of Airbnb Listings in 2019
 
-## 4.1 Section A: Distribution of Airbnb Listings in 2019
+## 4.1 Exploratory Spatial Data Analysis
 
-### 4.1.1 Exploratory Spatial Data Analysis
+### 4.1.1 Exploratory Geospatial Analysis
+
+Taking a quick look at the distribution of Airbnb listings
 
 ```{r}
+mpsz_sf <- st_read(dsn = "the2data/sgdata", 
+                layer = "MP14_SUBZONE_WEB_PL")
+
 tmap_mode("plot")
-tm_shape(airbnb_2019) +
-  tm_dots(alpha = 0.4,
-          col = "blue",
-          size = 0.05) +
-  tm_shape(sg_hotels) +
-  tm_dots(alpha = 0.4,
-          col = "red",
-          size = 0.05) +
-  tm_shape(tourist_attractions) +
-  tm_dots(alpha = 0.4,
-          col = "green",
-          size = 0.05) 
+tm_shape(mpsz_sf) +
+  tm_polygons() +
+  tm_shape(airbnb_2019) +
+  tm_dots()
 ```
 
-### 4.1.2 First-order Spatial Point Patterns Analysis
+### 4.1.2 First-order Spatial Point Patterns Analysis (Data Processing)
 
 First-order Spatial Point Patterns Analysis (SPPA) will be performed using **spatstat** package.
 
@@ -330,54 +340,101 @@ Kernel Density Maps will be used to unravel spatial patterns between the locatio
 On the other hand, Kernel density gives smoother results that allows for plotting nicer visuals, which is **crucial** for getting substantial analysis insights. 
 
 ![Visual comparison of Point Density vs Kernel Density](DensityPoint.png)
-#### Kernel Density Map of Airbnb Listings 
+#### Computing kernel density values 
 
-```{r}
-# kde_airbnb2019_bw_original <- density(airbnb_2019_ppp, sigma=bw.diggle, edge=TRUE, kernel="gaussian") 
+The code chunk below computes a kernel density by using the following configurations of *density()* of **spatstat**, with automatic bandwidth selection method used (*bw.diggle()*). 
 
-# kde_airbnb2019_bw  <- density(airbnb2019_ppp_owin, sigma=bw.diggle, edge=TRUE, kernel="gaussian")
-# 
-# gridded_kde_airbnb2019_bw <- as.SpatialGridDataFrame.im(kde_airbnb2019_bw)
-# spplot(gridded_kde_airbnb2019_bw, main="Airbnb Listings")
-# 
+Thereafter, the *plot()* function of Base R is then used to display the kernel density derived. 
 
-# bw <- bw <- bw.diggle(airbnb_2019_ppp)
-# bw
-```
-
-- Original
+*P.S. We will only use Airbnb 2019 to plot this exploratory map, as we are only interested in seeing how the values looked so the Airbnb 2019 data will be used as a reference for the others*
 
 ```{r}
 kde_airbnb2019_bw  <- density(airbnb_2019_ppp, sigma=bw.diggle, edge=TRUE, kernel="gaussian")
-plot(kde_airbnb2019_bw, main="Airbnb Listings")
+
+plot(kde_airbnb2019_bw, main="Airbnb Listings (original)")
+```
+Notice the very small values being produced, this is resulted from a mismatch of measurement, thus we will rescale the units in the next section.
+
+#### Rescaling KDE values
+
+Rescaling is essential because the unit of measurement does not match, resulting in very small values. Therefore, we will rescale the unit of measurement from meter to kilometer, and compute the kernel density again.  
+
+```{r}
+kde_airbnb2019.km <- rescale(airbnb_2019_ppp, 1000, "km")
+kde_airbnb2021.km <- rescale(airbnb_2021_ppp, 1000, "km")
+kde_hawker.km <- rescale(hawker_ppp, 1000, "km")
+kde_tourism.km <- rescale(tourist_attractions_ppp, 1000, "km")
+kde_hotels.km <- rescale(hotels_ppp, 1000, "km")
+kde_mrt.km <- rescale(mrt_ppp, 1000, "km")
 ```
 
 ```{r}
-# Convert units to km
-kde_airbnb2019.km <- rescale(airbnb_2019_ppp, 1000, "km")
-
 kde_airbnb2019.bw  <- density(kde_airbnb2019.km, sigma=1, edge=TRUE, kernel="gaussian")
-plot(kde_airbnb2019.bw, main="Airbnb Listings")
+kde_airbnb2021.bw  <- density(kde_airbnb2021.km, sigma=1, edge=TRUE, kernel="gaussian")
+kde_hawker.bw  <- density(kde_hawker.km, sigma=1, edge=TRUE, kernel="gaussian")
+kde_tourism.bw  <- density(kde_tourism.km, sigma=1, edge=TRUE, kernel="gaussian")
+kde_hotels.bw  <- density(kde_hotels.km, sigma=1, edge=TRUE, kernel="gaussian")
+kde_mrt.bw  <- density(kde_mrt.km, sigma=1, edge=TRUE, kernel="gaussian")
 ```
 
-- Converting KDE output into grid object
+And finally plot the map again (which should have bigger values).
+
+```{r fig.width=8, fig.height=6}
+par(mfrow=c(2,3))
+
+plot(kde_airbnb2019.bw, main="Airbnb Listings 2019 (km)")
+plot(kde_hawker.bw, main="Hawker Centres (km)")
+plot(kde_tourism.bw, main="Tourist Attractions (km)")
+plot(kde_hotels.bw, main="Hotels (km)")
+plot(kde_mrt.bw, main="MRT Stations (km)")
+```
+
+#### Converting KDE outputs into grid objects
+
+This conversion does not change the output results, it just makes it more suitable for mapping purposes.
 
 ```{r}
 gridded_kde_airbnb2019_bw <- as.SpatialGridDataFrame.im(kde_airbnb2019.bw)
-spplot(gridded_kde_airbnb2019_bw, main="Airbnb Listings")
+gridded_kde_airbnb2021_bw <- as.SpatialGridDataFrame.im(kde_airbnb2021.bw)
+gridded_kde_hawker_bw <- as.SpatialGridDataFrame.im(kde_hawker.bw)
+gridded_kde_tourism_bw <- as.SpatialGridDataFrame.im(kde_tourism.bw)
+gridded_kde_hotels_bw <- as.SpatialGridDataFrame.im(kde_hotels.bw)
+gridded_kde_mrt_bw <- as.SpatialGridDataFrame.im(kde_mrt.bw)
 ```
+
+#### Converting Gridded outputs into Raster
+
+Next, we will convert the gridded kernal density objects into RasterLayer object by using *raster()* of **raster** package.
 
 ```{r}
 kde_airbnb_2019_bw_raster <- raster(gridded_kde_airbnb2019_bw)
+kde_airbnb_2021_bw_raster <- raster(gridded_kde_airbnb2021_bw)
+kde_hawker_bw_raster <- raster(gridded_kde_hawker_bw)
+kde_tourism_bw_raster <- raster(gridded_kde_tourism_bw)
+kde_hotels_bw_raster <- raster(gridded_kde_hotels_bw)
+kde_mrt_bw_raster <- raster(gridded_kde_mrt_bw)
+
 kde_airbnb_2019_bw_raster
 ```
-- We need to assign the projected systems to the new Raster layer, because the crs will be lost when converting into a ppp object earlier on
+We need to reassign the projected systems to the new Raster layer, because the crs will be lost (as shown in above output) when converting into a ppp object earlier on. 
+
+The below code chunk will assign the projected systems to the Raster layer.
 
 ```{r}
 projection(kde_airbnb_2019_bw_raster) <- CRS("+init=EPSG:3414 +datum=WGS84 +units=km")
+projection(kde_airbnb_2021_bw_raster) <- CRS("+init=EPSG:3414 +datum=WGS84 +units=km")
+projection(kde_hawker_bw_raster) <- CRS("+init=EPSG:3414 +datum=WGS84 +units=km")
+projection(kde_tourism_bw_raster) <- CRS("+init=EPSG:3414 +datum=WGS84 +units=km")
+projection(kde_hotels_bw_raster) <- CRS("+init=EPSG:3414 +datum=WGS84 +units=km")
+projection(kde_mrt_bw_raster) <- CRS("+init=EPSG:3414 +datum=WGS84 +units=km")
 
 kde_airbnb_2019_bw_raster
 ```
+### 4.1.3 First-order Spatial Point Patterns Analysis (Plotting of Maps)
+
+Finally, we can then plot the processed data into cartographic quality maps using **tmap** package.
+
+#### Kernel Density Map of Airbnb Listings 2019
 
 ```{r}
 tmap_mode("view")
@@ -388,45 +445,324 @@ tm_shape(sg) +
              alpha = 0.5) +
 tm_shape(kde_airbnb_2019_bw_raster) + 
   tm_raster("v", alpha = 0.7) +
-  tm_layout(legend.position = c("right", "bottom"), frame = FALSE, title = "Airbnb Listings 2019") +
+  tm_layout(legend.position = c("right", "bottom"), frame = FALSE, title = "Kernel Density of Airbnb Listings 2019") +
   tm_basemap('OpenStreetMap')
 ```
 
+As shown in the visualisation above, the raster values are encoded explicitly onto the raster pixel using the values in "v" field. 
 
-```{r}
-plot(kde_airbnb2019_bw)
-```
+#### Kernel Density Map of existing Hotels
 
-
-```{r}
+```{r eval=FALSE}
 tmap_mode("plot")
-tm_shape(airbnb_2019) +
-  tm_dots(alpha = 0.4,
-          col = "blue",
-          size = 0.05) +
-  tm_shape(sg_hotels) +
-  tm_dots(alpha = 0.4,
-          col = "red",
-          size = 0.05) +
-  tm_shape(tourist_attractions) +
-  tm_dots(alpha = 0.4,
-          col = "green",
-          size = 0.05) 
+
+tm_shape(sg) +
+  tm_borders(col = 'black',
+             lwd = 1,
+             alpha = 0.5) +
+tm_shape(kde_hotels_bw_raster) + 
+  tm_raster("v", alpha = 0.7) +
+  tm_layout(legend.position = c("right", "bottom"), frame = FALSE, title = "Kernel Density of existing Hotels") +
+  tm_basemap('OpenStreetMap')
 ```
+![Screenshot of Kernel Density of Hotels](KDHotels.png)
+
+#### Kernel Density Map of MRT Stations
+
+```{r eval=FALSE}
+tm_shape(sg) +
+  tm_borders(col = 'black',
+             lwd = 1,
+             alpha = 0.5) +
+tm_shape(kde_mrt_bw_raster) + 
+  tm_raster("v", alpha = 0.7) +
+  tm_layout(legend.position = c("right", "bottom"), frame = FALSE, title = "Kernel Density of MRT Stations") +
+  tm_basemap('OpenStreetMap')
+```
+![Screenshot of Kernel Density of MRT stations](KDmrt.png)
+
+#### Kernel Density Map of Tourist Attractions
+
+```{r eval=FALSE}
+tm_shape(sg) +
+  tm_borders(col = 'black',
+             lwd = 1,
+             alpha = 0.5) +
+tm_shape(kde_tourism_bw_raster) + 
+  tm_raster("v", alpha = 0.7) +
+  tm_layout(legend.position = c("right", "bottom"), frame = FALSE, title = "Kernel Density of Tourist Attractions") +
+  tm_basemap('OpenStreetMap')
+```
+![Screenshot of Kernel Density of Tourist Attractions](KDTourist.png)
+
+#### Kernel Density Map of Hawker Centres
+
+```{r eval=FALSE}
+tm_shape(sg) +
+  tm_borders(col = 'black',
+             lwd = 1,
+             alpha = 0.5) +
+tm_shape(kde_hawker_bw_raster) + 
+  tm_raster("v", alpha = 0.7) +
+  tm_layout(legend.position = c("right", "bottom"), frame = FALSE, title = "Kernel Density of Hawker Centres") +
+  tm_basemap('OpenStreetMap')
+```
+![Screenshot of Kernel Density of Hawker Centres](KDHawker.png)
+
+From the above plotted maps, we can see a common spatial pattern among all of them:
+
+- The Airbnb Listings seems to clusters around the central/south of Singapore, where the Central Region is located in. 
+- This is not surprising as the more **famous landmarks or tourist attractions** of Singapore are located in that area, such as the Merlion, Marina Bay Sands to name a few.
+- Therefore, it makes perfect sense for most Airbnb listings to be located that area. Similarly, the other location factors (Hotels and Hawker Centres) would be concentrated around that same area as well, so as to **maximize footfall and tourist spending**. 
+- For MRT stations, there is concentration around that area as well, with shorter distance between stations, such as **City Hall MRT and Esplande MRT**, which are well within a 10 minutes' walk. Thus, it is easy to see why properties in the area would be strategically listed on Airbnb, because having more MRT stations means higher accessibility for visitors. 
+
+#### Extract Central Region area for targeted analysis
+
+The following code chunk will be used to load and extract the Central Region area.
 
 ```{r}
-tmap_mode("plot")
-tm_shape(airbnb_2021) +
-  tm_dots(alpha = 0.4,
-          col = "blue",
-          size = 0.05) 
+mpsz <- st_read(dsn = "the2data/sgdata", 
+                layer = "MP14_SUBZONE_WEB_PL")
+
+central_area = mpsz[mpsz$REGION_N == 'CENTRAL REGION', ]
 ```
 
-## 4.2 Section B: Impact of COVID-19 on Distribution of Airbnb Listings in 2021
+- Plotting out the extracted Central Region area
 
-# 5. Conclusion
+```{r fig.width=6, fig.height=4}
+plot(st_geometry(central_area), main = 'Central Region')
+```
+- Converting the Central Region spatial point data frame into ppp object
 
-# 6. References
+```{r}
+central_sp = as(as_Spatial(central_area), "SpatialPolygons")
+
+central_owin = as(central_sp, "owin")
+
+airbnb2019_central_ppp = airbnb_2019_ppp[central_owin]
+hawker_central_ppp = hawker_ppp[central_owin]
+tourism_central_ppp = tourist_attractions_ppp[central_owin]
+hotels_central_ppp = hotels_ppp[central_owin]
+mrt_central_ppp = mrt_ppp[central_owin]
+
+plot(airbnb2019_central_ppp, main='Central Region')
+```
+#### Nearest Neighbour Index for Central Region using Clark-Evans test of aggregation
+
+In this section, we will perform the Clark-Evans test of aggregation for a spatial point pattern by using *clarkevans.test()* of **statspat**.
+
+The test hypotheses are:
+
+Ho = The distribution of Airbnb Listings in the Central Region are randomly distributed.
+
+H1 = The distribution of Airbnb Listings in the Central Region are not randomly distributed.
+
+The 95% confident interval will be used. The null hypothesis will be rejected if p-value is smaller than alpha value of 0.05.
+
+```{r eval=FALSE}
+clarkevans.test(airbnb2019_central_ppp,
+                correction='none',
+                clipregion = NULL,
+                alternative=c("two.sided"),
+                nsim=999)
+```
+![](clarkevans.png)
+
+As shown by the output above, the p-value is smaller than 0.05. Therefore, we will reject the null hypothesis that the Airbnb Listings are randomly distributed, meaning the spatial patterns are statistically significant and does show signs of clustering. 
+
+## 4.2 Second-order Spatial Point Patterns Analysis
+
+### 4.2.1 Data preparation 
+
+Using the code chunk below, we will combine Airbnb Listings with the respective Location Factors into one object for use in the later analyses.
+
+The end result is a simple feature data frame named **combined_df**.
+
+```{r}
+c_airbnb2019 <- airbnb_2019 %>%
+  select("name", "geometry")
+
+c_airbnb2019$TYPE <- "Airbnb"
+
+names(c_airbnb2019)[names(c_airbnb2019) == 'name'] <- 'NAME'
+
+c_hawker <- hawker_centres %>%
+  select("NAME", "geometry")
+
+c_hawker$TYPE <- "Hawker"
+
+c_hotels <- sg_hotels %>%
+  select("NAME", "geometry")
+
+c_hotels$TYPE <- "Hotels"
+
+c_mrt <- mrt_sf %>%
+  select("STN_NAME", "geometry")
+
+names(c_mrt)[names(c_mrt) == 'STN_NAME'] <- 'NAME'
+
+c_mrt$TYPE <- "MRT"
+
+c_tourism <- tourist_attractions %>%
+  select("NAME", "geometry")
+
+c_tourism$TYPE <- "Tourism"
+
+combined_df <- rbind(c_airbnb2019, c_hawker, c_hotels, c_tourism)
+```
+
+We face issues when combining the mrt dataset into combined_df, therefore we will exclude mrt from the analysis.
+
+The following code chunk will then change **combined_df** into a Spatial Point Data Frame, then change the Type field from character data type to factor type. 
+
+The next conversion will be converting into a PPP object which is required by **spatstat** package, and using the *jitter()* method to remove duplicates from the PPP object.
+
+```{r}
+combined_sp <- as(as_Spatial(combined_df), "SpatialPointsDataFrame")
+
+combined_sp@data$TYPE <- as.factor(combined_sp@data$TYPE)
+
+combined_ppp <- as(combined_sp, "ppp")
+
+combined_ppp_jit <- rjitter(combined_ppp, retry=TRUE, nsim=1, drop=TRUE)
+
+combined_central_ppp = combined_ppp_jit[central_owin]
+
+marks(combined_central_ppp) <- factor(combined_central_ppp$marks$TYPE)
+```
+
+#### Analysing Marked Point Patterns
+
+Using the code chunk below, *density()* will be used to compute the kernel density for the respective objects. Then, plot() is used to plot the output kernel density objects derived.
+
+```{r fig.width=12, fig.height=8}
+plot(density(split(rescale(combined_central_ppp, 1000))))
+```
+Then, we are using *intensity()* of **spatstat** package is used to reveal the density of the respective factors as shown in the code chunk below.
+
+```{r}
+intensity(rescale(combined_central_ppp, 1000))
+```
+The output reveals that in the Central Region study area:
+
+- Airbnb Listings has the highest density of 48.86 units per km square
+- In comparison, there are only 2.96 hotels per km square, so it is a drastic difference
+- Tourist Attractions and Hawker Centres has even lesser units per km square, with 0.67 and 0.51 units respectively
+
+### 4.2.1 Analysing Spatial Point Process: Cross K-Function
+
+Using the **Cross K-Function** from *Kcross()* of **spatstat** package, we can determine if the location of Airbnb Listings are close or far away from the other location factors. 
+
+This helps us analyse the relationship between Airbnb listings and the respective location factors (Hawker Centres, Hotels etc).
+
+#### Relationship of Airbnb Listings and Hotels: Cross K graph 
+
+```{r}
+Airbnb_Hotels_Kcross <- Kcross(combined_central_ppp,
+                           i="Airbnb", j="Hotels",
+                           correction='border')
+plot(Airbnb_Hotels_Kcross)
+```
+The plot above reveals that the marked spatial point events are not spatially independent. However, we will do a hypothesis test to confirm this observation.
+
+#### Relationship of Airbnb Listings and Hotels: Complete Spatial Randomness (CSR) statistical testing 
+
+The test hypotheses are as follows:
+
+Ho = The distribution of Airbnb Listings and Hotels are spatially independent.
+
+H1 = The distribution of Airbnb Listings and Hotels are NOT spatially independent.
+
+The null hypothesis will be rejected if p-value is smaller than alpha value of 0.001 (i.e. at 99.9% confident interval).
+
+In order to perform the CSR test, the *envelope()* of **spatstat** package will be used.
+
+```{r}
+Airbnb_Hotels_Kcross.csr <- envelope(combined_central_ppp, Kcross, i="Airbnb", j="Hotels", correction='border', nsim=999)
+```
+```{r}
+plot(Airbnb_Hotels_Kcross.csr, xlab="distance(m)", xlim=c(0,500))
+```
+The plot above reveals that the distribution of Airbnb Listings and Hotels are not spatially independent. Since the observed(black) line is outside the envelope, the null hypothesis is rejected because the empirical k-cross line is not within the enveloper of the 99.9% confidence interval. 
+
+In essence, we will reject the null hypothesis because the results are statistically significant, and we can infer that there are signs of a clustering relationship between Airbnb Listings and Hotels.
+
+#### Relationship of Airbnb Listings and Tourist Attractions: Cross K graph 
+
+```{r}
+Airbnb_Tourism_Kcross <- Kcross(combined_central_ppp,
+                           i="Airbnb", j="Tourism",
+                           correction='border')
+plot(Airbnb_Tourism_Kcross)
+```
+
+The plot above reveals that the Airbnb listings and Tourist Attractions are not spatially independent. However, we will do a hypothesis test to confirm this observation.
+
+#### Relationship of Airbnb Listings and Tourist Attractions: Complete Spatial Randomness (CSR) statistical testing 
+
+The test hypotheses are as follows:
+
+Ho = The distribution of Airbnb Listings and Tourist Attractions are spatially independent.
+
+H1 = The distribution of Airbnb Listings and Tourist Attractions are NOT spatially independent.
+
+The null hypothesis will be rejected if p-value is smaller than alpha value of 0.001 (i.e. at 99.9% confident interval).
+
+```{r}
+Airbnb_Tourism_Kcross.csr <- envelope(combined_central_ppp, Kcross, i="Airbnb", j="Tourism", correction='border', nsim=999)
+```
+```{r}
+plot(Airbnb_Tourism_Kcross.csr, xlab="distance(m)", xlim=c(0,500))
+```
+
+The plot above reveals that the distribution of Airbnb Listings and Tourist Attractions are not spatially independent. Since the observed(black) line is outside the envelope, the null hypothesis is rejected because the empirical k-cross line is not within the enveloper of the 99.9% confidence interval. 
+
+In essence, we will reject the null hypothesis because the results are statistically significant, and we can infer that there are signs of a clustering relationship between Airbnb Listings and Tourist Attractions.
+
+#### Relationship of Airbnb Listings and Hawker Centres: Cross K graph 
+
+```{r}
+Airbnb_Hawker_Kcross <- Kcross(combined_central_ppp,
+                           i="Airbnb", j="Hawker",
+                           correction='border')
+plot(Airbnb_Hawker_Kcross)
+```
+
+The plot above reveals that the Airbnb listings and Hawker Centres are not spatially independent. However, we will do a hypothesis test to confirm this observation.
+
+#### Relationship of Airbnb Listings and Hawker Centres: Complete Spatial Randomness (CSR) statistical testing 
+
+The test hypotheses are as follows:
+
+Ho = The distribution of Airbnb Listings and Hawker Centres are spatially independent.
+
+H1 = The distribution of Airbnb Listings and Hawker Centres are NOT spatially independent.
+
+The null hypothesis will be rejected if p-value is smaller than alpha value of 0.001 (i.e. at 99.9% confident interval).
+
+In order to perform the CSR test, the *envelope()* of **spatstat** package will be used.
+
+```{r}
+Airbnb_Hawker_Kcross.csr <- envelope(combined_central_ppp, Kcross, i="Airbnb", j="Hawker", correction='border', nsim=999)
+```
+```{r}
+plot(Airbnb_Hawker_Kcross.csr, xlab="distance(m)", xlim=c(0,500))
+```
+
+The plot above reveals that the distribution of Airbnb Listings and Hawker Centres are not spatially independent. Since the observed(black) line is outside the envelope, the null hypothesis is rejected because the empirical k-cross line is not within the enveloper of the 99.9% confidence interval. 
+
+In essence, we will reject the null hypothesis because the results are statistically significant, and we can infer that there are signs of a clustering relationship between Airbnb Listings and Hawker Centres.
+
+### 4.2.1 Analysing Spatial Point Process: Cross L-Function
+
+
+
+
+# 5. Section B: Impact of COVID-19 on Distribution of Airbnb Listings in 2021
+
+# 6. Conclusion
+
+# 7. References
 
 - [Short-term home sharing remains illegal in Singapore; Airbnb disappointed](https://www.todayonline.com/singapore/short-term-home-sharing-remains-illegal-singapore-airbnb-disappointed)
 
