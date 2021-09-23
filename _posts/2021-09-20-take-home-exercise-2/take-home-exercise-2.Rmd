@@ -33,7 +33,7 @@ The specific questions we are trying to find out are:
 
 - Are the locations of Airbnb Listings spatially independent?
 
-- If they are NOT spatially independent, what location factors (Hotels, Hawker Centres, MRT Stations, Tourist Attractions) were they attracted to?
+- If they are NOT spatially independent, what location factors (Hotels, Hawker Centres, MRT Stations, Tourist Attractions) do they cluster around to?
 
 ## 1.2 The Data
 
@@ -172,7 +172,6 @@ The code chunk below uses *as_Spatial()* of **sf** package to convert the respec
 
 ```{r}
 airbnb_2019_sp <- as_Spatial(airbnb_2019)
-airbnb_2021_sp <- as_Spatial(airbnb_2021)
 hotels_sp <- as_Spatial(sg_hotels)
 hawker_sp <- as_Spatial(hawker_centres)
 tourist_attractions_sp <- as_Spatial(tourist_attractions)
@@ -195,7 +194,6 @@ The below code chunks converts the Spatial* classes into generic sp objects.
 
 ```{r}
 airbnb_2019_sp <- as(airbnb_2019_sp, "SpatialPoints")
-airbnb_2021_sp <- as(airbnb_2021_sp, "SpatialPoints")
 hotels_sp <- as(hotels_sp, "SpatialPoints")
 hawker_sp <- as(hawker_sp, "SpatialPoints")
 tourist_attractions_sp <- as(tourist_attractions_sp, "SpatialPoints")
@@ -217,7 +215,6 @@ In this step, we will use *as.ppp()* function of **spatstat** to convert the spa
 
 ```{r}
 airbnb_2019_ppp <- as(airbnb_2019_sp, "ppp")
-airbnb_2021_ppp <- as(airbnb_2021_sp, "ppp")
 hotels_ppp <- as(hotels_sp, "ppp")
 hawker_ppp <- as(hawker_sp, "ppp")
 tourist_attractions_ppp <- as(tourist_attractions_sp, "ppp")
@@ -242,11 +239,6 @@ We will use the **jittering** approach, which adds a small perturbation to the d
 
 ```{r}
 airbnb2019_ppp_jit <- rjitter(airbnb_2019_ppp, 
-                             retry=TRUE, 
-                             nsim=1, 
-                             drop=TRUE)
-
-airbnb2021_ppp_jit <- rjitter(airbnb_2021_ppp, 
                              retry=TRUE, 
                              nsim=1, 
                              drop=TRUE)
@@ -303,7 +295,6 @@ The output object combined both the point and polygon feature in one ppp object 
 
 ```{r}
 airbnb_2019_ppp = airbnb2019_ppp_jit[sg_owin]
-airbnb_2021_ppp = airbnb2021_ppp_jit[sg_owin]
 hawker_ppp = hawker_ppp_jit[sg_owin]
 tourist_attractions_ppp = tourism_ppp_jit[sg_owin]
 hotels_ppp = hotels_ppp_jit[sg_owin]
@@ -340,6 +331,7 @@ Kernel Density Maps will be used to unravel spatial patterns between the locatio
 On the other hand, Kernel density gives smoother results that allows for plotting nicer visuals, which is **crucial** for getting substantial analysis insights. 
 
 ![Visual comparison of Point Density vs Kernel Density](DensityPoint.png)
+
 #### Computing kernel density values 
 
 The code chunk below computes a kernel density by using the following configurations of *density()* of **spatstat**, with automatic bandwidth selection method used (*bw.diggle()*). 
@@ -361,7 +353,6 @@ Rescaling is essential because the unit of measurement does not match, resulting
 
 ```{r}
 kde_airbnb2019.km <- rescale(airbnb_2019_ppp, 1000, "km")
-kde_airbnb2021.km <- rescale(airbnb_2021_ppp, 1000, "km")
 kde_hawker.km <- rescale(hawker_ppp, 1000, "km")
 kde_tourism.km <- rescale(tourist_attractions_ppp, 1000, "km")
 kde_hotels.km <- rescale(hotels_ppp, 1000, "km")
@@ -370,7 +361,6 @@ kde_mrt.km <- rescale(mrt_ppp, 1000, "km")
 
 ```{r}
 kde_airbnb2019.bw  <- density(kde_airbnb2019.km, sigma=1, edge=TRUE, kernel="gaussian")
-kde_airbnb2021.bw  <- density(kde_airbnb2021.km, sigma=1, edge=TRUE, kernel="gaussian")
 kde_hawker.bw  <- density(kde_hawker.km, sigma=1, edge=TRUE, kernel="gaussian")
 kde_tourism.bw  <- density(kde_tourism.km, sigma=1, edge=TRUE, kernel="gaussian")
 kde_hotels.bw  <- density(kde_hotels.km, sigma=1, edge=TRUE, kernel="gaussian")
@@ -395,7 +385,6 @@ This conversion does not change the output results, it just makes it more suitab
 
 ```{r}
 gridded_kde_airbnb2019_bw <- as.SpatialGridDataFrame.im(kde_airbnb2019.bw)
-gridded_kde_airbnb2021_bw <- as.SpatialGridDataFrame.im(kde_airbnb2021.bw)
 gridded_kde_hawker_bw <- as.SpatialGridDataFrame.im(kde_hawker.bw)
 gridded_kde_tourism_bw <- as.SpatialGridDataFrame.im(kde_tourism.bw)
 gridded_kde_hotels_bw <- as.SpatialGridDataFrame.im(kde_hotels.bw)
@@ -408,7 +397,6 @@ Next, we will convert the gridded kernal density objects into RasterLayer object
 
 ```{r}
 kde_airbnb_2019_bw_raster <- raster(gridded_kde_airbnb2019_bw)
-kde_airbnb_2021_bw_raster <- raster(gridded_kde_airbnb2021_bw)
 kde_hawker_bw_raster <- raster(gridded_kde_hawker_bw)
 kde_tourism_bw_raster <- raster(gridded_kde_tourism_bw)
 kde_hotels_bw_raster <- raster(gridded_kde_hotels_bw)
@@ -422,7 +410,6 @@ The below code chunk will assign the projected systems to the Raster layer.
 
 ```{r}
 projection(kde_airbnb_2019_bw_raster) <- CRS("+init=EPSG:3414 +datum=WGS84 +units=km")
-projection(kde_airbnb_2021_bw_raster) <- CRS("+init=EPSG:3414 +datum=WGS84 +units=km")
 projection(kde_hawker_bw_raster) <- CRS("+init=EPSG:3414 +datum=WGS84 +units=km")
 projection(kde_tourism_bw_raster) <- CRS("+init=EPSG:3414 +datum=WGS84 +units=km")
 projection(kde_hotels_bw_raster) <- CRS("+init=EPSG:3414 +datum=WGS84 +units=km")
@@ -663,7 +650,7 @@ Airbnb_Hotels_Kcross <- Kcross(combined_central_ppp,
                            correction='border')
 plot(Airbnb_Hotels_Kcross)
 ```
-The plot above reveals that the marked spatial point events are not spatially independent. However, we will do a hypothesis test to confirm this observation.
+The plot above reveals that the marked spatial point events are **not spatially independent**. However, we will do a hypothesis test to confirm this observation.
 
 #### Relationship of Airbnb Listings and Hotels: Complete Spatial Randomness (CSR) statistical testing 
 
@@ -677,15 +664,20 @@ The null hypothesis will be rejected if p-value is smaller than alpha value of 0
 
 In order to perform the CSR test, the *envelope()* of **spatstat** package will be used.
 
-```{r}
+```{r eval=FALSE}
 Airbnb_Hotels_Kcross.csr <- envelope(combined_central_ppp, Kcross, i="Airbnb", j="Hotels", correction='border', nsim=999)
 ```
+
+```{r echo=FALSE}
+Airbnb_Hotels_Kcross.csr <- read_rds("the2data/rds/Airbnb_Hotels_Kcross.csr.rds")
+```
+
 ```{r}
 plot(Airbnb_Hotels_Kcross.csr, xlab="distance(m)", xlim=c(0,500))
 ```
-The plot above reveals that the distribution of Airbnb Listings and Hotels are not spatially independent. Since the observed(black) line is outside the envelope, the null hypothesis is rejected because the empirical k-cross line is not within the enveloper of the 99.9% confidence interval. 
+The plot above reveals that the distribution of Airbnb Listings and Hotels are not spatially independent. Since the observed(black) line is outside the envelope, the null hypothesis is rejected because the empirical k-cross line is not within the envelope of the 99.9% confidence interval. 
 
-In essence, we will reject the null hypothesis because the results are statistically significant, and we can infer that there are signs of a clustering relationship between Airbnb Listings and Hotels.
+In essence, we will reject the null hypothesis because the results are statistically significant, and we can infer that there are **signs of a clustering relationship between Airbnb Listings and Hotels**.
 
 #### Relationship of Airbnb Listings and Tourist Attractions: Cross K graph 
 
@@ -696,7 +688,7 @@ Airbnb_Tourism_Kcross <- Kcross(combined_central_ppp,
 plot(Airbnb_Tourism_Kcross)
 ```
 
-The plot above reveals that the Airbnb listings and Tourist Attractions are not spatially independent. However, we will do a hypothesis test to confirm this observation.
+The plot above reveals that the Airbnb listings and Tourist Attractions are **not spatially independent**. However, we will do a hypothesis test to confirm this observation.
 
 #### Relationship of Airbnb Listings and Tourist Attractions: Complete Spatial Randomness (CSR) statistical testing 
 
@@ -708,16 +700,21 @@ H1 = The distribution of Airbnb Listings and Tourist Attractions are NOT spatial
 
 The null hypothesis will be rejected if p-value is smaller than alpha value of 0.001 (i.e. at 99.9% confident interval).
 
-```{r}
+```{r eval=FALSE}
 Airbnb_Tourism_Kcross.csr <- envelope(combined_central_ppp, Kcross, i="Airbnb", j="Tourism", correction='border', nsim=999)
 ```
+
+```{r echo=FALSE}
+Airbnb_Tourism_Kcross.csr <- read_rds("the2data/rds/Airbnb_Tourism_Kcross.csr.rds")
+```
+
 ```{r}
 plot(Airbnb_Tourism_Kcross.csr, xlab="distance(m)", xlim=c(0,500))
 ```
 
-The plot above reveals that the distribution of Airbnb Listings and Tourist Attractions are not spatially independent. Since the observed(black) line is outside the envelope, the null hypothesis is rejected because the empirical k-cross line is not within the enveloper of the 99.9% confidence interval. 
+The plot above reveals that the distribution of Airbnb Listings and Tourist Attractions are not spatially independent. Although part of the observed (black) line did fall into the envelope around 180m, the majority of the observed line is not within the envelope of the 99.9% confidence interval, therefore the null hypothesis is rejected.
 
-In essence, we will reject the null hypothesis because the results are statistically significant, and we can infer that there are signs of a clustering relationship between Airbnb Listings and Tourist Attractions.
+In essence, we will reject the null hypothesis because the results are statistically significant, and we can infer that there are **signs of a clustering relationship between Airbnb Listings and Tourist Attractions**.
 
 #### Relationship of Airbnb Listings and Hawker Centres: Cross K graph 
 
@@ -728,7 +725,7 @@ Airbnb_Hawker_Kcross <- Kcross(combined_central_ppp,
 plot(Airbnb_Hawker_Kcross)
 ```
 
-The plot above reveals that the Airbnb listings and Hawker Centres are not spatially independent. However, we will do a hypothesis test to confirm this observation.
+The plot above reveals that the Airbnb listings and Hawker Centres are **not spatially independent**. However, we will do a hypothesis test to confirm this observation.
 
 #### Relationship of Airbnb Listings and Hawker Centres: Complete Spatial Randomness (CSR) statistical testing 
 
@@ -742,23 +739,312 @@ The null hypothesis will be rejected if p-value is smaller than alpha value of 0
 
 In order to perform the CSR test, the *envelope()* of **spatstat** package will be used.
 
-```{r}
+```{r eval=FALSE}
 Airbnb_Hawker_Kcross.csr <- envelope(combined_central_ppp, Kcross, i="Airbnb", j="Hawker", correction='border', nsim=999)
 ```
+
+```{r echo=FALSE}
+Airbnb_Hawker_Kcross.csr <- read_rds("the2data/rds/Airbnb_Hawker_Kcross.csr.rds")
+```
+
 ```{r}
 plot(Airbnb_Hawker_Kcross.csr, xlab="distance(m)", xlim=c(0,500))
 ```
 
-The plot above reveals that the distribution of Airbnb Listings and Hawker Centres are not spatially independent. Since the observed(black) line is outside the envelope, the null hypothesis is rejected because the empirical k-cross line is not within the enveloper of the 99.9% confidence interval. 
+The plot above reveals that the distribution of Airbnb Listings and Hawker Centres are not spatially independent. Since the observed(black) line is outside the envelope except for smaller distances (<100m), the null hypothesis is rejected because the empirical k-cross line is not within the envelope of the 99.9% confidence interval. 
 
-In essence, we will reject the null hypothesis because the results are statistically significant, and we can infer that there are signs of a clustering relationship between Airbnb Listings and Hawker Centres.
+In essence, we will reject the null hypothesis because the results are statistically significant, and we can infer that there are **signs of a clustering relationship between Airbnb Listings and Hawker Centres**.
 
 ### 4.2.1 Analysing Spatial Point Process: Cross L-Function
 
+Similar to Cross-K-Function, we can perform the CSR test by using *envelope()* of **spatstat** package will be used. L Function is used so as to normalise the results of K Function, and ensure higher accuracy of final results.
 
+```{r fig.width=12, fig.height=8}
+Airbnb_Hotels_Lcross <- Lcross(combined_central_ppp, i="Airbnb", j="Hotels", correction='border')
+Airbnb_Tourism_Lcross <- Lcross(combined_central_ppp, i="Airbnb", j="Tourism", correction='border')
+Airbnb_Hawker_Lcross <- Lcross(combined_central_ppp, i="Airbnb", j="Hawker", correction='border')
 
+par(mfrow=c(2,2))
+plot(Airbnb_Hotels_Lcross , . -r ~ r, xlab = "distance(m)", xlim=c(0, 500))
+plot(Airbnb_Tourism_Lcross, . -r ~ r, xlab = "distance(m)", xlim=c(0, 500))
+plot(Airbnb_Hawker_Lcross, . -r ~ r, xlab = "distance(m)", xlim=c(0, 500))
+```
+
+#### Relationship of Airbnb Listings and Location Factors: Complete Spatial Randomness (CSR) statistical testing
+
+```{r eval=FALSE}
+Hotels_Lcross.csr <- envelope(combined_central_ppp, Lcross, i="Airbnb", j="Hotels", correction='border', nsim=999)
+Tourism_Lcross.csr <- envelope(combined_central_ppp, Lcross, i="Airbnb", j="Tourism", correction='border', nsim=999)
+Hawker_Lcross.csr <- envelope(combined_central_ppp, Lcross, i="Airbnb", j="Hawker", correction='border', nsim=999)
+```
+
+```{r echo=FALSE}
+Hotels_Lcross.csr <- read_rds("the2data/rds/Airbnb_Hotels_Lcross.csr.rds")
+Tourism_Lcross.csr <- read_rds("the2data/rds/Airbnb_Tourism_Lcross.csr.rds")
+Hawker_Lcross.csr <- read_rds("the2data/rds/Airbnb_Hawker_Lcross.csr.rds")
+```
+
+```{r}
+par(mfrow=c(2,2))
+plot(Hotels_Lcross.csr, . -r ~ r, xlab="distance(m)", xlim=c(0,500))
+plot(Tourism_Lcross.csr, . -r ~ r, xlab="distance(m)", xlim=c(0,500))
+plot(Hawker_Lcross.csr, . -r ~ r, xlab="distance(m)", xlim=c(0,500))
+```
+
+The above results is in line with the earlier results obtained from Cross K Function, the null hypotheses for the respective factors are rejected, and we can infer that there are indeed **signs of clustering between the Airbnb Listings and the respective location factors**.
 
 # 5. Section B: Impact of COVID-19 on Distribution of Airbnb Listings in 2021
+
+In this section, we will analyse the impact of COVID-19 on Airbnb listings in Singapore, by comparing their listings data from both June 2019 and June 2021. This is why we also imported the 2021 dataset earlier on in **3. Data Wrangling ** section. 
+
+## 5.1 Exploratory Spatial Data Analysis
+
+### 5.1.1 Data preparation for Airbnb data subsets based on room type
+
+We will do this for both 2019 and 2021 datasets. 
+
+The 4 types of room types are:
+
+- Entire home/apt
+- Hotel room
+- Private room
+- Shared room
+
+However, the 2019 dataset does not have **Hotel room** room type so we will exclude that room type from our analysis.
+
+```{r}
+EH2019 <- airbnb_2019[airbnb_2019$room_type == "Entire home/apt", ]
+PR2019 <- airbnb_2019[airbnb_2019$room_type == "Private room", ]
+SR2019 <- airbnb_2019[airbnb_2019$room_type == "Shared room", ]
+
+EH2021 <- airbnb_2021[airbnb_2021$room_type == "Entire home/apt", ]
+PR2021 <- airbnb_2021[airbnb_2021$room_type == "Private room", ]
+SR2021 <- airbnb_2021[airbnb_2021$room_type == "Shared room", ]
+```
+
+#### Converting the subset dataframes into generic sp objects
+
+```{r}
+EH2019_sp = as(as_Spatial(EH2019), "SpatialPoints")
+PR2019_sp = as(as_Spatial(PR2019), "SpatialPoints")
+SR2019_sp = as(as_Spatial(SR2019), "SpatialPoints")
+
+EH2021_sp = as(as_Spatial(EH2021), "SpatialPoints")
+PR2021_sp = as(as_Spatial(PR2021), "SpatialPoints")
+SR2021_sp = as(as_Spatial(SR2021), "SpatialPoints")
+```
+
+#### Converting generic sp objects into ppp objects
+
+```{r}
+EH2019_sp_ppp = as(EH2019_sp, "ppp")
+PR2019_sp_ppp = as(PR2019_sp, "ppp")
+SR2019_sp_ppp = as(SR2019_sp, "ppp")
+
+EH2021_sp_ppp = as(EH2021_sp, "ppp")
+PR2021_sp_ppp = as(PR2021_sp, "ppp")
+SR2021_sp_ppp = as(SR2021_sp, "ppp")
+```
+
+#### Removing duplicate points from the pp objects
+
+```{r}
+EH2019_sp_ppp_jit = rjitter(EH2019_sp_ppp, retry=TRUE, nsim=1, drop=TRUE)
+PR2019_sp_ppp_jit = rjitter(PR2019_sp_ppp, retry=TRUE, nsim=1, drop=TRUE)
+SR2019_sp_ppp_jit = rjitter(SR2019_sp_ppp, retry=TRUE, nsim=1, drop=TRUE)
+
+EH2021_sp_ppp_jit = rjitter(EH2021_sp_ppp, retry=TRUE, nsim=1, drop=TRUE)
+PR2021_sp_ppp_jit = rjitter(PR2021_sp_ppp, retry=TRUE, nsim=1, drop=TRUE)
+SR2021_sp_ppp_jit = rjitter(SR2021_sp_ppp, retry=TRUE, nsim=1, drop=TRUE)
+```
+
+#### Rescale the unit of measurement from Metre to Kilometre
+
+```{r}
+EH2019_sp_ppp_jit.km = rescale(EH2019_sp_ppp_jit[sg_owin], 1000, "km")
+PR2019_sp_ppp_jit.km = rescale(PR2019_sp_ppp_jit[sg_owin], 1000, "km")
+SR2019_sp_ppp_jit.km = rescale(SR2019_sp_ppp_jit[sg_owin], 1000, "km")
+
+EH2021_sp_ppp_jit.km = rescale(EH2021_sp_ppp_jit[sg_owin], 1000, "km")
+PR2021_sp_ppp_jit.km = rescale(PR2021_sp_ppp_jit[sg_owin], 1000, "km")
+SR2021_sp_ppp_jit.km = rescale(SR2021_sp_ppp_jit[sg_owin], 1000, "km")
+```
+
+#### 5.1.2 Computing kernel density values  
+
+```{r}
+KDE_EH2019_bw <- density(EH2019_sp_ppp_jit.km, sigma=bw.diggle, edge=TRUE, kernel="gaussian")
+KDE_PR2019_bw <- density(PR2019_sp_ppp_jit.km, sigma=bw.diggle, edge=TRUE, kernel="gaussian")
+KDE_SR2019_bw <- density(SR2019_sp_ppp_jit.km, sigma=bw.diggle, edge=TRUE, kernel="gaussian")
+
+KDE_EH2021_bw <- density(EH2021_sp_ppp_jit.km, sigma=bw.diggle, edge=TRUE, kernel="gaussian")
+KDE_PR2021_bw <- density(PR2021_sp_ppp_jit.km, sigma=bw.diggle, edge=TRUE, kernel="gaussian")
+KDE_SR2021_bw <- density(SR2021_sp_ppp_jit.km, sigma=bw.diggle, edge=TRUE, kernel="gaussian")
+```
+
+```{r fig.width=8, fig.height=6}
+par(mfrow=c(2,3))
+
+plot(KDE_EH2019_bw, main="Entire Home/Apt 2019")
+plot(KDE_PR2019_bw, main="Private Room 2019")
+plot(KDE_SR2019_bw, main="Shared Room 2019")
+plot(KDE_EH2021_bw, main="Entire Home/Apt 2021")
+plot(KDE_PR2021_bw, main="Private Room 2021")
+plot(KDE_SR2021_bw, main="Shared Room 2021")
+
+```
+
+From the results above, we can see that we didn't get substantial results by using **sigma = bw.diggle**. Therefore, we will use **sigma = 1.2** as that's the maximum bandwidth, and hopefully we will get more comprehensive results.
+
+```{r}
+KDE_EH2019_bw <- density(EH2019_sp_ppp_jit.km, sigma=1.2, edge=TRUE, kernel="gaussian")
+KDE_PR2019_bw <- density(PR2019_sp_ppp_jit.km, sigma=1.2, edge=TRUE, kernel="gaussian")
+KDE_SR2019_bw <- density(SR2019_sp_ppp_jit.km, sigma=1.2, edge=TRUE, kernel="gaussian")
+
+KDE_EH2021_bw <- density(EH2021_sp_ppp_jit.km, sigma=1.2, edge=TRUE, kernel="gaussian")
+KDE_PR2021_bw <- density(PR2021_sp_ppp_jit.km, sigma=1.2, edge=TRUE, kernel="gaussian")
+KDE_SR2021_bw <- density(SR2021_sp_ppp_jit.km, sigma=1.2, edge=TRUE, kernel="gaussian")
+```
+
+```{r fig.width=8, fig.height=6}
+par(mfrow=c(2,3))
+
+plot(KDE_EH2019_bw, main="Entire Home/Apt 2019")
+plot(KDE_PR2019_bw, main="Private Room 2019")
+plot(KDE_SR2019_bw, main="Shared Room 2019")
+plot(KDE_EH2021_bw, main="Entire Home/Apt 2021")
+plot(KDE_PR2021_bw, main="Private Room 2021")
+plot(KDE_SR2021_bw, main="Shared Room 2021")
+```
+
+Voila! Now we have better results, and we shall proceed on. 
+
+#### Converting KDE outputs into grid objects
+
+This conversion does not change the output results, it just makes it more suitable for mapping purposes.
+
+```{r}
+gridded_KDE_EH2019_bw <- as.SpatialGridDataFrame.im(KDE_EH2019_bw)
+gridded_KDE_PR2019_bw <- as.SpatialGridDataFrame.im(KDE_PR2019_bw)
+gridded_KDE_SR2019_bw <- as.SpatialGridDataFrame.im(KDE_SR2019_bw)
+
+gridded_KDE_EH2021_bw <- as.SpatialGridDataFrame.im(KDE_EH2021_bw)
+gridded_KDE_PR2021_bw <- as.SpatialGridDataFrame.im(KDE_PR2021_bw)
+gridded_KDE_SR2021_bw <- as.SpatialGridDataFrame.im(KDE_SR2021_bw)
+```
+
+#### Converting Gridded outputs into Raster
+
+Next, we will convert the gridded kernal density objects into RasterLayer object by using *raster()* of **raster** package.
+
+```{r}
+gridded_KDE_EH2019_raster <- raster(gridded_KDE_EH2019_bw)
+gridded_KDE_PR2019_raster <- raster(gridded_KDE_PR2019_bw)
+gridded_KDE_SR2019_raster <- raster(gridded_KDE_SR2019_bw)
+
+gridded_KDE_EH2021_raster <- raster(gridded_KDE_EH2021_bw)
+gridded_KDE_PR2021_raster <- raster(gridded_KDE_PR2021_bw)
+gridded_KDE_SR2021_raster <- raster(gridded_KDE_SR2021_bw)
+```
+
+We then need to reassign the projected systems to the new Raster layer, because the crs will be lost (as shown in **3. Data Wrangling**) when converting into a ppp object earlier on. 
+
+The below code chunk will assign the projected systems to the Raster layer.
+
+```{r}
+projection(gridded_KDE_EH2019_raster) <- CRS("+init=EPSG:3414 +datum=WGS84 +units=km")
+projection(gridded_KDE_PR2019_raster) <- CRS("+init=EPSG:3414 +datum=WGS84 +units=km")
+projection(gridded_KDE_SR2019_raster) <- CRS("+init=EPSG:3414 +datum=WGS84 +units=km")
+
+projection(gridded_KDE_EH2021_raster) <- CRS("+init=EPSG:3414 +datum=WGS84 +units=km")
+projection(gridded_KDE_PR2021_raster) <- CRS("+init=EPSG:3414 +datum=WGS84 +units=km")
+projection(gridded_KDE_SR2021_raster) <- CRS("+init=EPSG:3414 +datum=WGS84 +units=km")
+```
+
+Finally, we can then plot the processed data into cartographic quality maps using **tmap** package.
+
+### 5.1.3 Computing kernel density maps 
+
+#### Kernel Density of room type (Entire Home/Apt)
+
+```{r}
+tmap_mode("view")
+
+EH2019_map <- tm_shape(sg) +
+  tm_borders(col = 'black',
+             lwd = 1,
+             alpha = 0.5) +
+tm_shape(gridded_KDE_EH2019_raster) + 
+  tm_raster("v", breaks=c(0, 20, 40, 60, 80, 100), alpha = 0.7) +
+  tm_layout(legend.position = c("right", "bottom"), frame = FALSE, title = "Entire Home/Apt 2019") +
+  tm_basemap('OpenStreetMap')
+
+EH2021_map <- tm_shape(sg) +
+  tm_borders(col = 'black',
+             lwd = 1,
+             alpha = 0.5) +
+tm_shape(gridded_KDE_EH2021_raster) + 
+  tm_raster("v", breaks=c(0, 20, 40, 60, 80, 100), alpha = 0.7) +
+  tm_layout(legend.position = c("right", "bottom"), frame = FALSE, title = "Entire Home/Apt 2021") +
+  tm_basemap('OpenStreetMap')
+
+tmap_arrange(EH2019_map, EH2021_map, asp=1, ncol=2)
+```
+#### Kernel Density of room type (Private Room)
+
+```{r}
+tmap_mode("view")
+
+PR2019_map <- tm_shape(sg) +
+  tm_borders(col = 'black',
+             lwd = 1,
+             alpha = 0.5) +
+tm_shape(gridded_KDE_PR2019_raster) + 
+  tm_raster("v", breaks=c(0, 20, 40, 60, 80), alpha = 0.7) +
+  tm_layout(legend.position = c("right", "bottom"), frame = FALSE, title = "Private Room 2019") +
+  tm_basemap('OpenStreetMap')
+
+PR2021_map <- tm_shape(sg) +
+  tm_borders(col = 'black',
+             lwd = 1,
+             alpha = 0.5) +
+tm_shape(gridded_KDE_PR2021_raster) + 
+  tm_raster("v",breaks=c(0, 20, 40, 60, 80), alpha = 0.7) +
+  tm_layout(legend.position = c("right", "bottom"), frame = FALSE, title = "Private Room 2021") +
+  tm_basemap('OpenStreetMap')
+
+tmap_arrange(PR2019_map, PR2021_map, asp=1, ncol=2)
+```
+
+#### Kernel Density of room type (Shared Room)
+
+```{r}
+tmap_mode("view")
+
+SR2019_map <- tm_shape(sg) +
+  tm_borders(col = 'black',
+             lwd = 1,
+             alpha = 0.5) +
+tm_shape(gridded_KDE_SR2019_raster) + 
+  tm_raster("v", breaks=c(0, 5, 10, 15, 20, 25), alpha = 0.7) +
+  tm_layout(legend.position = c("right", "bottom"), frame = FALSE, title = "Shared Room 2019") +
+  tm_basemap('OpenStreetMap')
+
+SR2021_map <- tm_shape(sg) +
+  tm_borders(col = 'black',
+             lwd = 1,
+             alpha = 0.5) +
+tm_shape(gridded_KDE_SR2021_raster) + 
+  tm_raster("v", breaks=c(0, 5, 10, 15, 20, 25), alpha = 0.7) +
+  tm_layout(legend.position = c("right", "bottom"), frame = FALSE, title = "Shared Room 2021") +
+  tm_basemap('OpenStreetMap')
+
+tmap_arrange(SR2019_map, SR2021_map, asp=1, ncol=2)
+```
+
+From the plotted maps above, we can see that for all 3 Room Types, it is evident that there has been a drop in the number of units per km square from 2019 to 2021. This could be seen explicitly through the lighter greens in the 2021 maps as compared to their 2019 counterparts. 
+
+## 5.2 Second-order Spatial Point Patterns Analysis
 
 # 6. Conclusion
 
