@@ -35,6 +35,8 @@ The specific questions we are trying to find out are:
 
 - If they are NOT spatially independent, what location factors (Hotels, Hawker Centres, MRT Stations, Tourist Attractions) do they cluster around to?
 
+- Has COVID-19 affected the distribution of Airbnb Listings in Singapore? 
+
 ## 1.2 The Data
 
 For analysis purposes, the following data are used:
@@ -421,6 +423,8 @@ kde_airbnb_2019_bw_raster
 
 Finally, we can then plot the processed data into cartographic quality maps using **tmap** package.
 
+*P.S. To avoid facing issues with deploying the study to Netlify, only one leaflet/interactive map will be utilised (the first map). The other maps will be shown as screenshots instead, however this should not affect the analysis as they are visually effective as well. *
+
 #### Kernel Density Map of Airbnb Listings 2019
 
 ```{r}
@@ -559,7 +563,7 @@ As shown by the output above, the p-value is smaller than 0.05. Therefore, we wi
 
 ## 4.2 Second-order Spatial Point Patterns Analysis
 
-### 4.2.1 Data preparation 
+### 4.2.1 Data Preparation 
 
 Using the code chunk below, we will combine Airbnb Listings with the respective Location Factors into one object for use in the later analyses.
 
@@ -598,7 +602,7 @@ c_tourism$TYPE <- "Tourism"
 combined_df <- rbind(c_airbnb2019, c_hawker, c_hotels, c_tourism)
 ```
 
-We face issues when combining the mrt dataset into combined_df, therefore we will exclude mrt from the analysis.
+We face issues when combining the mrt dataset into combined_df, therefore we will **exclude mrt** from the analysis.
 
 The following code chunk will then change **combined_df** into a Spatial Point Data Frame, then change the Type field from character data type to factor type. 
 
@@ -632,11 +636,11 @@ intensity(rescale(combined_central_ppp, 1000))
 ```
 The output reveals that in the Central Region study area:
 
-- Airbnb Listings has the highest density of 48.86 units per km square
-- In comparison, there are only 2.96 hotels per km square, so it is a drastic difference
-- Tourist Attractions and Hawker Centres has even lesser units per km square, with 0.67 and 0.51 units respectively
+- **Airbnb Listings** has the highest density of **48.86 units per km square**
+- In comparison, there are only **2.96 hotels per km square**, so it is a drastic difference
+- **Tourist Attractions** and **Hawker Centres** has even lesser units per km square, with **0.67** and **0.51** units respectively
 
-### 4.2.1 Analysing Spatial Point Process: Cross K-Function
+### 4.2.2 Analysing Spatial Point Process: Cross K-Function
 
 Using the **Cross K-Function** from *Kcross()* of **spatstat** package, we can determine if the location of Airbnb Listings are close or far away from the other location factors. 
 
@@ -755,7 +759,7 @@ The plot above reveals that the distribution of Airbnb Listings and Hawker Centr
 
 In essence, we will reject the null hypothesis because the results are statistically significant, and we can infer that there are **signs of a clustering relationship between Airbnb Listings and Hawker Centres**.
 
-### 4.2.1 Analysing Spatial Point Process: Cross L-Function
+### 4.2.3 Analysing Spatial Point Process: Cross L-Function
 
 Similar to Cross-K-Function, we can perform the CSR test by using *envelope()* of **spatstat** package will be used. L Function is used so as to normalise the results of K Function, and ensure higher accuracy of final results.
 
@@ -824,6 +828,8 @@ SR2021 <- airbnb_2021[airbnb_2021$room_type == "Shared room", ]
 
 #### Converting the subset dataframes into generic sp objects
 
+Similar to what we did in *3. Data Wrangling*, we will need to convert the imported data frames into generic sp objects.
+
 ```{r}
 EH2019_sp = as(as_Spatial(EH2019), "SpatialPoints")
 PR2019_sp = as(as_Spatial(PR2019), "SpatialPoints")
@@ -835,6 +841,8 @@ SR2021_sp = as(as_Spatial(SR2021), "SpatialPoints")
 ```
 
 #### Converting generic sp objects into ppp objects
+
+Then, we will need convert the generic sp objects into ppp objects.
 
 ```{r}
 EH2019_sp_ppp = as(EH2019_sp, "ppp")
@@ -848,6 +856,8 @@ SR2021_sp_ppp = as(SR2021_sp, "ppp")
 
 #### Removing duplicate points from the pp objects
 
+We will then use the jitter method to remove duplicate points.
+
 ```{r}
 EH2019_sp_ppp_jit = rjitter(EH2019_sp_ppp, retry=TRUE, nsim=1, drop=TRUE)
 PR2019_sp_ppp_jit = rjitter(PR2019_sp_ppp, retry=TRUE, nsim=1, drop=TRUE)
@@ -860,6 +870,8 @@ SR2021_sp_ppp_jit = rjitter(SR2021_sp_ppp, retry=TRUE, nsim=1, drop=TRUE)
 
 #### Rescale the unit of measurement from Metre to Kilometre
 
+Rescaling is essential for getting more concrete kernel density values.
+
 ```{r}
 EH2019_sp_ppp_jit.km = rescale(EH2019_sp_ppp_jit[sg_owin], 1000, "km")
 PR2019_sp_ppp_jit.km = rescale(PR2019_sp_ppp_jit[sg_owin], 1000, "km")
@@ -870,7 +882,7 @@ PR2021_sp_ppp_jit.km = rescale(PR2021_sp_ppp_jit[sg_owin], 1000, "km")
 SR2021_sp_ppp_jit.km = rescale(SR2021_sp_ppp_jit[sg_owin], 1000, "km")
 ```
 
-#### 5.1.2 Computing kernel density values  
+### 5.1.2 Computing kernel density values  
 
 ```{r}
 KDE_EH2019_bw <- density(EH2019_sp_ppp_jit.km, sigma=bw.diggle, edge=TRUE, kernel="gaussian")
@@ -894,7 +906,7 @@ plot(KDE_SR2021_bw, main="Shared Room 2021")
 
 ```
 
-From the results above, we can see that we didn't get substantial results by using **sigma = bw.diggle**. Therefore, we will use **sigma = 1.2** as that's the maximum bandwidth, and hopefully we will get more comprehensive results.
+From the results above, we can see that we didn't get substantial results by using **sigma = bw.diggle**. Therefore, we will use **sigma = 1.2** as the maximum bandwidth as ~1.2 or 1200 is the largest value, and hopefully we will get more comprehensive results.
 
 ```{r}
 KDE_EH2019_bw <- density(EH2019_sp_ppp_jit.km, sigma=1.2, edge=TRUE, kernel="gaussian")
@@ -917,11 +929,11 @@ plot(KDE_PR2021_bw, main="Private Room 2021")
 plot(KDE_SR2021_bw, main="Shared Room 2021")
 ```
 
-Voila! Now we have better results, and we shall proceed on. 
+Voila! Now we have better results, so we shall proceed on. 
 
 #### Converting KDE outputs into grid objects
 
-This conversion does not change the output results, it just makes it more suitable for mapping purposes.
+This conversion into grid objects does not change the output results, it just makes it more suitable for mapping purposes.
 
 ```{r}
 gridded_KDE_EH2019_bw <- as.SpatialGridDataFrame.im(KDE_EH2019_bw)
@@ -935,7 +947,7 @@ gridded_KDE_SR2021_bw <- as.SpatialGridDataFrame.im(KDE_SR2021_bw)
 
 #### Converting Gridded outputs into Raster
 
-Next, we will convert the gridded kernal density objects into RasterLayer object by using *raster()* of **raster** package.
+Next, we will convert the gridded kernel density objects into RasterLayer object by using *raster()* of **raster** package.
 
 ```{r}
 gridded_KDE_EH2019_raster <- raster(gridded_KDE_EH2019_bw)
@@ -965,9 +977,11 @@ Finally, we can then plot the processed data into cartographic quality maps usin
 
 ### 5.1.3 Computing kernel density maps 
 
+*P.S. Similar to the earlier kernel density maps, to avoid facing issues with deploying the study to Netlify, only one leaflet/interactive map will be utilised (the first map). The other maps will be shown as screenshots instead, however this should not affect the analysis as they are visually effective as well. *
+
 #### Kernel Density of room type (Entire Home/Apt)
 
-```{r}
+```{r, figures-side, fig.show="hold", out.width="50%"}
 tmap_mode("view")
 
 EH2019_map <- tm_shape(sg) +
@@ -988,11 +1002,16 @@ tm_shape(gridded_KDE_EH2021_raster) +
   tm_layout(legend.position = c("right", "bottom"), frame = FALSE, title = "Entire Home/Apt 2021") +
   tm_basemap('OpenStreetMap')
 
-tmap_arrange(EH2019_map, EH2021_map, asp=1, ncol=2)
+EH2019_map
+
+EH2021_map
 ```
+
+*P.S. For the above maps, I'm having difficulties plotting them side by side when deploying them onto Netlify. Therefore, this is the best that I can display, the Top Map will be for 2019 and the Bottom Map will be for 2021.*
+
 #### Kernel Density of room type (Private Room)
 
-```{r}
+```{r eval=FALSE}
 tmap_mode("view")
 
 PR2019_map <- tm_shape(sg) +
@@ -1015,10 +1034,11 @@ tm_shape(gridded_KDE_PR2021_raster) +
 
 tmap_arrange(PR2019_map, PR2021_map, asp=1, ncol=2)
 ```
+![Screenshot of Kernel Density Maps of Private Room 2019 vs Private Room 2021](PR20192021.png)
 
 #### Kernel Density of room type (Shared Room)
 
-```{r}
+```{r eval=FALSE}
 tmap_mode("view")
 
 SR2019_map <- tm_shape(sg) +
@@ -1041,10 +1061,167 @@ tm_shape(gridded_KDE_SR2021_raster) +
 
 tmap_arrange(SR2019_map, SR2021_map, asp=1, ncol=2)
 ```
+![Screenshot of Kernel Density Maps of Shared Room 2019 vs Shared Room 2021](SR20192021.png)
 
-From the plotted maps above, we can see that for all 3 Room Types, it is evident that there has been a drop in the number of units per km square from 2019 to 2021. This could be seen explicitly through the lighter greens in the 2021 maps as compared to their 2019 counterparts. 
+From the plotted maps above, we can see that for all 3 Room Types, it is evident that there has been a drop in the number of units per km square from 2019 to 2021. This could be seen explicitly through the lighter greens in the 2021 maps as compared to their 2019 counterparts.
+
+This serves as evidence on how much COVID-19 has impacted these listings in Singapore, especially in a negative way. This is not surprising as there has been several news on the negative impact of COVID-19 on Airbnb, such as the organisation [Airbnb itself losing a 19 percent drop in revenue.](https://www.theverge.com/2020/11/16/21570416/airbnb-coronavirus-pandemic-travel-hospitality)
 
 ## 5.2 Second-order Spatial Point Patterns Analysis
+
+### 5.2.1 Data Preparation
+
+Using the code chunk below, we will combine the room types into one data frame respectively using their 2019 and 2021 data sets.
+
+```{r}
+C_EH2019 <- EH2019 %>%
+  select("name", "geometry")
+
+C_EH2019$Type <- "2019"
+
+C_EH2021 <- EH2021 %>%
+  select("name", "geometry") 
+
+C_EH2021$Type <- "2021"
+
+COMBINED_EH <- rbind(C_EH2019, C_EH2021)
+
+C_PR2019 <- PR2019 %>%
+  select("name", "geometry")
+
+C_PR2019$Type <- "2019"
+
+C_PR2021 <- PR2021 %>%
+  select("name", "geometry") 
+
+C_PR2021$Type <- "2021"
+
+COMBINED_PR <- rbind(C_PR2019, C_PR2021)
+
+C_SR2019 <- SR2019 %>%
+  select("name", "geometry")
+
+C_SR2019$Type <- "2019"
+
+C_SR2021 <- SR2021 %>%
+  select("name", "geometry") 
+
+C_SR2021$Type <- "2021"
+
+COMBINED_SR <- rbind(C_SR2019, C_SR2021)
+```
+
+The following code chunk will then change the respective data frames into Spatial Point Data Frames, then change the *Type* field from *character* data type to *factor* data type.
+
+The next conversion will be converting into a PPP object which is required by **spatstat** package, and using the *jitter()* method to remove duplicates from the PPP object.
+
+We will also scope down the study region to the **Central Region** similar to earlier on, therefore we wil use **central_owin** object to clip the boundary.
+
+#### Conversion for Entire Home/Apt room type
+
+```{r}
+EH_combined_sp <- as(as_Spatial(COMBINED_EH), "SpatialPointsDataFrame")
+
+EH_combined_sp@data$Type <- as.factor(EH_combined_sp@data$Type)
+
+EH_combined_ppp <- as(EH_combined_sp, "ppp")
+
+EH_combined_ppp_jit <- rjitter(EH_combined_ppp, retry = TRUE, nsim = 1, drop = TRUE)
+
+EH_combined_central_ppp = EH_combined_ppp_jit[central_owin]
+
+marks(EH_combined_central_ppp) <- factor(EH_combined_central_ppp$marks$Type)
+```
+
+#### Conversion for Private Room room type
+
+```{r}
+PR_combined_sp <- as(as_Spatial(COMBINED_PR), "SpatialPointsDataFrame")
+
+PR_combined_sp@data$Type <- as.factor(PR_combined_sp@data$Type)
+
+PR_combined_ppp <- as(PR_combined_sp, "ppp")
+
+PR_combined_ppp_jit <- rjitter(PR_combined_ppp, retry = TRUE, nsim = 1, drop = TRUE)
+
+PR_combined_central_ppp = PR_combined_ppp_jit[central_owin]
+
+marks(PR_combined_central_ppp) <- factor(PR_combined_central_ppp$marks$Type)
+```
+
+#### Conversion for Shared Room room type
+
+```{r}
+SR_combined_sp <- as(as_Spatial(COMBINED_SR), "SpatialPointsDataFrame")
+
+SR_combined_sp@data$Type <- as.factor(SR_combined_sp@data$Type)
+
+SR_combined_ppp <- as(SR_combined_sp, "ppp")
+
+SR_combined_ppp_jit <- rjitter(SR_combined_ppp, retry = TRUE, nsim = 1, drop = TRUE)
+
+SR_combined_central_ppp = SR_combined_ppp_jit[central_owin]
+
+marks(SR_combined_central_ppp) <- factor(SR_combined_central_ppp$marks$Type)
+```
+
+#### Analysing marked point patterns
+
+Using the code chunk below, *density()* will be used to compute the kernel density for the respective objects. Then, *plot()* is used to plot the output kernel density objects derived.
+
+##### Entire Home/Apt room type
+
+```{r}
+plot(density(split(rescale(EH_combined_central_ppp, 1000))))
+```
+
+Then, we will use *intensity()* of **spatstat** package is used to reveal the density of **Entire Home/Apt 2019 vs Entire Home/Apt 2021** as shown in the code chunk below.
+
+```{r}
+intensity(rescale(EH_combined_central_ppp, 1000))
+```
+
+The output reveals that for **Entire Home/Apt room type in the Central Region** study area:
+
+- In **2019**, there were **28.41 Airbnb units** per km square
+- In **2021**, there was a significant drop, with only **11.7 units** per km square
+
+##### Private Room room type
+
+```{r}
+plot(density(split(rescale(PR_combined_central_ppp, 1000))))
+```
+
+Then, we will use *intensity()* of **spatstat** package is used to reveal the density of **Private Room 2019 vs Private Room 2021** as shown in the code chunk below.
+
+```{r}
+intensity(rescale(PR_combined_central_ppp, 1000))
+```
+
+The output reveals that for **Private Room room type in the Central Region** study area:
+
+- In **2019**, there were **17.6 Airbnb units** per km square
+- In **2021**, there was a significant drop as well, with only **10.6 units** per km square
+
+##### Shared Room room type
+
+```{r}
+plot(density(split(rescale(SR_combined_central_ppp, 1000))))
+```
+
+Then, we will use *intensity()* of **spatstat** package is used to reveal the density of **Shared Room 2019 vs Shared Room 2021** as shown in the code chunk below.
+
+```{r}
+intensity(rescale(SR_combined_central_ppp, 1000))
+```
+
+The output reveals that for **Shared Room room type in the Central Region** study area:
+
+- In **2019**, there were **2.89 Airbnb units** per km square
+- In **2021**, there was a drop as well, with **1.06 units** per km square
+
+### 5.2.2 Analysing Spatial Point Process: Cross K-Function
+
 
 # 6. Conclusion
 
