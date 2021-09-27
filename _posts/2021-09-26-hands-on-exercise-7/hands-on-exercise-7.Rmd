@@ -16,7 +16,7 @@ output:
 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # Overview
@@ -109,7 +109,7 @@ Before we can compute the global spatial autocorrelation statistics, we need to 
 
 In the code chunk below, *poly2nb()* of **spdep** package is used to compute contiguity weight matrices for the study area. This function builds a neighbours' list based on regions with contiguous boundaries. 
 
-Specifying this "queen" argument is not necessary because the default is set to TRUE, meaning this function will return a list of first order neighbours using the Queen criteria. However, if you do not want to compute Queen spatial weights, you can set the arugment to FALSE too.
+Specifying this "queen" argument is not necessary because the default is set to TRUE, meaning this function will return a list of first order neighbours using the Queen criteria. However, if you do not want to compute Queen spatial weights, you can set the argument to FALSE too, which will compute using Rook's criteria.
 
 So specifically for this study, the code chunk below is used to compute **Queen contiguity weight matrix**.
 
@@ -151,7 +151,7 @@ Question: What statistical conclusion can you draw from the output above?
 
 * From the given output:
   + The p-value is 0.000001095, which is very small and statistically significant.
-  + Hence, we will reject the null hypothesis and say that the developments are not spatially independent AKA there are strong signs of clustering 
+  + Hence, we will reject the null hypothesis and say that the developments are not spatially independent AKA there are strong signs of clustering. Since the Moran I Statistic is positive and approaching 1, we can infer that it reveals signs of cluster spatial pattern.
   
 ## Computing Monte Carlo Moran’s I 
 
@@ -159,12 +159,14 @@ The analytical approach to the Moran’s I analysis benefits from being fast. Bu
 
 The code chunk below performs permutation test for Moran’s I statistic. A total of 1000 simulations will be performed.
 
+*set.seed()* function sets the starting number used to generate a sequence of random numbers – it ensures that you get the same result if you start with that same seed each time you run the same process
+
 ```{r}
 set.seed(1234)
 bperm= moran.mc(hunan$GDPPC, listw=rswm_q, nsim=999, zero.policy = TRUE, na.action=na.omit)
 bperm
 ```
-Question: What statistical conclustion can you draw fro mthe output above?
+Question: What statistical conclusion can you draw from the output above?
 
 * Similar to the analytical method, since the p-value is small and statistically significant, we will reject the null hypothesis and say that the developments are not spatially independent AKA there are strong signs of clustering 
 
@@ -298,7 +300,7 @@ hunan.localMI <- cbind(hunan,localMI) %>%
 
 ### Mapping local Moran’s I values
 
-Using choropleth mapping functions of **tmap** package, we can plot the local Moran’s I values by using the code chinks below.
+Using choropleth mapping functions of **tmap** package, we can plot the local Moran’s I values by using the code chunks below.
 
 ```{r fig.width=12, fig.height=8}
 tm_shape(hunan.localMI) +
@@ -488,7 +490,10 @@ The term ‘hot spot’ has been used generically across disciplines to describe
 
 ## Getis and Ord’s G-Statistics
 
-An alternative spatial statistics to detect spatial anomalies is the Getis and Ord’s G-statistics (Getis and Ord, 1972; Ord and Getis, 1995). It looks at neighbours within a defined proximity to identify where either high or low values cluster spatially. Here, statistically significant hot-spots are recognised as areas of high values where other areas within a neighbourhood range also share high values too.
+An alternative spatial statistics to detect spatial anomalies is the Getis and Ord’s G-statistics (Getis and Ord, 1972; Ord and Getis, 1995). 
+It looks at neighbours within a defined proximity to identify where either high or low values cluster spatially. Here, statistically significant hot-spots are recognised as areas of high values where other areas within a neighbourhood range also share high values too.
+
+*P.S. Variables used must only contain POSITIVE Values*
 
 The analysis consists of three steps:
 
@@ -553,7 +558,9 @@ The summary output shows that the largest first nearest neighbour distance is 61
 
 ### Computing fixed distance weight matrix
 
-Now, we will compute the distance weight matrix by using *dnearneigh()* as shown in the code chunk below.
+Now, we will compute the distance weight matrix by using *dnearneigh()* as shown in the code chunk below. 
+
+- 62 is used after rounding up from the previous output of **Max Value 61.79**, so as to catch at least one neighbour per county
 
 ```{r}
 wm_d62 <- dnearneigh(coords, 0, 62, longlat = TRUE)
@@ -613,7 +620,7 @@ In fact, the code chunk above performs three tasks. First, it convert the output
 
 ### Mapping Gi values with fixed distance weights
 
-The code chunk below shows the functions used to map the Gi values derived using fixed distance weight matrix.
+The code chunk below shows the functions used to map the Gi values derived using FIXED distance weight matrix.
 
 ```{r fig.width=12,fig.height=8}
 gdppc <- qtm(hunan, "GDPPC")
@@ -630,7 +637,7 @@ tmap_arrange(gdppc, Gimap, asp=1, ncol=2)
 
 ### Gi statistics using adaptive distance
 
-The code chunk below are used to compute the Gi values for GDPPC2012 by using an adaptive distance weight matrix (i.e *knb_lw*).
+The code chunk below are used to compute the Gi values for GDPPC2012 by using an ADAPTIVE distance weight matrix (i.e *knb_lw*).
 
 ```{r}
 fips <- order(hunan$County)
@@ -643,7 +650,7 @@ hunan.gi <- cbind(hunan, as.matrix(gi.adaptive)) %>%
 
 It is time for us to visualise the locations of hot spot and cold spot areas. The choropleth mapping functions of **tmap** package will be used to map the Gi values.
 
-The code chunk below shows the functions used to map the Gi values derived using fixed distance weight matrix.
+The code chunk below shows the functions used to map the Gi values derived using ADAPTIVE distance weight matrix.
 
 ```{r fig.width=12, fig.height=8}
 gdppc <- qtm(hunan, "GDPPC")
@@ -658,7 +665,7 @@ Gimap <- tm_shape(hunan.gi) +
 tmap_arrange(gdppc, Gimap, asp=1, ncol=2)
 ```
 
-
+Notice how the above output is much more smoother than its FIXED distance weight counterpart? Therefore, it really depends on context when choosing which method to use and the kind of visualisation one is looking for.
 
 
 

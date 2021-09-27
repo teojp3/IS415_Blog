@@ -116,7 +116,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   <!--/radix_placeholder_rmarkdown_metadata-->
   
   <script type="text/json" id="radix-resource-manifest">
-  {"type":"character","attributes":{},"value":["data/aspatial/Dictionary.xlsx","data/aspatial/Hunan_2012.csv","data/geospatial/Hunan.dbf","data/geospatial/Hunan.prj","data/geospatial/Hunan.qpj","data/geospatial/Hunan.shp","data/geospatial/Hunan.shx","hands-on-exercise-7_files/figure-html5/unnamed-chunk-13-1.png","hands-on-exercise-7_files/figure-html5/unnamed-chunk-19-1.png","hands-on-exercise-7_files/figure-html5/unnamed-chunk-20-1.png","hands-on-exercise-7_files/figure-html5/unnamed-chunk-21-1.png","hands-on-exercise-7_files/figure-html5/unnamed-chunk-25-1.png","hands-on-exercise-7_files/figure-html5/unnamed-chunk-26-1.png","hands-on-exercise-7_files/figure-html5/unnamed-chunk-27-1.png","hands-on-exercise-7_files/figure-html5/unnamed-chunk-28-1.png","hands-on-exercise-7_files/figure-html5/unnamed-chunk-30-1.png","hands-on-exercise-7_files/figure-html5/unnamed-chunk-38-1.png","hands-on-exercise-7_files/figure-html5/unnamed-chunk-39-1.png","hands-on-exercise-7_files/figure-html5/unnamed-chunk-5-1.png","hands-on-exercise-7_files/figure-html5/unnamed-chunk-50-1.png","hands-on-exercise-7_files/figure-html5/unnamed-chunk-52-1.png"]}
+  {"type":"character","attributes":{},"value":["data/aspatial/Dictionary.xlsx","data/aspatial/Hunan_2012.csv","data/geospatial/Hunan.dbf","data/geospatial/Hunan.prj","data/geospatial/Hunan.qpj","data/geospatial/Hunan.shp","data/geospatial/Hunan.shx","hands-on-exercise-7_files/anchor-4.2.2/anchor.min.js","hands-on-exercise-7_files/bowser-1.9.3/bowser.min.js","hands-on-exercise-7_files/distill-2.2.21/template.v2.js","hands-on-exercise-7_files/figure-html5/unnamed-chunk-13-1.png","hands-on-exercise-7_files/figure-html5/unnamed-chunk-19-1.png","hands-on-exercise-7_files/figure-html5/unnamed-chunk-20-1.png","hands-on-exercise-7_files/figure-html5/unnamed-chunk-21-1.png","hands-on-exercise-7_files/figure-html5/unnamed-chunk-25-1.png","hands-on-exercise-7_files/figure-html5/unnamed-chunk-26-1.png","hands-on-exercise-7_files/figure-html5/unnamed-chunk-27-1.png","hands-on-exercise-7_files/figure-html5/unnamed-chunk-28-1.png","hands-on-exercise-7_files/figure-html5/unnamed-chunk-30-1.png","hands-on-exercise-7_files/figure-html5/unnamed-chunk-38-1.png","hands-on-exercise-7_files/figure-html5/unnamed-chunk-39-1.png","hands-on-exercise-7_files/figure-html5/unnamed-chunk-5-1.png","hands-on-exercise-7_files/figure-html5/unnamed-chunk-50-1.png","hands-on-exercise-7_files/figure-html5/unnamed-chunk-52-1.png","hands-on-exercise-7_files/header-attrs-2.10/header-attrs.js","hands-on-exercise-7_files/jquery-1.11.3/jquery.min.js","hands-on-exercise-7_files/popper-2.6.0/popper.min.js","hands-on-exercise-7_files/tippy-6.2.7/tippy-bundle.umd.min.js","hands-on-exercise-7_files/tippy-6.2.7/tippy-light-border.css","hands-on-exercise-7_files/tippy-6.2.7/tippy.css","hands-on-exercise-7_files/tippy-6.2.7/tippy.umd.min.js","hands-on-exercise-7_files/webcomponents-2.0.0/webcomponents.js"]}
   </script>
   <!--radix_placeholder_navigation_in_header-->
   <!--/radix_placeholder_navigation_in_header-->
@@ -1545,13 +1545,27 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 </ul>
 <h2 id="setting-the-analytical-tools">Setting the Analytical Tools</h2>
 <div class="layout-chunk" data-layout="l-body">
-
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>packages</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>'sf'</span>, <span class='st'>'spdep'</span>, <span class='st'>'tmap'</span>, <span class='st'>'tidyverse'</span><span class='op'>)</span>
+<span class='kw'>for</span> <span class='op'>(</span><span class='va'>p</span> <span class='kw'>in</span> <span class='va'>packages</span><span class='op'>)</span><span class='op'>{</span>
+  <span class='kw'>if</span><span class='op'>(</span><span class='op'>!</span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>require</a></span><span class='op'>(</span><span class='va'>p</span>, character.only <span class='op'>=</span> <span class='cn'>T</span><span class='op'>)</span><span class='op'>)</span><span class='op'>{</span>
+    <span class='fu'><a href='https://rdrr.io/r/utils/install.packages.html'>install.packages</a></span><span class='op'>(</span><span class='va'>p</span><span class='op'>)</span>
+  <span class='op'>}</span>
+  <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'>p</span>,character.only <span class='op'>=</span> <span class='cn'>T</span><span class='op'>)</span>
+<span class='op'>}</span>
+</code></pre>
+</div>
 </div>
 <h1 id="getting-data-into-r">Getting Data into R</h1>
 <p>In this section, we will importy a geospatial data set and its associated attribute table into R environment. The geospatial data is in ESRI shapefile format and the attribute table is in csv fomat.</p>
 <h2 id="import-shapefile-into-r-environment">Import shapefile into R Environment</h2>
 <p>The code chunk below uses <em>st_read()</em> of <strong>sf</strong> package to import Hunan shapefile into R. The imported shapefile will be <strong>simple features</strong> Object of <strong>sf</strong>.</p>
 <div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>hunan</span> <span class='op'>&lt;-</span> <span class='fu'>st_read</span><span class='op'>(</span>dsn <span class='op'>=</span> <span class='st'>"data/geospatial"</span>, 
+                 layer <span class='op'>=</span> <span class='st'>"Hunan"</span><span class='op'>)</span>
+</code></pre>
+</div>
 <pre><code>Reading layer `Hunan&#39; from data source 
   `C:\teojp3\IS415_blog\_posts\2021-09-26-hands-on-exercise-7\data\geospatial&#39; 
   using driver `ESRI Shapefile&#39;
@@ -1564,16 +1578,31 @@ Geodetic CRS:  WGS 84</code></pre>
 <h2 id="importing-csv-file-into-r-environment">Importing CSV file into R Environment</h2>
 <p>Next, we will import Hunan_2012.csv into R by using <em>read_csv()</em> of <strong>readr</strong> package. The output is in R data frame class.</p>
 <div class="layout-chunk" data-layout="l-body">
-
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>hunan2012</span> <span class='op'>&lt;-</span> <span class='fu'>read_csv</span><span class='op'>(</span><span class='st'>"data/aspatial/Hunan_2012.csv"</span><span class='op'>)</span>
+</code></pre>
+</div>
 </div>
 <h2 id="perform-relational-join">Perform Relational Join</h2>
 <p>The code chunk below will be used to update the attribute table of <em>hunan’s</em> SpatialPolygonsDataFrame with the attribute fields of <em>hunan2012</em> dataframe. This is performed by using <em>left_join()</em> of <strong>dplyr</strong> package.</p>
 <div class="layout-chunk" data-layout="l-body">
-
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>hunan</span> <span class='op'>&lt;-</span> <span class='fu'>left_join</span><span class='op'>(</span><span class='va'>hunan</span>,<span class='va'>hunan2012</span><span class='op'>)</span>
+</code></pre>
+</div>
 </div>
 <h2 id="visualising-regional-development-indicator">Visualising Regional Development Indicator</h2>
 <p>Now, we are going to prepare a basemap and a choropleth map that shows the distribution of GDPPC 2012 by using <em>qtm()</em> of <strong>tmap</strong> package.</p>
 <div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>basemap</span> <span class='op'>&lt;-</span> <span class='fu'>tm_shape</span><span class='op'>(</span><span class='va'>hunan</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>tm_polygons</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>tm_text</span><span class='op'>(</span><span class='st'>"NAME_3"</span>, size<span class='op'>=</span><span class='fl'>0.5</span><span class='op'>)</span>
+
+<span class='va'>gdppc</span> <span class='op'>&lt;-</span> <span class='fu'>qtm</span><span class='op'>(</span><span class='va'>hunan</span>, <span class='st'>"GDPPC"</span><span class='op'>)</span>
+<span class='fu'>tmap_arrange</span><span class='op'>(</span><span class='va'>basemap</span>, <span class='va'>gdppc</span>, asp<span class='op'>=</span><span class='fl'>1</span>, ncol<span class='op'>=</span><span class='fl'>2</span><span class='op'>)</span>
+</code></pre>
+</div>
 <p><img src="hands-on-exercise-7_files/figure-html5/unnamed-chunk-5-1.png" width="1152" /></p>
 </div>
 <h1 id="global-spatial-autocorrelation">Global Spatial Autocorrelation</h1>
@@ -1581,9 +1610,14 @@ Geodetic CRS:  WGS 84</code></pre>
 <h2 id="computing-contiguity-spatial-weights">Computing Contiguity Spatial Weights</h2>
 <p>Before we can compute the global spatial autocorrelation statistics, we need to construct spatial weights of the study area. The spatial weights is used to define the neighbourhood relationships between the geographical units (i.e. county) in the study area.</p>
 <p>In the code chunk below, <em>poly2nb()</em> of <strong>spdep</strong> package is used to compute contiguity weight matrices for the study area. This function builds a neighbours’ list based on regions with contiguous boundaries.</p>
-<p>Specifying this “queen” argument is not necessary because the default is set to TRUE, meaning this function will return a list of first order neighbours using the Queen criteria. However, if you do not want to compute Queen spatial weights, you can set the arugment to FALSE too.</p>
+<p>Specifying this “queen” argument is not necessary because the default is set to TRUE, meaning this function will return a list of first order neighbours using the Queen criteria. However, if you do not want to compute Queen spatial weights, you can set the argument to FALSE too, which will compute using Rook’s criteria.</p>
 <p>So specifically for this study, the code chunk below is used to compute <strong>Queen contiguity weight matrix</strong>.</p>
 <div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>wm_q</span> <span class='op'>&lt;-</span> <span class='fu'>poly2nb</span><span class='op'>(</span><span class='va'>hunan</span>, queen<span class='op'>=</span><span class='cn'>TRUE</span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>wm_q</span><span class='op'>)</span>
+</code></pre>
+</div>
 <pre><code>Neighbour list object:
 Number of regions: 88 
 Number of nonzero links: 448 
@@ -1604,6 +1638,11 @@ Link number distribution:
 <p>In our case, each neighboring polygon will be assigned equal weight (style=“W”). This is accomplished by assigning the fraction 1/(#ofneighbors) to each neighboring county then summing the weighted income values.</p>
 <p>While this is the most intuitive way to summaries the neighbors’ values, it has one drawback in that polygons along the edges of the study area will base their lagged values on fewer polygons thus potentially over- or under-estimating the true nature of the spatial autocorrelation in the data. For this example, we’ll stick with the style=“W” option for simplicity’s sake but note that other more robust options are available, notably style=“B”.</p>
 <div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>rswm_q</span> <span class='op'>&lt;-</span> <span class='fu'>nb2listw</span><span class='op'>(</span><span class='va'>wm_q</span>, style<span class='op'>=</span><span class='st'>"W"</span>, zero.policy <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
+<span class='va'>rswm_q</span>
+</code></pre>
+</div>
 <pre><code>Characteristics of weights list object:
 Neighbour list object:
 Number of regions: 88 
@@ -1625,6 +1664,10 @@ W 88 7744 88 37.86334 365.9147</code></pre>
 <li>H0: Distribution of developments in Hunan are spatially independent</li>
 </ul>
 <div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>moran.test</span><span class='op'>(</span><span class='va'>hunan</span><span class='op'>$</span><span class='va'>GDPPC</span>, listw<span class='op'>=</span><span class='va'>rswm_q</span>, zero.policy <span class='op'>=</span> <span class='cn'>TRUE</span>, na.action<span class='op'>=</span><span class='va'>na.omit</span><span class='op'>)</span>
+</code></pre>
+</div>
 <pre><code>
     Moran I test under randomisation
 
@@ -1643,13 +1686,20 @@ Moran I statistic       Expectation          Variance
 <li>From the given output:
 <ul>
 <li>The p-value is 0.000001095, which is very small and statistically significant.</li>
-<li>Hence, we will reject the null hypothesis and say that the developments are not spatially independent AKA there are strong signs of clustering</li>
+<li>Hence, we will reject the null hypothesis and say that the developments are not spatially independent AKA there are strong signs of clustering. Since the Moran I Statistic is positive and approaching 1, we can infer that it reveals signs of cluster spatial pattern.</li>
 </ul></li>
 </ul>
 <h2 id="computing-monte-carlo-morans-i">Computing Monte Carlo Moran’s I</h2>
 <p>The analytical approach to the Moran’s I analysis benefits from being fast. But it may be sensitive to irregularly distributed polygons. A safer approach to hypothesis testing is to run an MC simulation using the <em>moran.mc()</em> function. The moran.mc function takes an extra argument n, the number of simulations.</p>
 <p>The code chunk below performs permutation test for Moran’s I statistic. A total of 1000 simulations will be performed.</p>
+<p><em>set.seed()</em> function sets the starting number used to generate a sequence of random numbers – it ensures that you get the same result if you start with that same seed each time you run the same process</p>
 <div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>1234</span><span class='op'>)</span>
+<span class='va'>bperm</span><span class='op'>=</span> <span class='fu'>moran.mc</span><span class='op'>(</span><span class='va'>hunan</span><span class='op'>$</span><span class='va'>GDPPC</span>, listw<span class='op'>=</span><span class='va'>rswm_q</span>, nsim<span class='op'>=</span><span class='fl'>999</span>, zero.policy <span class='op'>=</span> <span class='cn'>TRUE</span>, na.action<span class='op'>=</span><span class='va'>na.omit</span><span class='op'>)</span>
+<span class='va'>bperm</span>
+</code></pre>
+</div>
 <pre><code>
     Monte-Carlo simulation of Moran I
 
@@ -1660,23 +1710,40 @@ number of simulations + 1: 1000
 statistic = 0.30075, observed rank = 1000, p-value = 0.001
 alternative hypothesis: greater</code></pre>
 </div>
-<p>Question: What statistical conclustion can you draw fro mthe output above?</p>
+<p>Question: What statistical conclusion can you draw from the output above?</p>
 <ul>
 <li>Similar to the analytical method, since the p-value is small and statistically significant, we will reject the null hypothesis and say that the developments are not spatially independent AKA there are strong signs of clustering</li>
 </ul>
 <h3 id="visualising-monte-carlo-morans-i">Visualising Monte Carlo Moran’s I</h3>
 <p>It is always a good practice for us the examine the simulated Moran’s I test statistics in greater detail. This can be achieved by plotting the distribution of the statistical values as a histogram by using the code chunk below.</p>
 <div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='va'>bperm</span><span class='op'>$</span><span class='va'>res</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>999</span><span class='op'>]</span><span class='op'>)</span>
+</code></pre>
+</div>
 <pre><code>[1] -0.01504572</code></pre>
 </div>
 <div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/stats/cor.html'>var</a></span><span class='op'>(</span><span class='va'>bperm</span><span class='op'>$</span><span class='va'>res</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>999</span><span class='op'>]</span><span class='op'>)</span>
+</code></pre>
+</div>
 <pre><code>[1] 0.004371574</code></pre>
 </div>
 <div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>bperm</span><span class='op'>$</span><span class='va'>res</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>999</span><span class='op'>]</span><span class='op'>)</span>
+</code></pre>
+</div>
 <pre><code>    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
 -0.18339 -0.06168 -0.02125 -0.01505  0.02611  0.27593 </code></pre>
 </div>
 <div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/graphics/hist.html'>hist</a></span><span class='op'>(</span><span class='va'>bperm</span><span class='op'>$</span><span class='va'>res</span>, freq<span class='op'>=</span><span class='cn'>TRUE</span>, breaks<span class='op'>=</span><span class='fl'>20</span>, xlab<span class='op'>=</span><span class='st'>"Simulated Moran's I"</span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/graphics/abline.html'>abline</a></span><span class='op'>(</span>v<span class='op'>=</span><span class='fl'>0</span>, col<span class='op'>=</span><span class='st'>"red"</span><span class='op'>)</span> 
+</code></pre>
+</div>
 <p><img src="hands-on-exercise-7_files/figure-html5/unnamed-chunk-13-1.png" width="624" /></p>
 </div>
 <h2 id="global-spatial-autocorrelation-gearys">Global Spatial Autocorrelation: Geary’s</h2>
@@ -1684,6 +1751,10 @@ alternative hypothesis: greater</code></pre>
 <h3 id="gearys-c-test">Geary’s C test</h3>
 <p>The code chunk below performs Geary’s C test for spatial autocorrelation by using <em>geary.test()</em> of <strong>spdep</strong>.</p>
 <div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>geary.test</span><span class='op'>(</span><span class='va'>hunan</span><span class='op'>$</span><span class='va'>GDPPC</span>, listw<span class='op'>=</span><span class='va'>rswm_q</span><span class='op'>)</span>
+</code></pre>
+</div>
 <pre><code>
     Geary C test under randomisation
 
@@ -1703,6 +1774,12 @@ Geary C statistic       Expectation          Variance
 </ul>
 <h3 id="computing-monte-carlo-gearys-c">Computing Monte Carlo Geary’s C</h3>
 <div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>1234</span><span class='op'>)</span>
+<span class='va'>bperm</span><span class='op'>=</span><span class='fu'>geary.mc</span><span class='op'>(</span><span class='va'>hunan</span><span class='op'>$</span><span class='va'>GDPPC</span>, listw<span class='op'>=</span><span class='va'>rswm_q</span>, nsim<span class='op'>=</span><span class='fl'>999</span><span class='op'>)</span>
+<span class='va'>bperm</span>
+</code></pre>
+</div>
 <pre><code>
     Monte-Carlo simulation of Geary C
 
@@ -1720,16 +1797,33 @@ alternative hypothesis: greater</code></pre>
 <h3 id="visualising-the-monte-carlo-gearys-c">Visualising the Monte Carlo Geary’s C</h3>
 <p>Next, we will plot a histogram to reveal the distribution of the simulated values by using the code chunk below.</p>
 <div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='va'>bperm</span><span class='op'>$</span><span class='va'>res</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>999</span><span class='op'>]</span><span class='op'>)</span>
+</code></pre>
+</div>
 <pre><code>[1] 1.004402</code></pre>
 </div>
 <div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/stats/cor.html'>var</a></span><span class='op'>(</span><span class='va'>bperm</span><span class='op'>$</span><span class='va'>res</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>999</span><span class='op'>]</span><span class='op'>)</span>
+</code></pre>
+</div>
 <pre><code>[1] 0.007436493</code></pre>
 </div>
 <div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>bperm</span><span class='op'>$</span><span class='va'>res</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>999</span><span class='op'>]</span><span class='op'>)</span>
+</code></pre>
+</div>
 <pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
  0.7142  0.9502  1.0052  1.0044  1.0595  1.2722 </code></pre>
 </div>
 <div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/graphics/hist.html'>hist</a></span><span class='op'>(</span><span class='va'>bperm</span><span class='op'>$</span><span class='va'>res</span>, freq<span class='op'>=</span><span class='cn'>TRUE</span>, breaks<span class='op'>=</span><span class='fl'>20</span>, xlab<span class='op'>=</span><span class='st'>"Simulated Geary c"</span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/graphics/abline.html'>abline</a></span><span class='op'>(</span>v<span class='op'>=</span><span class='fl'>1</span>, col<span class='op'>=</span><span class='st'>"red"</span><span class='op'>)</span> 
+</code></pre>
+</div>
 <p><img src="hands-on-exercise-7_files/figure-html5/unnamed-chunk-19-1.png" width="624" /></p>
 </div>
 <h2 id="spatial-correlogram">Spatial Correlogram</h2>
@@ -1737,11 +1831,21 @@ alternative hypothesis: greater</code></pre>
 <h3 id="compute-morans-i-correlogram">Compute Moran’s I correlogram</h3>
 <p>In the code chunk below, <em>sp.correlogram()</em> of spdep package is used to compute a 6-lag spatial correlogram of GDPPC. The global spatial autocorrelation used in Moran’s I. The <strong>plot()</strong> of base Graph is then used to plot the output.</p>
 <div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>MI_corr</span> <span class='op'>&lt;-</span> <span class='fu'>sp.correlogram</span><span class='op'>(</span><span class='va'>wm_q</span>, <span class='va'>hunan</span><span class='op'>$</span><span class='va'>GDPPC</span>, order<span class='op'>=</span><span class='fl'>6</span>, method<span class='op'>=</span><span class='st'>"I"</span>, style<span class='op'>=</span><span class='st'>"B"</span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='va'>MI_corr</span><span class='op'>)</span>
+</code></pre>
+</div>
 <p><img src="hands-on-exercise-7_files/figure-html5/unnamed-chunk-20-1.png" width="624" /></p>
 </div>
 <h3 id="compute-gearys-c-correlogram-and-plot">Compute Geary’s C correlogram and plot</h3>
 <p>In the code chunk below, <em>sp.correlogram()</em> of <strong>spdep</strong> package is used to compute a 6-lag spatial correlogram of GDPPC. The global spatial autocorrelation used in Geary’s C. The <strong>plot()</strong> of base Graph is then used to plot the output.</p>
 <div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>GC_corr</span> <span class='op'>&lt;-</span> <span class='fu'>sp.correlogram</span><span class='op'>(</span><span class='va'>wm_q</span>, <span class='va'>hunan</span><span class='op'>$</span><span class='va'>GDPPC</span>, order<span class='op'>=</span><span class='fl'>6</span>, method<span class='op'>=</span><span class='st'>"C"</span>, style<span class='op'>=</span><span class='st'>"W"</span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='va'>GC_corr</span><span class='op'>)</span>
+</code></pre>
+</div>
 <p><img src="hands-on-exercise-7_files/figure-html5/unnamed-chunk-21-1.png" width="624" /></p>
 </div>
 <h1 id="cluster-and-outlier-analysis">Cluster and Outlier Analysis</h1>
@@ -1751,6 +1855,12 @@ alternative hypothesis: greater</code></pre>
 <p>To compute local Moran’s I, the <em>localmoran()</em> function of <strong>spdep</strong> will be used. It computes <em>Ii</em> values, given a set of zi values and a listw object providing neighbour weighting information for the polygon associated with the zi values.</p>
 <p>The code chunks below are used to compute local Moran’s I of GDPPC2012 at the county level.</p>
 <div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>fips</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/order.html'>order</a></span><span class='op'>(</span><span class='va'>hunan</span><span class='op'>$</span><span class='va'>County</span><span class='op'>)</span>
+<span class='va'>localMI</span> <span class='op'>&lt;-</span> <span class='fu'>localmoran</span><span class='op'>(</span><span class='va'>hunan</span><span class='op'>$</span><span class='va'>GDPPC</span>, <span class='va'>rswm_q</span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>localMI</span><span class='op'>)</span>
+</code></pre>
+</div>
 <pre><code>            Ii          E.Ii       Var.Ii        Z.Ii Pr(z != E(Ii))
 1 -0.001468468 -2.815006e-05 4.723841e-04 -0.06626904      0.9471636
 2  0.025878173 -6.061953e-04 1.016664e-02  0.26266425      0.7928094
@@ -1769,6 +1879,10 @@ alternative hypothesis: greater</code></pre>
 </ul>
 <p>The code chunk below list the content of the local Moran matrix derived by using <em>printCoefmat()</em>.</p>
 <div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/stats/printCoefmat.html'>printCoefmat</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span><span class='op'>(</span><span class='va'>localMI</span><span class='op'>[</span><span class='va'>fips</span>,<span class='op'>]</span>, row.names<span class='op'>=</span><span class='va'>hunan</span><span class='op'>$</span><span class='va'>County</span><span class='op'>[</span><span class='va'>fips</span><span class='op'>]</span><span class='op'>)</span>, check.names<span class='op'>=</span><span class='cn'>FALSE</span><span class='op'>)</span>
+</code></pre>
+</div>
 <pre><code>                       Ii        E.Ii      Var.Ii        Z.Ii
 Anhua         -2.2493e-02 -5.0048e-03  5.8235e-02 -7.2467e-02
 Anren         -3.9932e-01 -7.0111e-03  7.0348e-02 -1.4791e+00
@@ -1951,23 +2065,62 @@ Zixing                0.4830</code></pre>
 <h2 id="mapping-the-local-morans-i">Mapping the local Moran’s I</h2>
 <p>Before mapping the local Moran’s I map, it is wise to append the local Moran’s I dataframe (i.e. localMI) onto hunan SpatialPolygonDataFrame. The code chunks below can be used to perform the task. The out SpatialPolygonDataFrame is called <em>hunan.localMI</em>.</p>
 <div class="layout-chunk" data-layout="l-body">
-
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>hunan.localMI</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/cbind.html'>cbind</a></span><span class='op'>(</span><span class='va'>hunan</span>,<span class='va'>localMI</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>rename</span><span class='op'>(</span>Pr.Ii <span class='op'>=</span> <span class='va'>Pr.z....E.Ii..</span><span class='op'>)</span>
+</code></pre>
+</div>
 </div>
 <h3 id="mapping-local-morans-i-values">Mapping local Moran’s I values</h3>
-<p>Using choropleth mapping functions of <strong>tmap</strong> package, we can plot the local Moran’s I values by using the code chinks below.</p>
+<p>Using choropleth mapping functions of <strong>tmap</strong> package, we can plot the local Moran’s I values by using the code chunks below.</p>
 <div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>tm_shape</span><span class='op'>(</span><span class='va'>hunan.localMI</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>tm_fill</span><span class='op'>(</span>col <span class='op'>=</span> <span class='st'>"Ii"</span>, 
+          style <span class='op'>=</span> <span class='st'>"pretty"</span>,
+          palette <span class='op'>=</span> <span class='st'>"RdBu"</span>,
+          title <span class='op'>=</span> <span class='st'>"local moran statistics"</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>tm_borders</span><span class='op'>(</span>alpha <span class='op'>=</span> <span class='fl'>0.5</span><span class='op'>)</span>
+</code></pre>
+</div>
 <p><img src="hands-on-exercise-7_files/figure-html5/unnamed-chunk-25-1.png" width="1152" /></p>
 </div>
 <h3 id="mapping-local-morans-i-p-values">Mapping local Moran’s I p-values</h3>
 <p>The choropleth shows there is evidence for both positive and negative Ii values. However, it is useful to consider the p-values for each of these values, as consider above.</p>
 <p>The code chunks below produce a choropleth map of Moran’s I p-values by using functions of <strong>tmap</strong> package.</p>
 <div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>tm_shape</span><span class='op'>(</span><span class='va'>hunan.localMI</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>tm_fill</span><span class='op'>(</span>col <span class='op'>=</span> <span class='st'>"Pr.Ii"</span>, 
+          breaks<span class='op'>=</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='op'>-</span><span class='cn'>Inf</span>, <span class='fl'>0.001</span>, <span class='fl'>0.01</span>, <span class='fl'>0.05</span>, <span class='fl'>0.1</span>, <span class='cn'>Inf</span><span class='op'>)</span>,
+          palette<span class='op'>=</span><span class='st'>"-Blues"</span>, 
+          title <span class='op'>=</span> <span class='st'>"local Moran's I p-values"</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>tm_borders</span><span class='op'>(</span>alpha <span class='op'>=</span> <span class='fl'>0.5</span><span class='op'>)</span>
+</code></pre>
+</div>
 <p><img src="hands-on-exercise-7_files/figure-html5/unnamed-chunk-26-1.png" width="1152" /></p>
 </div>
 <h3 id="mapping-both-local-morans-i-values-and-p-values">Mapping both local Moran’s I values and p-values</h3>
 <p>For effective interpretation, it is better to plot both the local Moran’s I values map and its corresponding p-values map next to each other.</p>
 <p>The code chunk below will be used to create such visualisation.</p>
 <div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>localMI.map</span> <span class='op'>&lt;-</span> <span class='fu'>tm_shape</span><span class='op'>(</span><span class='va'>hunan.localMI</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>tm_fill</span><span class='op'>(</span>col <span class='op'>=</span> <span class='st'>"Ii"</span>, 
+          style <span class='op'>=</span> <span class='st'>"pretty"</span>, 
+          title <span class='op'>=</span> <span class='st'>"local moran statistics"</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>tm_borders</span><span class='op'>(</span>alpha <span class='op'>=</span> <span class='fl'>0.5</span><span class='op'>)</span>
+
+<span class='va'>pvalue.map</span> <span class='op'>&lt;-</span> <span class='fu'>tm_shape</span><span class='op'>(</span><span class='va'>hunan.localMI</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>tm_fill</span><span class='op'>(</span>col <span class='op'>=</span> <span class='st'>"Pr.Ii"</span>, 
+          breaks<span class='op'>=</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='op'>-</span><span class='cn'>Inf</span>, <span class='fl'>0.001</span>, <span class='fl'>0.01</span>, <span class='fl'>0.05</span>, <span class='fl'>0.1</span>, <span class='cn'>Inf</span><span class='op'>)</span>,
+          palette<span class='op'>=</span><span class='st'>"-Blues"</span>, 
+          title <span class='op'>=</span> <span class='st'>"local Moran's I p-values"</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>tm_borders</span><span class='op'>(</span>alpha <span class='op'>=</span> <span class='fl'>0.5</span><span class='op'>)</span>
+
+<span class='fu'>tmap_arrange</span><span class='op'>(</span><span class='va'>localMI.map</span>, <span class='va'>pvalue.map</span>, asp<span class='op'>=</span><span class='fl'>1</span>, ncol<span class='op'>=</span><span class='fl'>2</span><span class='op'>)</span>
+</code></pre>
+</div>
 <p><img src="hands-on-exercise-7_files/figure-html5/unnamed-chunk-27-1.png" width="1152" /></p>
 </div>
 <h2 id="creating-a-lisa-cluster-map">Creating a LISA Cluster Map</h2>
@@ -1976,56 +2129,139 @@ Zixing                0.4830</code></pre>
 <p>The Moran scatterplot is an illustration of the relationship between the values of the chosen attribute at each location and the average value of the same attribute at neighboring locations.</p>
 <p>The code chunk below plots the Moran scatterplot of GDPPC 2012 by using <em>moran.plot()</em> of <strong>spdep</strong>.</p>
 <div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>nci</span> <span class='op'>&lt;-</span> <span class='fu'>moran.plot</span><span class='op'>(</span><span class='va'>hunan</span><span class='op'>$</span><span class='va'>GDPPC</span>, <span class='va'>rswm_q</span>,
+                  labels<span class='op'>=</span><span class='fu'><a href='https://rdrr.io/r/base/character.html'>as.character</a></span><span class='op'>(</span><span class='va'>hunan</span><span class='op'>$</span><span class='va'>County</span><span class='op'>)</span>, 
+                  xlab<span class='op'>=</span><span class='st'>"GDPPC 2012"</span>, 
+                  ylab<span class='op'>=</span><span class='st'>"Spatially Lag GDPPC 2012"</span><span class='op'>)</span>
+</code></pre>
+</div>
 <p><img src="hands-on-exercise-7_files/figure-html5/unnamed-chunk-28-1.png" width="624" /></p>
 </div>
 <p>Notice that the plot is split in 4 quadrants. The top right corner belongs to areas that have high GDPPC and are surrounded by other areas that have the average level of GDPPC. This are the high-high locations in the lesson slide.</p>
 <h3 id="plotting-moran-scatterplot-with-standardised-variable">Plotting Moran scatterplot with standardised variable</h3>
 <p>First we will use <em>scale()</em> to centers and scales the variable. here centering is done by subtracting the mean (omitting NAs) the corresponding columns, and scaling is done by dividing the (centered) variable by their standard deviations.</p>
 <div class="layout-chunk" data-layout="l-body">
-
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>hunan</span><span class='op'>$</span><span class='va'>Z.GDPPC</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/scale.html'>scale</a></span><span class='op'>(</span><span class='va'>hunan</span><span class='op'>$</span><span class='va'>GDPPC</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='va'>as.vector</span> 
+</code></pre>
+</div>
 </div>
 <p>The <em>as.vector()</em> added to the end is to make sure that the data type we get out of this is a vector, that map neatly into out dataframe.</p>
 <p>Now, we are ready to plot the Moran scatterplot again by using the code chunk below.</p>
 <div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>nci2</span> <span class='op'>&lt;-</span> <span class='fu'>moran.plot</span><span class='op'>(</span><span class='va'>hunan</span><span class='op'>$</span><span class='va'>Z.GDPPC</span>, <span class='va'>rswm_q</span>,
+                   labels<span class='op'>=</span><span class='fu'><a href='https://rdrr.io/r/base/character.html'>as.character</a></span><span class='op'>(</span><span class='va'>hunan</span><span class='op'>$</span><span class='va'>County</span><span class='op'>)</span>,
+                   xlab<span class='op'>=</span><span class='st'>"z-GDPPC 2012"</span>, 
+                   ylab<span class='op'>=</span><span class='st'>"Spatially Lag z-GDPPC 2012"</span><span class='op'>)</span>
+</code></pre>
+</div>
 <p><img src="hands-on-exercise-7_files/figure-html5/unnamed-chunk-30-1.png" width="624" /></p>
 </div>
 <h3 id="preparing-lisa-map-classes">Preparing LISA map classes</h3>
 <p>The code chunks below show the steps to prepare a LISA cluster map.</p>
 <div class="layout-chunk" data-layout="l-body">
-
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>quadrant</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/vector.html'>vector</a></span><span class='op'>(</span>mode<span class='op'>=</span><span class='st'>"numeric"</span>,length<span class='op'>=</span><span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span><span class='op'>(</span><span class='va'>localMI</span><span class='op'>)</span><span class='op'>)</span>
+</code></pre>
+</div>
 </div>
 <p>Next, we centers the variable of interest around its mean.</p>
 <div class="layout-chunk" data-layout="l-body">
-
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>DV</span> <span class='op'>&lt;-</span> <span class='va'>hunan</span><span class='op'>$</span><span class='va'>GDPPC</span> <span class='op'>-</span> <span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='va'>hunan</span><span class='op'>$</span><span class='va'>GDPPC</span><span class='op'>)</span>     
+</code></pre>
+</div>
 </div>
 <p>This is follow by centering the local Moran’s around the mean.</p>
 <div class="layout-chunk" data-layout="l-body">
-
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>C_mI</span> <span class='op'>&lt;-</span> <span class='va'>localMI</span><span class='op'>[</span>,<span class='fl'>1</span><span class='op'>]</span> <span class='op'>-</span> <span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='va'>localMI</span><span class='op'>[</span>,<span class='fl'>1</span><span class='op'>]</span><span class='op'>)</span>    
+</code></pre>
+</div>
 </div>
 <p>Next, we will set a statistical significance level for the local Moran.</p>
 <div class="layout-chunk" data-layout="l-body">
-
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>signif</span> <span class='op'>&lt;-</span> <span class='fl'>0.05</span> 
+</code></pre>
+</div>
 </div>
 <p>These four command lines define the high-high, low-low, low-high and high-low categories.</p>
 <div class="layout-chunk" data-layout="l-body">
-
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>quadrant</span><span class='op'>[</span><span class='va'>DV</span> <span class='op'>&gt;</span><span class='fl'>0</span> <span class='op'>&amp;</span> <span class='va'>C_mI</span><span class='op'>&gt;</span><span class='fl'>0</span><span class='op'>]</span> <span class='op'>&lt;-</span> <span class='fl'>4</span>      
+<span class='va'>quadrant</span><span class='op'>[</span><span class='va'>DV</span> <span class='op'>&lt;</span><span class='fl'>0</span> <span class='op'>&amp;</span> <span class='va'>C_mI</span><span class='op'>&lt;</span><span class='fl'>0</span><span class='op'>]</span> <span class='op'>&lt;-</span> <span class='fl'>1</span>      
+<span class='va'>quadrant</span><span class='op'>[</span><span class='va'>DV</span> <span class='op'>&lt;</span><span class='fl'>0</span> <span class='op'>&amp;</span> <span class='va'>C_mI</span><span class='op'>&gt;</span><span class='fl'>0</span><span class='op'>]</span> <span class='op'>&lt;-</span> <span class='fl'>2</span>
+<span class='va'>quadrant</span><span class='op'>[</span><span class='va'>DV</span> <span class='op'>&gt;</span><span class='fl'>0</span> <span class='op'>&amp;</span> <span class='va'>C_mI</span><span class='op'>&lt;</span><span class='fl'>0</span><span class='op'>]</span> <span class='op'>&lt;-</span> <span class='fl'>3</span>
+</code></pre>
+</div>
 </div>
 <p>Lastly, places non-significant Moran in the category 0.</p>
 <div class="layout-chunk" data-layout="l-body">
-
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>quadrant</span><span class='op'>[</span><span class='va'>localMI</span><span class='op'>[</span>,<span class='fl'>5</span><span class='op'>]</span><span class='op'>&gt;</span><span class='va'>signif</span><span class='op'>]</span> <span class='op'>&lt;-</span> <span class='fl'>0</span>
+</code></pre>
+</div>
 </div>
 <p>In fact, we can combined all the steps into one single code chunk as shown below:</p>
 <div class="layout-chunk" data-layout="l-body">
-
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>quadrant</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/vector.html'>vector</a></span><span class='op'>(</span>mode<span class='op'>=</span><span class='st'>"numeric"</span>,length<span class='op'>=</span><span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span><span class='op'>(</span><span class='va'>localMI</span><span class='op'>)</span><span class='op'>)</span>
+<span class='va'>DV</span> <span class='op'>&lt;-</span> <span class='va'>hunan</span><span class='op'>$</span><span class='va'>GDPPC</span> <span class='op'>-</span> <span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='va'>hunan</span><span class='op'>$</span><span class='va'>GDPPC</span><span class='op'>)</span>     
+<span class='va'>C_mI</span> <span class='op'>&lt;-</span> <span class='va'>localMI</span><span class='op'>[</span>,<span class='fl'>1</span><span class='op'>]</span> <span class='op'>-</span> <span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='va'>localMI</span><span class='op'>[</span>,<span class='fl'>1</span><span class='op'>]</span><span class='op'>)</span>    
+<span class='va'>signif</span> <span class='op'>&lt;-</span> <span class='fl'>0.05</span>       
+<span class='va'>quadrant</span><span class='op'>[</span><span class='va'>DV</span> <span class='op'>&gt;</span><span class='fl'>0</span> <span class='op'>&amp;</span> <span class='va'>C_mI</span><span class='op'>&gt;</span><span class='fl'>0</span><span class='op'>]</span> <span class='op'>&lt;-</span> <span class='fl'>4</span>      
+<span class='va'>quadrant</span><span class='op'>[</span><span class='va'>DV</span> <span class='op'>&lt;</span><span class='fl'>0</span> <span class='op'>&amp;</span> <span class='va'>C_mI</span><span class='op'>&lt;</span><span class='fl'>0</span><span class='op'>]</span> <span class='op'>&lt;-</span> <span class='fl'>1</span>      
+<span class='va'>quadrant</span><span class='op'>[</span><span class='va'>DV</span> <span class='op'>&lt;</span><span class='fl'>0</span> <span class='op'>&amp;</span> <span class='va'>C_mI</span><span class='op'>&gt;</span><span class='fl'>0</span><span class='op'>]</span> <span class='op'>&lt;-</span> <span class='fl'>2</span>
+<span class='va'>quadrant</span><span class='op'>[</span><span class='va'>DV</span> <span class='op'>&gt;</span><span class='fl'>0</span> <span class='op'>&amp;</span> <span class='va'>C_mI</span><span class='op'>&lt;</span><span class='fl'>0</span><span class='op'>]</span> <span class='op'>&lt;-</span> <span class='fl'>3</span>
+<span class='va'>quadrant</span><span class='op'>[</span><span class='va'>localMI</span><span class='op'>[</span>,<span class='fl'>5</span><span class='op'>]</span><span class='op'>&gt;</span><span class='va'>signif</span><span class='op'>]</span> <span class='op'>&lt;-</span> <span class='fl'>0</span>
+</code></pre>
+</div>
 </div>
 <h3 id="plotting-lisa-map">Plotting LISA map</h3>
 <p>Now, we can build the LISA map by using the code chunks below.</p>
 <div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>hunan.localMI</span><span class='op'>$</span><span class='va'>quadrant</span> <span class='op'>&lt;-</span> <span class='va'>quadrant</span>
+<span class='va'>colors</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"#ffffff"</span>, <span class='st'>"#2c7bb6"</span>, <span class='st'>"#abd9e9"</span>, <span class='st'>"#fdae61"</span>, <span class='st'>"#d7191c"</span><span class='op'>)</span>
+<span class='va'>clusters</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"insignificant"</span>, <span class='st'>"low-low"</span>, <span class='st'>"low-high"</span>, <span class='st'>"high-low"</span>, <span class='st'>"high-high"</span><span class='op'>)</span>
+
+<span class='fu'>tm_shape</span><span class='op'>(</span><span class='va'>hunan.localMI</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>tm_fill</span><span class='op'>(</span>col <span class='op'>=</span> <span class='st'>"quadrant"</span>, 
+          style <span class='op'>=</span> <span class='st'>"cat"</span>, 
+          palette <span class='op'>=</span> <span class='va'>colors</span><span class='op'>[</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/sort.html'>sort</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/unique.html'>unique</a></span><span class='op'>(</span><span class='va'>quadrant</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span><span class='op'>+</span><span class='fl'>1</span><span class='op'>]</span>, 
+          labels <span class='op'>=</span> <span class='va'>clusters</span><span class='op'>[</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/sort.html'>sort</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/unique.html'>unique</a></span><span class='op'>(</span><span class='va'>quadrant</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span><span class='op'>+</span><span class='fl'>1</span><span class='op'>]</span>,
+          popup.vars <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>""</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>tm_view</span><span class='op'>(</span>set.zoom.limits <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>11</span>,<span class='fl'>17</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>tm_borders</span><span class='op'>(</span>alpha<span class='op'>=</span><span class='fl'>0.5</span><span class='op'>)</span>
+</code></pre>
+</div>
 <p><img src="hands-on-exercise-7_files/figure-html5/unnamed-chunk-38-1.png" width="1152" /></p>
 </div>
 <p>For effective interpretation, it is better to plot both the local Moran’s I values map and its corresponding p-values map next to each other.</p>
 <p>The code chunk below will be used to create such visualisation.</p>
 <div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>gdppc</span> <span class='op'>&lt;-</span> <span class='fu'>qtm</span><span class='op'>(</span><span class='va'>hunan</span>, <span class='st'>"GDPPC"</span><span class='op'>)</span>
+
+<span class='va'>hunan.localMI</span><span class='op'>$</span><span class='va'>quadrant</span> <span class='op'>&lt;-</span> <span class='va'>quadrant</span>
+<span class='va'>colors</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"#ffffff"</span>, <span class='st'>"#2c7bb6"</span>, <span class='st'>"#abd9e9"</span>, <span class='st'>"#fdae61"</span>, <span class='st'>"#d7191c"</span><span class='op'>)</span>
+<span class='va'>clusters</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"insignificant"</span>, <span class='st'>"low-low"</span>, <span class='st'>"low-high"</span>, <span class='st'>"high-low"</span>, <span class='st'>"high-high"</span><span class='op'>)</span>
+
+<span class='va'>LISAmap</span> <span class='op'>&lt;-</span> <span class='fu'>tm_shape</span><span class='op'>(</span><span class='va'>hunan.localMI</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>tm_fill</span><span class='op'>(</span>col <span class='op'>=</span> <span class='st'>"quadrant"</span>, 
+          style <span class='op'>=</span> <span class='st'>"cat"</span>, 
+          palette <span class='op'>=</span> <span class='va'>colors</span><span class='op'>[</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/sort.html'>sort</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/unique.html'>unique</a></span><span class='op'>(</span><span class='va'>quadrant</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span><span class='op'>+</span><span class='fl'>1</span><span class='op'>]</span>, 
+          labels <span class='op'>=</span> <span class='va'>clusters</span><span class='op'>[</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/sort.html'>sort</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/unique.html'>unique</a></span><span class='op'>(</span><span class='va'>quadrant</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span><span class='op'>+</span><span class='fl'>1</span><span class='op'>]</span>,
+          popup.vars <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>""</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>tm_view</span><span class='op'>(</span>set.zoom.limits <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>11</span>,<span class='fl'>17</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>tm_borders</span><span class='op'>(</span>alpha<span class='op'>=</span><span class='fl'>0.5</span><span class='op'>)</span>
+
+<span class='fu'>tmap_arrange</span><span class='op'>(</span><span class='va'>gdppc</span>, <span class='va'>LISAmap</span>, asp<span class='op'>=</span><span class='fl'>1</span>, ncol<span class='op'>=</span><span class='fl'>2</span><span class='op'>)</span>
+</code></pre>
+</div>
 <p><img src="hands-on-exercise-7_files/figure-html5/unnamed-chunk-39-1.png" width="1152" /></p>
 </div>
 <h1 id="hot-spot-and-cold-spot-area-analysis">Hot Spot and Cold Spot Area Analysis</h1>
@@ -2033,6 +2269,7 @@ Zixing                0.4830</code></pre>
 <p>The term ‘hot spot’ has been used generically across disciplines to describe a region or value that is higher relative to its surroundings (Lepers et al 2005, Aben et al 2012, Isobe et al 2015).</p>
 <h2 id="getis-and-ords-g-statistics">Getis and Ord’s G-Statistics</h2>
 <p>An alternative spatial statistics to detect spatial anomalies is the Getis and Ord’s G-statistics (Getis and Ord, 1972; Ord and Getis, 1995). It looks at neighbours within a defined proximity to identify where either high or low values cluster spatially. Here, statistically significant hot-spots are recognised as areas of high values where other areas within a neighbourhood range also share high values too.</p>
+<p><em>P.S. Variables used must only contain POSITIVE Values</em></p>
 <p>The analysis consists of three steps:</p>
 <ul>
 <li>Deriving spatial weight matrix</li>
@@ -2052,15 +2289,24 @@ Zixing                0.4830</code></pre>
 <p>Our input vector will be the geometry column of us.bound. Our function will be <em>st_centroid()</em>. We will be using map_dbl variation of map from the purrr package.</p>
 <p>To get our longitude values we map the st_centroid() function over the geometry column of us.bound and access the longitude value through double bracket notation [[]] and 1. This allows us to get only the longitude, which is the first value in each centroid.</p>
 <div class="layout-chunk" data-layout="l-body">
-
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>longitude</span> <span class='op'>&lt;-</span> <span class='fu'>map_dbl</span><span class='op'>(</span><span class='va'>hunan</span><span class='op'>$</span><span class='va'>geometry</span>, <span class='op'>~</span><span class='fu'>st_centroid</span><span class='op'>(</span><span class='va'>.x</span><span class='op'>)</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span><span class='op'>)</span>
+</code></pre>
+</div>
 </div>
 <p>We do the same for latitude with one key difference. We access the second value per each centroid with [[2]].</p>
 <div class="layout-chunk" data-layout="l-body">
-
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>latitude</span> <span class='op'>&lt;-</span> <span class='fu'>map_dbl</span><span class='op'>(</span><span class='va'>hunan</span><span class='op'>$</span><span class='va'>geometry</span>, <span class='op'>~</span><span class='fu'>st_centroid</span><span class='op'>(</span><span class='va'>.x</span><span class='op'>)</span><span class='op'>[[</span><span class='fl'>2</span><span class='op'>]</span><span class='op'>]</span><span class='op'>)</span>
+</code></pre>
+</div>
 </div>
 <p>Now that we have latitude and longitude, we use cbind to put longitude and latitude into the same object.</p>
 <div class="layout-chunk" data-layout="l-body">
-
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>coords</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/cbind.html'>cbind</a></span><span class='op'>(</span><span class='va'>longitude</span>, <span class='va'>latitude</span><span class='op'>)</span>
+</code></pre>
+</div>
 </div>
 <h3 id="determine-the-cut-off-distance">Determine the cut-off distance</h3>
 <p>Firstly, we need to determine the upper limit for distance band by using the steps below:</p>
@@ -2071,13 +2317,28 @@ Zixing                0.4830</code></pre>
 <li><p>Remove the list structure of the returned object by using <strong>unlist()</strong>.</p></li>
 </ul>
 <div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'>#coords &lt;- coordinates(hunan)</span>
+<span class='va'>k1</span> <span class='op'>&lt;-</span> <span class='fu'>knn2nb</span><span class='op'>(</span><span class='fu'>knearneigh</span><span class='op'>(</span><span class='va'>coords</span><span class='op'>)</span><span class='op'>)</span>
+<span class='va'>k1dists</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/unlist.html'>unlist</a></span><span class='op'>(</span><span class='fu'>nbdists</span><span class='op'>(</span><span class='va'>k1</span>, <span class='va'>coords</span>, longlat <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>k1dists</span><span class='op'>)</span>
+</code></pre>
+</div>
 <pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
   24.79   32.57   38.01   39.07   44.52   61.79 </code></pre>
 </div>
 <p>The summary output shows that the largest first nearest neighbour distance is 61.79 km, so using this as the upper threshold gives certainty that all units will have at least one neighbour.</p>
 <h3 id="computing-fixed-distance-weight-matrix">Computing fixed distance weight matrix</h3>
 <p>Now, we will compute the distance weight matrix by using <em>dnearneigh()</em> as shown in the code chunk below.</p>
+<ul>
+<li>62 is used after rounding up from the previous output of <strong>Max Value 61.79</strong>, so as to catch at least one neighbour per county</li>
+</ul>
 <div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>wm_d62</span> <span class='op'>&lt;-</span> <span class='fu'>dnearneigh</span><span class='op'>(</span><span class='va'>coords</span>, <span class='fl'>0</span>, <span class='fl'>62</span>, longlat <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
+<span class='va'>wm_d62</span>
+</code></pre>
+</div>
 <pre><code>Neighbour list object:
 Number of regions: 88 
 Number of nonzero links: 324 
@@ -2090,6 +2351,11 @@ Average number of links: 3.681818 </code></pre>
 <li><p>If <em>zero policy</em> is set to TRUE, weights vectors of zero length are inserted for regions without neighbour in the neighbours list. These will in turn generate lag values of zero, equivalent to the sum of products of the zero row t(rep(0, length=length(neighbours))) %*% x, for arbitraty numerical vector x of length length(neighbours). The spatially lagged value of x for the zero-neighbour region will then be zero, which may (or may not) be a sensible choice.</p></li>
 </ul>
 <div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>wm62_lw</span> <span class='op'>&lt;-</span> <span class='fu'>nb2listw</span><span class='op'>(</span><span class='va'>wm_d62</span>, style <span class='op'>=</span> <span class='st'>'B'</span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>wm62_lw</span><span class='op'>)</span>
+</code></pre>
+</div>
 <pre><code>Characteristics of weights list object:
 Neighbour list object:
 Number of regions: 88 
@@ -2114,6 +2380,11 @@ B 88 7744 324 648 5440</code></pre>
 <p>One of the characteristics of fixed distance weight matrix is that more densely settled areas (usually the urban areas) tend to have more neighbours and the less densely settled areas (usually the rural counties) tend to have lesser neighbours. Having many neighbours smoothes the neighbour relationship across more neighbours.</p>
 <p>It is possible to control the numbers of neighbours directly using k-nearest neighbours, either accepting asymmetric neighbours or imposing symmetry as shown in the code chunk below.</p>
 <div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>knn</span> <span class='op'>&lt;-</span> <span class='fu'>knn2nb</span><span class='op'>(</span><span class='fu'>knearneigh</span><span class='op'>(</span><span class='va'>coords</span>, k<span class='op'>=</span><span class='fl'>8</span><span class='op'>)</span><span class='op'>)</span>
+<span class='va'>knn</span>
+</code></pre>
+</div>
 <pre><code>Neighbour list object:
 Number of regions: 88 
 Number of nonzero links: 704 
@@ -2123,6 +2394,11 @@ Non-symmetric neighbours list</code></pre>
 </div>
 <p>Next, <em>nb2listw()</em> is used to convert the nb object into spatial weights object.</p>
 <div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>knn_lw</span> <span class='op'>&lt;-</span> <span class='fu'>nb2listw</span><span class='op'>(</span><span class='va'>knn</span>, style <span class='op'>=</span> <span class='st'>'B'</span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>knn_lw</span><span class='op'>)</span>
+</code></pre>
+</div>
 <pre><code>Characteristics of weights list object:
 Neighbour list object:
 Number of regions: 88 
@@ -2147,6 +2423,12 @@ B 88 7744 704 1300 23014</code></pre>
 <h2 id="computing-gi-statistics">Computing Gi statistics</h2>
 <h3 id="gi-statistics-using-fixed-distance">Gi statistics using fixed distance</h3>
 <div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>fips</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/order.html'>order</a></span><span class='op'>(</span><span class='va'>hunan</span><span class='op'>$</span><span class='va'>County</span><span class='op'>)</span>
+<span class='va'>gi.fixed</span> <span class='op'>&lt;-</span> <span class='fu'>localG</span><span class='op'>(</span><span class='va'>hunan</span><span class='op'>$</span><span class='va'>GDPPC</span>, <span class='va'>wm62_lw</span><span class='op'>)</span>
+<span class='va'>gi.fixed</span>
+</code></pre>
+</div>
 <pre><code> [1]  0.436075843 -0.265505650 -0.073033665  0.413017033  0.273070579
  [6] -0.377510776  2.863898821  2.794350420  5.216125401  0.228236603
 [11]  0.951035346 -0.536334231  0.176761556  1.195564020 -0.033020610
@@ -2176,25 +2458,62 @@ attr(,&quot;class&quot;)
 <p>The Gi statistics is represented as a Z-score. Greater values represent a greater intensity of clustering and the direction (positive or negative) indicates high or low clusters.</p>
 <p>Next, we will join the Gi values to their corresponding hunan sf data frame by using the code chunk below.</p>
 <div class="layout-chunk" data-layout="l-body">
-
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>hunan.gi</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/cbind.html'>cbind</a></span><span class='op'>(</span><span class='va'>hunan</span>, <span class='fu'><a href='https://rdrr.io/r/base/matrix.html'>as.matrix</a></span><span class='op'>(</span><span class='va'>gi.fixed</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>rename</span><span class='op'>(</span>gstat_fixed <span class='op'>=</span> <span class='va'>as.matrix.gi.fixed.</span><span class='op'>)</span>
+</code></pre>
+</div>
 </div>
 <p>In fact, the code chunk above performs three tasks. First, it convert the output vector (i.e. <em>gi.fixed</em>) into r matrix object by using <em>as.matrix()</em>. Next, <em>cbind()</em> is used to join <a href="mailto:hun@data" class="email">hun@data</a> and <em>gi.fixed</em> matrix to produce a new SpatialPolygonDataFrame called **hunan.gi.* Lastly, the field name of the gi values is renamed to <em>gstat_fixed</em> by using <em>names()</em>.</p>
 <h3 id="mapping-gi-values-with-fixed-distance-weights">Mapping Gi values with fixed distance weights</h3>
-<p>The code chunk below shows the functions used to map the Gi values derived using fixed distance weight matrix.</p>
+<p>The code chunk below shows the functions used to map the Gi values derived using FIXED distance weight matrix.</p>
 <div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>gdppc</span> <span class='op'>&lt;-</span> <span class='fu'>qtm</span><span class='op'>(</span><span class='va'>hunan</span>, <span class='st'>"GDPPC"</span><span class='op'>)</span>
+
+<span class='va'>Gimap</span> <span class='op'>&lt;-</span><span class='fu'>tm_shape</span><span class='op'>(</span><span class='va'>hunan.gi</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>tm_fill</span><span class='op'>(</span>col <span class='op'>=</span> <span class='st'>"gstat_fixed"</span>, 
+          style <span class='op'>=</span> <span class='st'>"pretty"</span>,
+          palette<span class='op'>=</span><span class='st'>"-RdBu"</span>,
+          title <span class='op'>=</span> <span class='st'>"local Gi"</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>tm_borders</span><span class='op'>(</span>alpha <span class='op'>=</span> <span class='fl'>0.5</span><span class='op'>)</span>
+
+<span class='fu'>tmap_arrange</span><span class='op'>(</span><span class='va'>gdppc</span>, <span class='va'>Gimap</span>, asp<span class='op'>=</span><span class='fl'>1</span>, ncol<span class='op'>=</span><span class='fl'>2</span><span class='op'>)</span>
+</code></pre>
+</div>
 <p><img src="hands-on-exercise-7_files/figure-html5/unnamed-chunk-50-1.png" width="1152" /></p>
 </div>
 <h3 id="gi-statistics-using-adaptive-distance">Gi statistics using adaptive distance</h3>
-<p>The code chunk below are used to compute the Gi values for GDPPC2012 by using an adaptive distance weight matrix (i.e <em>knb_lw</em>).</p>
+<p>The code chunk below are used to compute the Gi values for GDPPC2012 by using an ADAPTIVE distance weight matrix (i.e <em>knb_lw</em>).</p>
 <div class="layout-chunk" data-layout="l-body">
-
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>fips</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/order.html'>order</a></span><span class='op'>(</span><span class='va'>hunan</span><span class='op'>$</span><span class='va'>County</span><span class='op'>)</span>
+<span class='va'>gi.adaptive</span> <span class='op'>&lt;-</span> <span class='fu'>localG</span><span class='op'>(</span><span class='va'>hunan</span><span class='op'>$</span><span class='va'>GDPPC</span>, <span class='va'>knn_lw</span><span class='op'>)</span>
+<span class='va'>hunan.gi</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/cbind.html'>cbind</a></span><span class='op'>(</span><span class='va'>hunan</span>, <span class='fu'><a href='https://rdrr.io/r/base/matrix.html'>as.matrix</a></span><span class='op'>(</span><span class='va'>gi.adaptive</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>rename</span><span class='op'>(</span>gstat_adaptive <span class='op'>=</span> <span class='va'>as.matrix.gi.adaptive.</span><span class='op'>)</span>
+</code></pre>
+</div>
 </div>
 <h3 id="mapping-gi-values-with-adaptive-distance-weights">Mapping Gi values with adaptive distance weights</h3>
 <p>It is time for us to visualise the locations of hot spot and cold spot areas. The choropleth mapping functions of <strong>tmap</strong> package will be used to map the Gi values.</p>
-<p>The code chunk below shows the functions used to map the Gi values derived using fixed distance weight matrix.</p>
+<p>The code chunk below shows the functions used to map the Gi values derived using ADAPTIVE distance weight matrix.</p>
 <div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>gdppc</span> <span class='op'>&lt;-</span> <span class='fu'>qtm</span><span class='op'>(</span><span class='va'>hunan</span>, <span class='st'>"GDPPC"</span><span class='op'>)</span>
+
+<span class='va'>Gimap</span> <span class='op'>&lt;-</span> <span class='fu'>tm_shape</span><span class='op'>(</span><span class='va'>hunan.gi</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>tm_fill</span><span class='op'>(</span>col <span class='op'>=</span> <span class='st'>"gstat_adaptive"</span>, 
+          style <span class='op'>=</span> <span class='st'>"pretty"</span>,
+          palette<span class='op'>=</span><span class='st'>"-RdBu"</span>,
+          title <span class='op'>=</span> <span class='st'>"local Gi"</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>tm_borders</span><span class='op'>(</span>alpha <span class='op'>=</span> <span class='fl'>0.5</span><span class='op'>)</span>
+
+<span class='fu'>tmap_arrange</span><span class='op'>(</span><span class='va'>gdppc</span>, <span class='va'>Gimap</span>, asp<span class='op'>=</span><span class='fl'>1</span>, ncol<span class='op'>=</span><span class='fl'>2</span><span class='op'>)</span>
+</code></pre>
+</div>
 <p><img src="hands-on-exercise-7_files/figure-html5/unnamed-chunk-52-1.png" width="1152" /></p>
 </div>
+<p>Notice how the above output is much more smoother than its FIXED distance weight counterpart? Therefore, it really depends on context when choosing which method to use and the kind of visualisation one is looking for.</p>
 <div class="sourceCode" id="cb22"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
