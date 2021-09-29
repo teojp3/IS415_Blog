@@ -509,6 +509,8 @@ From the above plotted maps, we can see a common spatial pattern among all of th
 
 #### Extract Central Region area for targeted analysis
 
+Since majority of the Airbnb Listings are located in the Central Region, we will be scoping down the analysis to the Central Region as our study area.
+
 The following code chunk will be used to load and extract the Central Region area.
 
 ```{r}
@@ -622,6 +624,8 @@ combined_central_ppp = combined_ppp_jit[central_owin]
 marks(combined_central_ppp) <- factor(combined_central_ppp$marks$TYPE)
 ```
 
+As shown in the above code chunk, the *marks()* function is used to assign the marks to SR_combined_central_ppp and affix a multitype attribute to it. This process is essential, because **multitype attribute** is needed for **Marked Point Patterns** and **K-Cross/L-Cross function** to run. 
+
 #### Analysing Marked Point Patterns
 
 Using the code chunk below, *density()* will be used to compute the kernel density for the respective objects. Then, plot() is used to plot the output kernel density objects derived.
@@ -652,7 +656,7 @@ This helps us analyse the relationship between Airbnb listings and the respectiv
 Airbnb_Hotels_Kcross <- Kcross(combined_central_ppp,
                            i="Airbnb", j="Hotels",
                            correction='border')
-plot(Airbnb_Hotels_Kcross)
+plot(Airbnb_Hotels_Kcross, xlim=c(0,1000))
 ```
 The plot above reveals that the marked spatial point events are **not spatially independent**. However, we will do a hypothesis test to confirm this observation.
 
@@ -689,10 +693,18 @@ In essence, we will reject the null hypothesis because the results are statistic
 Airbnb_Tourism_Kcross <- Kcross(combined_central_ppp,
                            i="Airbnb", j="Tourism",
                            correction='border')
-plot(Airbnb_Tourism_Kcross)
+plot(Airbnb_Tourism_Kcross, xlim=c(0,1000))
 ```
 
-The plot above reveals that the Airbnb listings and Tourist Attractions are **not spatially independent**. However, we will do a hypothesis test to confirm this observation.
+The plot above reveals that majority of the Airbnb listings and Tourist Attractions are **not spatially independent**.
+
+Only for distances around 180m, spatial independence for that distance is statistically NOT significant.
+
+For distances less than 180m, the graph reveals **statistically significant clustering spatial pattern**.
+
+Meanwhile, for distances more than ~185m, the graph reveals **statistically significant regular (inhibition) spatial pattern**.
+
+However, we will do a hypothesis test to confirm this observation.
 
 #### Relationship of Airbnb Listings and Tourist Attractions: Complete Spatial Randomness (CSR) statistical testing 
 
@@ -716,9 +728,15 @@ Airbnb_Tourism_Kcross.csr <- read_rds("the2data/rds/Airbnb_Tourism_Kcross.csr.rd
 plot(Airbnb_Tourism_Kcross.csr, xlab="distance(m)", xlim=c(0,500))
 ```
 
-The plot above reveals that the distribution of Airbnb Listings and Tourist Attractions are not spatially independent. Although part of the observed (black) line did fall into the envelope around 180m, the majority of the observed line is not within the envelope of the 99.9% confidence interval, therefore the null hypothesis is rejected.
+The plot above reveals that the distribution of Airbnb Listings and Tourist Attractions are not spatially independent. Although part of the observed (black) line did fall into the envelope around 180m (same results as earlier), the majority of the observed line is not within the envelope of the 99.9% confidence interval, therefore the null hypothesis is rejected.
 
-In essence, we will reject the null hypothesis because the results are statistically significant, and we can infer that there are **signs of a clustering relationship between Airbnb Listings and Tourist Attractions**.
+Same results as the earlier plot:
+
+- For distances less than 180m, the graph reveals **statistically significant clustering spatial pattern**.
+
+- Meanwhile, for distances more than ~185m, the graph reveals **statistically significant dispersion spatial pattern**.
+
+In essence, we will reject the null hypothesis because the results are statistically significant, and we can infer that there are **signs of a clustering relationship between Airbnb Listings and Tourist Attractions for smaller distances (<180m)** and **signs of a regular (inhibition) relationship between Airbnb Listings and Tourist Attractions for larger distances (>185m)**, only distances around 180m are not statistically significant.
 
 #### Relationship of Airbnb Listings and Hawker Centres: Cross K graph 
 
@@ -726,10 +744,10 @@ In essence, we will reject the null hypothesis because the results are statistic
 Airbnb_Hawker_Kcross <- Kcross(combined_central_ppp,
                            i="Airbnb", j="Hawker",
                            correction='border')
-plot(Airbnb_Hawker_Kcross)
+plot(Airbnb_Hawker_Kcross, xlim=c(0,1000))
 ```
 
-The plot above reveals that the Airbnb listings and Hawker Centres are **not spatially independent**. However, we will do a hypothesis test to confirm this observation.
+The plot above reveals that from around 150m and further, the Airbnb listings and Hawker Centres are **not spatially independent**. However, we will do a hypothesis test to confirm this observation.
 
 #### Relationship of Airbnb Listings and Hawker Centres: Complete Spatial Randomness (CSR) statistical testing 
 
@@ -754,10 +772,11 @@ Airbnb_Hawker_Kcross.csr <- read_rds("the2data/rds/Airbnb_Hawker_Kcross.csr.rds"
 ```{r}
 plot(Airbnb_Hawker_Kcross.csr, xlab="distance(m)", xlim=c(0,500))
 ```
+Similar to the results earlier on, only for distances 100m and below, the results are not satistiscally significant, so they are spatially independent.
 
-The plot above reveals that the distribution of Airbnb Listings and Hawker Centres are not spatially independent. Since the observed(black) line is outside the envelope except for smaller distances (<100m), the null hypothesis is rejected because the empirical k-cross line is not within the envelope of the 99.9% confidence interval. 
+However for the majority (>100m), the plot above reveals that the distribution of Airbnb Listings and Hawker Centres are not spatially independent. Since the observed(black) line is outside the envelope except for smaller distances (<100m), the null hypothesis is rejected because the empirical k-cross line is not within the envelope of the 99.9% confidence interval. 
 
-In essence, we will reject the null hypothesis because the results are statistically significant, and we can infer that there are **signs of a clustering relationship between Airbnb Listings and Hawker Centres**.
+In essence, we will reject the null hypothesis because the results are statistically significant, and we can infer that there are **signs of a clustering relationship between Airbnb Listings and Hawker Centres for distances larger than 100m**.
 
 ### 4.2.3 Analysing Spatial Point Process: Cross L-Function
 
@@ -788,14 +807,20 @@ Tourism_Lcross.csr <- read_rds("the2data/rds/Airbnb_Tourism_Lcross.csr.rds")
 Hawker_Lcross.csr <- read_rds("the2data/rds/Airbnb_Hawker_Lcross.csr.rds")
 ```
 
-```{r}
+```{r fig.width=12, fig.height=8}
 par(mfrow=c(2,2))
 plot(Hotels_Lcross.csr, . -r ~ r, xlab="distance(m)", xlim=c(0,500))
 plot(Tourism_Lcross.csr, . -r ~ r, xlab="distance(m)", xlim=c(0,500))
 plot(Hawker_Lcross.csr, . -r ~ r, xlab="distance(m)", xlim=c(0,500))
 ```
 
-The above results is in line with the earlier results obtained from Cross K Function, the null hypotheses for the respective factors are rejected, and we can infer that there are indeed **signs of clustering between the Airbnb Listings and the respective location factors**.
+The above results is in line with the earlier results obtained from Cross K Function, the null hypotheses for the respective factors are rejected, and this further strengthens our statistical conclusions.
+
+Essentially:
+
+- **Hotels:** We can infer that there are **signs of a clustering relationship between Airbnb Listings and Hotels**
+- **Tourist Attractions:** We can infer that there are **signs of a clustering relationship between Airbnb Listings and Tourist Attractions for smaller distances (<180m)** and **signs of a regular relationship (inhibition) between Airbnb Listings and Tourist Attractions for larger distances (>185m)**, only distances around 180m are not statistically significant
+- **Hawker Centres:** We can infer that there are **signs of a clustering relationship between Airbnb Listings and Hawker Centres for distances larger than 100m**
 
 # 5. Section B: Impact of COVID-19 on Distribution of Airbnb Listings in 2021
 
@@ -1220,10 +1245,246 @@ The output reveals that for **Shared Room room type in the Central Region** stud
 - In **2019**, there were **2.89 Airbnb units** per km square
 - In **2021**, there was a drop as well, with **1.06 units** per km square
 
-### 5.2.2 Analysing Spatial Point Process: Cross K-Function
+### 5.2.2 Nearest Neighbour Index for Central Region using Clark-Evans test of aggregation
 
+In this section, we will perform the Clark-Evans test of aggregation for a spatial point pattern by using *clarkevans.test()* of **statspat**. Earlier on we did the test for Airbnb 2019 data set, now we will conduct the test for **Airbnb 2021 data set** and compare the outputs of both tests.
+
+- Data Preparation for Airbnb 2021 dataset. The same sets of conversions as the earlier processes will take place (changing into ppp object etc). 
+
+```{r}
+airbnb_2021_sp <- as_Spatial(airbnb_2021)
+airbnb_2021_sp <- as(airbnb_2021_sp, "SpatialPoints")
+airbnb_2021_ppp <- as(airbnb_2021_sp, "ppp")
+airbnb2021_ppp_jit <- rjitter(airbnb_2021_ppp, retry = TRUE, nsim = 1, drop = TRUE)
+airbnb_2021_ppp = airbnb2021_ppp_jit[sg_owin]
+airbnb2021_central_ppp = airbnb_2021_ppp[central_owin]
+```
+
+The test hypotheses are:
+
+Ho = The distribution of Airbnb Listings (2021) in the Central Region are randomly distributed.
+
+H1 = The distribution of Airbnb Listings (2021) in the Central Region are not randomly distributed.
+
+The 95% confident interval will be used. The null hypothesis will be rejected if p-value is smaller than alpha value of 0.05.
+
+```{r eval=FALSE}
+clarkevans.test(airbnb2021_central_ppp,
+                correction='none',
+                clipregion = NULL,
+                alternative=c("two.sided"),
+                nsim=999)
+```
+![](clarkevans2021.png)
+
+As shown by the output above, the p-value is smaller than 0.05. Therefore, we will reject the null hypothesis that the Airbnb Listings (2021) are randomly distributed, meaning the spatial patterns are statistically significant and does show signs of clustering. 
+
+However, what we are more interested in is the index values of this test. We will compare the respective indexes of the Airbnb 2019 and Airbnb 2021 data sets. 
+
+![](clarkevans.png)
+The above image shows the index of the **Airbnb 2019** data set, which is **0.4844.** Its **2021 counterpart** has an **index of 0.45007**, this enables us to infer that the Airbnb 2021 listings actually has a **more clustered spatial pattern** as compared to the 2019 data set. This is because the closer an index is to 0, the more clustered it is.
+
+Essentially, a more clustered spatial pattern means that there are **a considerable greater number of Airbnb listings in 2021** as compared to previously in 2019, meaning that **COVID-19 did not affect the number of Airbnb listings in the study area negatively**.
+
+This is unexpected as it contradicts what we could see from the kernel density values earlier on. Therefore, additional statistical testing will be done in the next section to evaluate this conclusion.
+
+### 5.2.3 Analysing Spatial Point Process: G-Function
+
+To further confirm our observations as stated above, the G function metric will be used for statistical testing. Using the G-function, we can then measure how are the Airbnb listings spaced, according to their respective years (2019 vs 2021). 
+
+*Gest()* and *envelope* of **spatstat** package will be used to compute the metric.
+
+#### Separating the three room types into 2019 and 2021 
+
+```{r}
+EH_ppp_2019 <- subset(EH_combined_central_ppp, marks == "2019")
+EH_ppp_2021 <- subset(EH_combined_central_ppp, marks == "2021")
+
+PR_ppp_2019 <- subset(PR_combined_central_ppp, marks == "2019")
+PR_ppp_2021 <- subset(PR_combined_central_ppp, marks == "2021")
+
+SR_ppp_2019 <- subset(SR_combined_central_ppp, marks == "2019")
+SR_ppp_2021 <- subset(SR_combined_central_ppp, marks == "2021")
+```
+
+#### Plotting the G-function estimates and shapes for the three room types for 2019 and 2021 
+
+```{r fig.width=12, fig.height=12}
+G_EH_2019 <- Gest(EH_ppp_2019, correction = "border")
+G_EH_2021 <- Gest(EH_ppp_2021, correction = "border")
+
+G_PR_2019 <- Gest(PR_ppp_2019, correction = "border")
+G_PR_2021 <- Gest(PR_ppp_2021, correction = "border")
+
+G_SR_2019 <- Gest(SR_ppp_2019, correction = "border")
+G_SR_2021 <- Gest(SR_ppp_2021, correction = "border")
+
+par(mfrow=c(3,2))
+plot(G_EH_2019, main="Airbnb Listings 2019 (Entire Home/Apt)", xlim=c(0,200))
+plot(G_EH_2021, main="Airbnb Listings 2021 (Entire Home/Apt)", xlim=c(0,200))
+plot(G_PR_2019, main="Airbnb Listings 2019 (Private Room)", xlim=c(0,200))
+plot(G_PR_2021, main="Airbnb Listings 2021 (Private Room)", xlim=c(0,200))
+plot(G_SR_2019, main="Airbnb Listings 2019 (Shared Room)", xlim=c(0,200))
+plot(G_SR_2021, main="Airbnb Listings 2021 (Shared Room)", xlim=c(0,200))
+```
+
+#### Performing Complete Spatial Randomness Test
+
+The hypotheses and test are as follows:
+
+Ho = The distribution of Airbnb listings 2019/2021 are randomly distributed.
+
+H1 = The distribution of Airbnb listings 2019/2021 are NOT randomly distributed.
+
+The null hypothesis will be rejected if p-value is smaller than alpha value of 0.001 (the value 0.001 is dependent on the number of simulations performed).
+
+#### Performing Monte Carlo simulations for Airbnb Listings 2019 and 2021 
+
+```{r eval=FALSE}
+G_EH_2019.csr <- envelope(EH_ppp_2019, Gest, nsim = 999)
+G_EH_2021.csr <- envelope(EH_ppp_2021, Gest, nsim = 999)
+G_PR_2019.csr <- envelope(PR_ppp_2019, Gest, nsim = 999)
+G_PR_2021.csr <- envelope(PR_ppp_2021, Gest, nsim = 999)
+G_SR_2019.csr <- envelope(SR_ppp_2019, Gest, nsim = 999)
+G_SR_2021.csr <- envelope(SR_ppp_2021, Gest, nsim = 999)
+```
+
+```{r include=FALSE}
+G_EH_2019.csr <- read_rds("the2data/rds/G_EH_2019.csr.rds")
+G_EH_2021.csr <- read_rds("the2data/rds/G_EH_2021.csr.rds")
+G_PR_2019.csr <- read_rds("the2data/rds/G_PR_2019.csr.rds")
+G_PR_2021.csr <- read_rds("the2data/rds/G_PR_2021.csr.rds")
+G_SR_2019.csr <- read_rds("the2data/rds/G_SR_2019.csr.rds")
+G_SR_2021.csr <- read_rds("the2data/rds/G_SR_2021.csr.rds")
+```
+
+
+```{r fig.width=12, fig.height=12}
+par(mfrow=c(3,2))
+plot(G_EH_2019.csr, main="Airbnb 2019 (Entire Home/Apt)", xlim=c(0,200))
+plot(G_EH_2021.csr, main="Airbnb 2021 (Entire Home/Apt)", xlim=c(0,200))
+plot(G_PR_2019.csr, main="Airbnb Listings 2019 (Private Room)", xlim=c(0,200))
+plot(G_PR_2021.csr, main="Airbnb Listings 2021 (Private Room)", xlim=c(0,200))
+plot(G_SR_2019.csr, main="Airbnb Listings 2019 (Shared Room)", xlim=c(0,200))
+plot(G_SR_2021.csr, main="Airbnb Listings 2021 (Shared Room)", xlim=c(0,200))
+```
+For all three room types, both 2019 and 2021's observed(black) lines are outside the envelope. Therefore, we will **reject the null hypotheses** and infer that **clustering spatial patterns are statistically significant**. 
+
+However, we are **more interested in comparing the shapes of 2019 against 2021**, so as to see whether there is a change in distribution due to the impact of COVID-19.
+
+Essentially:
+
+- **Entire Home/Apt:** The shape graph of 2019's rises more rapidly than its 2021 counterpart, therefore we can infer that **2019 actually has a more clustered spatial pattern than its 2021 counterpart** and that there were actually **significantly more Airbnb units back in 2019**.
+
+- **Private Room:** Interestingly, the shape graph of 2021 has a slightly steeper rise as compared to 2019, therefore we could infer that for Private Room listings, there **could be more units in the area in 2021, resulting in a slightly more clustered spatial pattern as compared to 2019**.
+
+- **Shared Room:** Similar to Entire Home/Apt room type, the shape graph of 2019's rises rapidly than its 2021 counterpart, therefore we can infer that **2019 actually has a more clustered spatial pattern than its 2021 counterpart** and that there were actually **significantly more Airbnb units back in 2019**.
+
+On the whole, the two out of three room types has a 2019 shape graph that rises more rapidly than its 2021 counterpart, therefore we can infer that majority of the results shows that **2019 actually has a more clustered spatial pattern than its 2021 counterpart** and that there were actually **significantly more Airbnb units back in 2019**.
+
+### 5.2.4 Analysing Spatial Point Process: F-Function
+
+To further confirm our observations as stated above, **another round of statistical testing** will be done with the **F function** metric. Using the F-function, we can then estimate the number of pair point Airbnb listings 2019/2021 from the sample point locations that is chosen at random.
+
+We will then **compare the final results against our results derived from the earlier G-function test**.
+
+#### Plotting the F-function estimates and shapes for the three room types for 2019 and 2021 
+
+The code chunk below will be used to compute F-function using *Fest()* of **spatat** package.
+
+```{r fig.width=12, fig.height=12}
+F_EH_2019 <- Fest(EH_ppp_2019)
+F_EH_2021 <- Fest(EH_ppp_2021)
+
+F_PR_2019 <- Fest(PR_ppp_2019)
+F_PR_2021 <- Fest(PR_ppp_2021)
+
+F_SR_2019 <- Fest(SR_ppp_2019)
+F_SR_2021 <- Fest(SR_ppp_2021)
+
+par(mfrow=c(3,2))
+plot(F_EH_2019, main="Airbnb Listings 2019 (Entire Home/Apt)", xlim=c(0,200))
+plot(F_EH_2021, main="Airbnb Listings 2021 (Entire Home/Apt)", xlim=c(0,200))
+plot(F_PR_2019, main="Airbnb Listings 2019 (Private Room)", xlim=c(0,200))
+plot(F_PR_2021, main="Airbnb Listings 2021 (Private Room)", xlim=c(0,200))
+plot(F_SR_2019, main="Airbnb Listings 2019 (Shared Room)", xlim=c(0,200))
+plot(F_SR_2021, main="Airbnb Listings 2021 (Shared Room)", xlim=c(0,200))
+```
+
+#### Performing Complete Spatial Randomness Test
+
+The hypotheses and test are as follows:
+
+Ho = The distribution of Airbnb listings 2019/2021 are randomly distributed.
+
+H1 = The distribution of Airbnb listings 2019/2021 are NOT randomly distributed.
+
+The null hypothesis will be rejected if p-value is smaller than alpha value of 0.001 (the value 0.001 is dependent on the number of simulations performed).
+
+#### Performing Monte Carlo simulations for Airbnb Listings 2019 and 2021 
+
+```{r eval=FALSE}
+F_EH_2019.csr <- envelope(EH_ppp_2019, Fest, nsim = 999)
+F_EH_2021.csr <- envelope(EH_ppp_2021, Fest, nsim = 999)
+F_PR_2019.csr <- envelope(PR_ppp_2019, Fest, nsim = 999)
+F_PR_2021.csr <- envelope(PR_ppp_2021, Fest, nsim = 999)
+F_SR_2019.csr <- envelope(SR_ppp_2019, Fest, nsim = 999)
+F_SR_2021.csr <- envelope(SR_ppp_2021, Fest, nsim = 999)
+```
+
+```{r include=FALSE}
+F_EH_2019.csr <- read_rds("the2data/rds/F_EH_2019.csr.rds")
+F_EH_2021.csr <- read_rds("the2data/rds/F_EH_2021.csr.rds")
+F_PR_2019.csr <- read_rds("the2data/rds/F_PR_2019.csr.rds")
+F_PR_2021.csr <- read_rds("the2data/rds/F_PR_2021.csr.rds")
+F_SR_2019.csr <- read_rds("the2data/rds/F_SR_2019.csr.rds")
+F_SR_2021.csr <- read_rds("the2data/rds/F_SR_2021.csr.rds")
+```
+
+```{r fig.width=12, fig.height=12}
+par(mfrow=c(3,2))
+plot(F_EH_2019.csr, main="Airbnb 2019 (Entire Home/Apt)", xlim=c(0,500), ylim=c(0,0.8))
+plot(F_EH_2021.csr, main="Airbnb 2021 (Entire Home/Apt)", xlim=c(0,500), ylim=c(0,0.8))
+plot(F_PR_2019.csr, main="Airbnb Listings 2019 (Private Room)", xlim=c(0,500), ylim=c(0,0.8))
+plot(F_PR_2021.csr, main="Airbnb Listings 2021 (Private Room)", xlim=c(0,500), ylim=c(0,0.8))
+plot(F_SR_2019.csr, main="Airbnb Listings 2019 (Shared Room)", xlim=c(0,500), ylim=c(0,0.8))
+plot(F_SR_2021.csr, main="Airbnb Listings 2021 (Shared Room)", xlim=c(0,500), ylim=c(0,0.8))
+```
+The results are in line with the previous G-function results. For all three room types, both 2019 and 2021's observed(black) lines are below the envelope. Therefore, we will **reject the null hypotheses** and infer that **clustering spatial patterns are statistically significant**. 
+
+However again, the main focus is to **compare the shapes of 2019 against 2021**, so as to see whether there is a change in distribution due to the impact of COVID-19.
+
+*P.S.* **Clustered** *= F(r) rises slowly at first, but more rapidly at longer distances.* **Evenness** *= F(r) rises rapidly at first, then slowly at longer distances.*
+
+Essentially:
+
+- **Entire Home/Apt:** The shape graph of 2021 rises slightly more rapidly at first than its 2021 counterpart, therefore we can infer that **2021 actually has a more even spatial pattern than its 2019 counterpart**. This is on target as the previous G-function results.
+
+- **Private Room:** The shape graph of 2019 has a slightly steeper rise at the start as compared to 2021, therefore we could infer that for Private Room listings, there **could be more units in the area in 2021, resulting in a slightly more clustered spatial pattern as compared to 2019**. This is on target as the previous G-function results as well.
+
+- **Shared Room:** The shape graph of 2019's rises slowly at first than its 2021 counterpart, then more rapidly as the distance becomes larger. Therefore we can infer that **2019 actually has a more clustered spatial pattern than its 2021 counterpart** and that there were actually **significantly more Airbnb units back in 2019**. This is on target as the previous G-function results as well.
 
 # 6. Conclusion
+
+### Section A: Distribution of Airbnb Listings in 2019
+
+Based on our end results, **signs of clustering relationships between Airbnb Listings and the respective factors** (Hotels, Tourist Attractions, Hawker Centres) are **statistically significant**. 
+
+### Section B: Impact of COVID-19 on Distribution of Airbnb Listings in 2021
+
+On the whole, we can infer that majority of the statistical results shows that **2019 actually has a more clustered spatial pattern than its 2021 counterpart** and that there were actually **significantly more Airbnb units back in 2019**. This meant that COVID-19 did impacted the Airbnb Listings in Singapore, in a **negative way** because there were lesser number of listings as compared to 2019.
+
+The only exception was for *Private Room room type*, where the statistical testing did not correlate to its earlier spatial pattern observations derived from its kernel density values. 
+
+However, these observations may not be conclusive due to several limitations such as limited data sources. Further analysis and study should be conducted in the future so as to further affirm the observation results.
+
+### As A Whole
+
+The location of **Airbnb listings** were found to be **NOT spatially independent**, and in the Study Area (Central Region), Airbnb listings were found to **cluster around (according to order); 1) Hotels, 2) Hawker Centres, 3) Tourist Attractions**.
+
+Due to the emergence of COVID-19, the study also uncovered the negative impact on the distribution of Airbnb listings in Singapore; such as **lowering the number of Entire Home/Apt room type units per km square** from 2019 to 2021, with **28.41 and 11.7 units per km square** respectively for those years.
+
+This is not surprising as the COVID-19 pandemic has caused [devastating economic consequences on a world-wide scale](https://www.bbc.com/news/business-51706225), however we should press on and learn to cohabit with the COVID-19 virus, then work together to achieve economic success for our country again. 
 
 # 7. References
 
@@ -1231,3 +1492,4 @@ The output reveals that for **Shared Room room type in the Central Region** stud
 
 - [Kernel vs Point Density](https://community.esri.com/t5/arcgis-spatial-analyst-questions/kernel-vs-point-density/td-p/610486)
 
+- [Understanding the Cross K Function](https://blog.jlevente.com/understanding-the-cross-k-function/)
