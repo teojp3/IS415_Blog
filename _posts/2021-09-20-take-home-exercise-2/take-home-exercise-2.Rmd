@@ -1472,9 +1472,9 @@ Based on our end results, **signs of clustering relationships between Airbnb Lis
 
 ### Section B: Impact of COVID-19 on Distribution of Airbnb Listings in 2021
 
-On the whole, we can infer that majority of the statistical results shows that **2019 actually has a more clustered spatial pattern than its 2021 counterpart** and that there were actually **significantly more Airbnb units back in 2019**. This meant that COVID-19 did impacted the Airbnb Listings in Singapore, in a **negative way** because there were lesser number of listings as compared to 2019.
+On the whole, we can infer that majority of the statistical results shows that **2019 actually has a more clustered spatial pattern than its 2021 counterpart** and that there were actually **significantly more Airbnb units back in 2019**. This meant that COVID-19 did impacted the Airbnb Listings in Singapore, in a **negative way** because there were lesser number of listings in 2021 as compared to 2019.
 
-The only exception was for *Private Room room type*, where the statistical testing did not correlate to its earlier spatial pattern observations derived from its kernel density values. 
+The only exception was for **Private Room room type**, where the statistical testing did not correlate to its earlier spatial pattern observations derived from its kernel density values. 
 
 However, these observations may not be conclusive due to several limitations such as limited data sources. Further analysis and study should be conducted in the future so as to further affirm the observation results.
 
@@ -1482,9 +1482,9 @@ However, these observations may not be conclusive due to several limitations suc
 
 The location of **Airbnb listings** were found to be **NOT spatially independent**, and in the Study Area (Central Region), Airbnb listings were found to **cluster around (according to order); 1) Hotels, 2) Hawker Centres, 3) Tourist Attractions**.
 
-Due to the emergence of COVID-19, the study also uncovered the negative impact on the distribution of Airbnb listings in Singapore; such as **lowering the number of Entire Home/Apt room type units per km square** from 2019 to 2021, with **28.41 and 11.7 units per km square** respectively for those years.
+Due to the emergence of COVID-19, the study also uncovered the negative impact on the distribution of Airbnb listings in Singapore; such as **lowering the number of Entire Home/Apt room type units per km square** from 2019 to 2021, with **28.41 to 11.7 units per km square** respectively for those years.
 
-This is not surprising as the COVID-19 pandemic has caused [devastating economic consequences on a world-wide scale](https://www.bbc.com/news/business-51706225), however we should press on and learn to cohabit with the COVID-19 virus, then work together to achieve economic success for our country again. 
+This is not surprising as the COVID-19 pandemic has caused [devastating economic consequences on a world-wide scale](https://www.bbc.com/news/business-51706225), however we must press on and learn to cohabit with the COVID-19 virus, then work together to achieve economic success for our country again. 
 
 # 7. References
 
