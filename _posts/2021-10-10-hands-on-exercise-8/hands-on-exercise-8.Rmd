@@ -53,15 +53,15 @@ Two data sets will be used in this study. They are:
 The R packages needed for this exercise are as follows:
 
 * Spatial data handling
-  + sf, rgdal and spdep
+  + **sf, rgdal** and **spdep**
 * Attribute data handling
-  + tidyverse, especially readr, ggplot2 and dplyr
+  + **tidyverse,** especially **readr, ggplot2** and **dplyr**
 * Choropleth mapping
-  + tmap
+  + **tmap**
 * Multivariate data visualisation and analysis
-  + coorplot, ggpubr, and heatmaply
+  + **coorplot, ggpubr,** and **heatmaply**
 * Cluster analysis
-  + cluster
+  + **cluster**
 
 The code chunks below installs and launches these R packages into R environment.
 
