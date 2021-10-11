@@ -34,7 +34,7 @@ for (p in packages){
 The code chunk below uses the *st_read()* function of **sf** package to import "MP14_SUBZONE_WEB_PL" shapefile into R as a simple feature data frame called __mpsz__.
 
 ```{r}
-mpsz <- st_read(dsn = "data/handson3data/geospatial", 
+mpsz <- st_read(dsn = "handson3data/geospatial", 
                 layer = "MP14_SUBZONE_WEB_PL")
 ```
 
@@ -46,7 +46,7 @@ mpsz
 - The *read_csv()* function will change the imported .csv file into an R dataframe
 
 ```{r}
-popdata <- read_csv("data/handson3data/aspatial/respopagesexfa2011to2020.csv")
+popdata <- read_csv("handson3data/aspatial/respopagesexfa2011to2020.csv")
 
 popdata
 ```
@@ -128,7 +128,7 @@ mpsz_pop2020 <- left_join(mpsz, popdata2020,
 ```
 
 ```{r}
-mpszpop2020 <- write_rds(mpsz_pop2020, "data/handson3data/rds/mpszpop2020.rds")
+mpszpop2020 <- write_rds(mpsz_pop2020, "handson3data/rds/mpszpop2020.rds")
 ```
 
 ## Examples of Choropleth Mapping with Geospatial Data Using tmap
