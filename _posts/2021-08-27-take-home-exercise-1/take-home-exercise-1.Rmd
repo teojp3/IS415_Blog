@@ -80,7 +80,7 @@ Datasets will now be imported into Rstudio.
 The R function *lapply* is also complementary for this process, as well as adding the file names as an additional column to the dataframes (So as to display the data by month later on).
 
 ```{r results='hide'}
-file_list <- list.files(path = "data/the1data/COVID-DATA" , pattern = "*.xlsx",  full.names = T)
+file_list <- list.files(path = "the1data/COVID-DATA" , pattern = "*.xlsx",  full.names = T)
 df_list <- lapply(seq_along(file_list), function(x) transform(read_xlsx(file_list[x]), MonthYear = file_list[x]))
 ```
 ### 3.1.2 Looking through the data and initial data cleaning  
@@ -160,7 +160,7 @@ As shown above, we will need to clean up the *MonthYear* column as it is very me
 
 ```{r}
 df2 <- df2 %>% 
-  mutate_at("MonthYear", str_replace, "data/the1data/COVID-DATA/Standar Kelurahan Data Corona", "")
+  mutate_at("MonthYear", str_replace, "the1data/COVID-DATA/Standar Kelurahan Data Corona", "")
 
 df2 <- df2 %>% 
   mutate_at("MonthYear", str_replace, "[(]", "")
@@ -210,12 +210,12 @@ final_df
 
 With all the data cleaning done, we will end out with writing out a .rds file from *final_df* and utilising it further on in the analysis, so as to ensure minimum data storage space.
 
-```{r}
-aspatial_df <- write_rds(final_df, "data/the1data/rds/aspatial_df.rds")
+```{r include=FALSE}
+aspatial_df <- write_rds(final_df, "the1data/rds/aspatial_df.rds")
 ```
 
 ```{r}
-aspatial_df <- read_rds("data/the1data/rds/aspatial_df.rds")
+aspatial_df <- read_rds("the1data/rds/aspatial_df.rds")
 ```
 
 ## 3.2 Geospatial Data
@@ -225,7 +225,7 @@ aspatial_df <- read_rds("data/the1data/rds/aspatial_df.rds")
 The following code cunk imports the **DKI Jakarta** geospatial data into R as a simple feature dataframe.
 
 ```{r}
-geospatial_df <- st_read(dsn = "data/the1data/BATAS DESA DESEMBER 2019 DUKCAPIL DKI JAKARTA", 
+geospatial_df <- st_read(dsn = "the1data/BATAS DESA DESEMBER 2019 DUKCAPIL DKI JAKARTA", 
                 layer = "BATAS_DESA_DESEMBER_2019_DUKCAPIL_DKI_JAKARTA")
 ```
 
@@ -399,13 +399,13 @@ Death_Rate <- na.omit(Death_Rate)
 Rds files are used as a form of best practice, so as to lessen the amount of data storage for the required data.
 
 ```{r}
-Case_Rate_rds <- write_rds(Case_Rate, "data/the1data/rds/Case_Rate_rds.rds")
-Death_Rate_rds <- write_rds(Death_Rate, "data/the1data/rds/Death_Rate_rds.rds")
+Case_Rate_rds <- write_rds(Case_Rate, "the1data/rds/Case_Rate_rds.rds")
+Death_Rate_rds <- write_rds(Death_Rate, "the1data/rds/Death_Rate_rds.rds")
 ```
 
 ```{r}
-Case_Rate_rds <- read_rds("data/the1data/rds/Case_Rate_rds.rds")
-Death_Rate_rds <- read_rds("data/the1data/rds/Death_Rate_rds.rds")
+Case_Rate_rds <- read_rds("the1data/rds/Case_Rate_rds.rds")
+Death_Rate_rds <- read_rds("the1data/rds/Death_Rate_rds.rds")
 ```
 
 #### Visualisation of **Case_Rate_Rds**
