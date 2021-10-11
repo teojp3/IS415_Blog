@@ -249,7 +249,7 @@ The code chunks below is used to perform the task. The unique identifier used to
 shan_sf <- left_join(shan_sf, ict_derived, by=c("TS_PCODE"="TS_PCODE"))
 ```
 
-The message above shows that *TS_CODE* field is the common field used to perform the left-join.
+The message above shows that *TS_PCODE* field is the common field used to perform the left-join.
 
 It is important to note that there is no new output data been created. Instead, the data fields from *ict_derived* data frame are now updated into the data frame of *shan_sf*.
 
