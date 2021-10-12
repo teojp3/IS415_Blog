@@ -1,19 +1,18 @@
 name: "Jun Peng's Workspace"
 title: "Jun Peng's Workspace"
+theme: theme.css
 description: |
   Jun Peng's Workspace 
 output_dir: "_site"
 navbar:
   right:
-    - text: "Take-home Exercise"
+    - text: "TAKE HOME EXERCISES"
       menu:
       - text: "Take-home Exercise 1"
-        href: take-home-exercise-1.html
+        href: https://teojp3-is415.netlify.app/posts/2021-08-27-take-home-exercise-1/
       - text: "Take-home Exercise 2"
-        href: 
-    - text: "In-class Exercise"
-      href: index.html
-    - text: "About"
+        href: https://teojp3-is415.netlify.app/posts/2021-09-20-take-home-exercise-2/
+    - text: "ABOUT"
       href: about.html
 output: distill::distill_article
 

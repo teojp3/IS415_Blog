@@ -1,7 +1,7 @@
 ---
 title: "Hands-on Exercise 4"
 description: |
-  A short description of the post.
+  Working on Hands-on Exercise 4.
 author:
   - name: Teo Jun Peng
     url: https://teojp3-is415.netlify.app/

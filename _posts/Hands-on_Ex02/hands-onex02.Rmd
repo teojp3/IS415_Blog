@@ -1,7 +1,7 @@
 ---
-title: "Hands-on_Ex02"
+title: "Hands-on Exercise 2"
 description: |
-  A short description of the post.
+  Working on Hands on Exercise 2.
 author:
   - name: Teo Jun Peng
     url: https://teojp3-is415.netlify.app/
@@ -13,7 +13,7 @@ output:
 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
@@ -26,16 +26,16 @@ for (p in packages){
 }
 ```
 ```{r}
-mpsz = st_read(dsn = "data/handson2data/geospatial", 
+mpsz = st_read(dsn = "handson2data/geospatial", 
                   layer = "MP14_SUBZONE_WEB_PL")
 ```
 ```{r}
-cyclingpath = st_read(dsn = "data/handson2data/geospatial", 
+cyclingpath = st_read(dsn = "handson2data/geospatial", 
                          layer = "CyclingPath")
 ```
 
 ```{r}
-preschool = st_read("data/handson2data/geospatial/pre-schools-location-kml.kml")
+preschool = st_read("handson2data/geospatial/pre-schools-location-kml.kml")
 ```
 ```{r}
 st_geometry(mpsz)
@@ -66,7 +66,7 @@ preschool3414 <- st_transform(preschool,
 ```
 
 ```{r}
-listings <- read_csv("data/aspatial/listings.csv")
+listings <- read_csv("handson2data/aspatial/listings.csv")
 glimpse(listings) 
 ```
 
@@ -122,7 +122,7 @@ ggplot(data=mpsz3414,
       x = "Pre-school density (per km sq)",
       y = "Frequency")
 ```
-```{r}
+```{r eval=FALSE}
 ggplot(data=mpsz3414, 
        aes(y='PreSch Count', 
            x= as.numeric(`PreSch Density`))) +

@@ -37,7 +37,7 @@ For this analysis, the following data are used:
 To begin the study, R packages will be used for efficiency and a more comprehensive analysis, such as *tidyverse* and *sf* etc.
 
 ```{r results='hide'}
-load("THE1_workspace.Rdata")
+
 packages = c('tidyverse', 'sf', 'readxl', 'readr', 'stringr', 'tmap', 'lemon', 'formatR')
 for (p in packages)
   {
@@ -49,23 +49,6 @@ for (p in packages)
 }
 ```
 
-
-```{r include=FALSE}
-
-# Prevent values from showing as exponential
-
-options(scipen = 999)
-
-save.image(file = "THE1_workspace.Rdata")
-
-knit_print.data.frame <- lemon_print
-```
-
-```{r include=FALSE}
-library(knitr)
-
-# knit('_posts/2021-08-27-take-home-exercise-1/take-home-exercise-1.Rmd')
-```
 
 # 3. Data Wrangling
 

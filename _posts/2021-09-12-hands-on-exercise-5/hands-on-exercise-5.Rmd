@@ -17,7 +17,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Overview
 
-Network constrained Spatial Point Patterns Analysis (NetSPAA) is a collection of spatial point patterns analysis methods special developed for analysing spatial point event occurs on or alongside network. The spatial point event can be locations of traffic accidents or childcare centres for example. The network, on the other hand can be a road network or river network.
+Network constrained Spatial Point Patterns Analysis (NetSPPA) is a collection of spatial point patterns analysis methods special developed for analysing spatial point event occurs on or alongside network. The spatial point event can be locations of traffic accidents or childcare centres for example. The network, on the other hand can be a road network or river network.
 
 This hands-on exercise enables us to gain hands-on experience on using appropriate functions of spNetwork package:
 
@@ -36,7 +36,7 @@ Both data sets are in ESRI shapefile format.
 # Installing R packages
 
 ```{r}
-packages = c('sp', 'rgdal', 'spNetwork', 'tmap')
+packages = c('sp', 'rgdal', 'spNetwork', 'tmap', 'FNN')
 for (p in packages){
 if(!require(p, character.only = T)){
 install.packages(p)
@@ -122,21 +122,21 @@ The points are located at center of the line based on the length of the line.
 We are ready to computer the NetKDE by using the code chunk below.
 
 ```{r}
-densities <- nkde(network, 
-                  events = childcare,
-                  w = rep(1,nrow(childcare)),
-                  samples = samples,
-                  kernel_name = "quartic",
-                  bw = 300, 
-                  div= "bw", 
-                  method = "simple", 
-                  digits = 1, 
-                  tol = 1,
-                  grid_shape = c(1,1), 
-                  max_depth = 8,
-                  agg = 5, #we aggregate events within a 5m radius (faster calculation)
-                  sparse = TRUE,
-                  verbose = FALSE)
+densities <- spNetwork::nkde(network, 
+                        events = childcare,
+                        w = rep(1,nrow(childcare)),
+                        samples = samples,
+                        kernel_name = "quartic",
+                        bw = 300, 
+                        div= "bw", 
+                        method = "simple", 
+                        digits = 1, 
+                        tol = 1,
+                        grid_shape = c(1,1), 
+                        max_depth = 8,
+                        agg = 5, #we aggregate events within a 5m radius (faster calculation)
+                        sparse = TRUE,
+                        verbose = FALSE)
 ```
 
 What can we learn from the code chunk above?
