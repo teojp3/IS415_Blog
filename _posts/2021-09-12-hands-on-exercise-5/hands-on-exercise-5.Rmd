@@ -49,10 +49,10 @@ library(p,character.only = T)
 The code chunk below uses readOGR() of rgdal package to import Punggol_St and Punggol_CC geospatial data sets into RStudio as SpatialLinesDataFrame and SpatialPointsDataFrame respectively.
 
 ```{r}
-network <- readOGR(dsn="data/handson5data/geospatial", 
+network <- readOGR(dsn="handson5data/geospatial", 
                    layer="Punggol_St",
                    verbose = FALSE)
-childcare <- readOGR(dsn="data/handson5data/geospatial",
+childcare <- readOGR(dsn="handson5data/geospatial",
                      layer="Punggol_CC",
                      verbose = FALSE)
 ```

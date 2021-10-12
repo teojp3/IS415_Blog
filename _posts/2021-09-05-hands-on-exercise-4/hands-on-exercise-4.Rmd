@@ -11,14 +11,9 @@ output:
     self_contained: false
 ---
 
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+```{r setup, include=FALSE, eval=TRUE, echo=TRUE, message=FALSE, error=FALSE, fig.retina=3}
+knitr::opts_chunk$set(echo = TRUE)
 ```
-
-Distill is a publication format for scientific and technical writing, native to the web.
-
-Learn more about using Distill at <https://rstudio.github.io/distill>.
 
 ```{r}
 packages = c('maptools', 'sf', 'raster','spatstat', 'tmap')
@@ -33,16 +28,16 @@ library(p,character.only = T)
 # In this section, st_read() of sf package will be used to import these three geospatial data sets into R.
 
 ```{r}
-childcare_sf <- st_read("data/handson4data/child-care-services-geojson.geojson") %>%
+childcare_sf <- st_read("handson4data/child-care-services-geojson.geojson") %>%
   st_transform(crs = 3414)
 
 
 ```
 ```{r}
-sg_sf <- st_read(dsn = "data/handson4data", layer="CostalOutline")
+sg_sf <- st_read(dsn = "handson4data", layer="CostalOutline")
 ```
 ```{r}
-mpsz_sf <- st_read(dsn = "data/handson4data", 
+mpsz_sf <- st_read(dsn = "handson4data", 
                 layer = "MP14_SUBZONE_WEB_PL")
 ```
 # Before we can use these data for analysis, it is important for us to ensure that they are projected in same projection system. Changed them to 3414 which is SG correct system
@@ -79,20 +74,12 @@ mpsz <- as_Spatial(mpsz_sf3414)
 sg <- as_Spatial(sg_sf3414)
 ```
 
-```{r}
-glimpse(childcare)
-```
+
 ```{r}
 childcare_sp <- as(childcare, "SpatialPoints")
 sg_sp <- as(sg, "SpatialPolygons")
 ```
 
-```{r}
-glimpse(childcare_sp)
-```
-```{r}
-glimpse(sg_sp)
-```
 ```{r}
 childcare_ppp <- as(childcare_sp, "ppp")
 childcare_ppp
@@ -147,12 +134,6 @@ childcareSG_ppp = childcare_ppp[sg_owin]
 
 ```{r}
 summary(childcareSG_ppp)
-```
-```{r}
-tmap_mode('plot')
-tm_shape(childcareSG_ppp) +
-  tm_dots(alpha=0.4, 
-          size=0.05)
 ```
 # Kernel Density Estimation
 

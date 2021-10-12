@@ -25,7 +25,7 @@ for (p in packages){
   library(p,character.only = T)
 }
 
-mpszpop2020 <- read_rds("data/handson3data/rds/mpszpop2020.rds")
+mpszpop2020 <- read_rds("handson3data/rds/mpszpop2020.rds")
 ```
 
 ## Visualising Extreme Values: Box Plot

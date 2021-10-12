@@ -36,22 +36,22 @@ library(p,character.only = T)
 get_theme_status('eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjc5NTgsInVzZXJfaWQiOjc5NTgsImVtYWlsIjoianVucGVuZy50ZW8uMjAxOUBzbXUuZWR1LnNnIiwiZm9yZXZlciI6ZmFsc2UsImlzcyI6Imh0dHA6XC9cL29tMi5kZmUub25lbWFwLnNnXC9hcGlcL3YyXC91c2VyXC9zZXNzaW9uIiwiaWF0IjoxNjMwODk2MTY4LCJleHAiOjE2MzEzMjgxNjgsIm5iZiI6MTYzMDg5NjE2OCwianRpIjoiYzBlNmJmNTg2OTVhOWJkOWE5NDU2MzFmOWI5YWY4YTIifQ._PeYQI2jiLSphQI_r5dzfzGbSCSPnZBW19_gOoENlvM', "kindergartens")
 ```
 
-```{r}
+```{r include=FALSE}
 search_themes('eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjc5NTgsInVzZXJfaWQiOjc5NTgsImVtYWlsIjoianVucGVuZy50ZW8uMjAxOUBzbXUuZWR1LnNnIiwiZm9yZXZlciI6ZmFsc2UsImlzcyI6Imh0dHA6XC9cL29tMi5kZmUub25lbWFwLnNnXC9hcGlcL3YyXC91c2VyXC9zZXNzaW9uIiwiaWF0IjoxNjMwODk2MTY4LCJleHAiOjE2MzEzMjgxNjgsIm5iZiI6MTYzMDg5NjE2OCwianRpIjoiYzBlNmJmNTg2OTVhOWJkOWE5NDU2MzFmOWI5YWY4YTIifQ._PeYQI2jiLSphQI_r5dzfzGbSCSPnZBW19_gOoENlvM')
 ```
 
 ## Importing Geospatial Data
 
 ```{r}
-sg_sf <- st_read(dsn = "data/handson4data", layer="CostalOutline")
+sg_sf <- st_read(dsn = "ice4data/shapefile", layer="CostalOutline")
 
-mpsz_sf <- st_read(dsn = "data/handson4data", layer = "MP14_SUBZONE_WEB_PL")
+mpsz_sf <- st_read(dsn = "ice4data/shapefile", layer = "MP14_SUBZONE_WEB_PL")
 ```
 ## Importing Aspatial Data
 
 ```{r}
-childcare <- read_rds("data/ice4data/rds/childcare.rds")
-CHAS <- read_rds('data/ice4data/rds/CHAS.rds')
+childcare <- read_rds("ice4data/rds/childcare.rds")
+CHAS <- read_rds('ice4data/rds/CHAS.rds')
 ```
 
 ```{r}
@@ -61,7 +61,7 @@ CHAS_sf <- st_as_sf(CHAS,
 ```
 
 ```{r}
-childcare$lat <- as.numeric(childcare$Lat)
+childcare$Lat <- as.numeric(childcare$Lat)
 childcare$Lng <- as.numeric(childcare$Lng)
 
 childcare_sf <- st_as_sf(childcare, coords = c("Lng",

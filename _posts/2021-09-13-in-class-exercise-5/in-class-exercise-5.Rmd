@@ -41,7 +41,7 @@ library(p, character.only = TRUE)
 Importing shapefile using *st_read*()* of **sf** package. The output object will be in tibble sf object class.
 
 ```{r}
-mpsz_sf <- st_read(dsn = "data/ice5data/shapefile", 
+mpsz_sf <- st_read(dsn = "ice5data/shapefile", 
                 layer = "MP14_SUBZONE_WEB_PL")
 ```
 Projection is in SVY21.
@@ -51,8 +51,8 @@ Projection is in SVY21.
 *read_rds()* of **readr** package is used instead of readRDS() of base R is used. This is because output of *read_rds()* is in tibble object.
 
 ```{r}
-childcare <- read_rds("data/ice5data/rds/childcare.rds")
-chas <- read_rds("data/ice5data/rds/chas.rds")
+childcare <- read_rds("ice5data/rds/childcare.rds")
+chas <- read_rds("ice5data/rds/chas.rds")
 ```
 
 Note that there are some data issues in childcare data frame because `Lat` and `Lng` should in numeric data type. The coordinate fields seem to be in decimal degrees. Hence, `WGS84` referencing system is assumed.

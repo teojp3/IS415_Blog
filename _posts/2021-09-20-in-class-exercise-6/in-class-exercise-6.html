@@ -116,7 +116,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   <!--/radix_placeholder_rmarkdown_metadata-->
   
   <script type="text/json" id="radix-resource-manifest">
-  {"type":"character","attributes":{},"value":["in-class-exercise-6_files/figure-html5/unnamed-chunk-17-1.png","in-class-exercise-6_files/figure-html5/unnamed-chunk-18-1.png","in-class-exercise-6_files/figure-html5/unnamed-chunk-19-1.png","in-class-exercise-6_files/figure-html5/unnamed-chunk-26-1.png","in-class-exercise-6_files/figure-html5/unnamed-chunk-27-1.png","in-class-exercise-6_files/figure-html5/unnamed-chunk-30-1.png","in-class-exercise-6_files/figure-html5/unnamed-chunk-40-1.png","in-class-exercise-6_files/figure-html5/unnamed-chunk-48-1.png","in-class-exercise-6_files/figure-html5/unnamed-chunk-5-1.png"]}
+  {"type":"character","attributes":{},"value":["handson6data/attribute/Dictionary.xlsx","handson6data/attribute/Hunan_2012.csv","handson6data/shapefile/Hunan.dbf","handson6data/shapefile/Hunan.prj","handson6data/shapefile/Hunan.qpj","handson6data/shapefile/Hunan.shp","handson6data/shapefile/Hunan.shx","in-class-exercise-6_files/anchor-4.2.2/anchor.min.js","in-class-exercise-6_files/bowser-1.9.3/bowser.min.js","in-class-exercise-6_files/distill-2.2.21/template.v2.js","in-class-exercise-6_files/figure-html5/unnamed-chunk-17-1.png","in-class-exercise-6_files/figure-html5/unnamed-chunk-18-1.png","in-class-exercise-6_files/figure-html5/unnamed-chunk-19-1.png","in-class-exercise-6_files/figure-html5/unnamed-chunk-26-1.png","in-class-exercise-6_files/figure-html5/unnamed-chunk-27-1.png","in-class-exercise-6_files/figure-html5/unnamed-chunk-30-1.png","in-class-exercise-6_files/figure-html5/unnamed-chunk-40-1.png","in-class-exercise-6_files/figure-html5/unnamed-chunk-48-1.png","in-class-exercise-6_files/figure-html5/unnamed-chunk-5-1.png","in-class-exercise-6_files/header-attrs-2.10/header-attrs.js","in-class-exercise-6_files/jquery-1.11.3/jquery.min.js","in-class-exercise-6_files/popper-2.6.0/popper.min.js","in-class-exercise-6_files/tippy-6.2.7/tippy-bundle.umd.min.js","in-class-exercise-6_files/tippy-6.2.7/tippy-light-border.css","in-class-exercise-6_files/tippy-6.2.7/tippy.css","in-class-exercise-6_files/tippy-6.2.7/tippy.umd.min.js","in-class-exercise-6_files/webcomponents-2.0.0/webcomponents.js"]}
   </script>
   <!--radix_placeholder_navigation_in_header-->
   <!--/radix_placeholder_navigation_in_header-->
@@ -1434,8 +1434,8 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   </script>
 
   <!--/radix_placeholder_distill-->
-  <script src="in-class-exercise-6_files/header-attrs-2.10/header-attrs.js"></script>
-  <script src="in-class-exercise-6_files/jquery-1.11.3/jquery.min.js"></script>
+  <script src="in-class-exercise-6_files/header-attrs-2.11/header-attrs.js"></script>
+  <script src="in-class-exercise-6_files/jquery-3.6.0/jquery-3.6.0.min.js"></script>
   <script src="in-class-exercise-6_files/popper-2.6.0/popper.min.js"></script>
   <link href="in-class-exercise-6_files/tippy-6.2.7/tippy.css" rel="stylesheet" />
   <link href="in-class-exercise-6_files/tippy-6.2.7/tippy-light-border.css" rel="stylesheet" />
@@ -1497,12 +1497,12 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <p>The code chunk below uses <em>st_read()</em> of <strong>sf</strong> package to import Hunan shapefile into R. The imported shapefile will be <strong>simple features</strong> Object of <strong>sf</strong>.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>hunan</span> <span class='op'>&lt;-</span> <span class='fu'>st_read</span><span class='op'>(</span>dsn <span class='op'>=</span> <span class='st'>"data/handson6data/shapefile"</span>, 
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>hunan</span> <span class='op'>&lt;-</span> <span class='fu'>st_read</span><span class='op'>(</span>dsn <span class='op'>=</span> <span class='st'>"handson6data/shapefile"</span>, 
                  layer <span class='op'>=</span> <span class='st'>"Hunan"</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>Reading layer `Hunan&#39; from data source 
-  `C:\teojp3\IS415_blog\data\handson6data\shapefile&#39; 
+  `C:\teojp3\IS415_blog\_posts\2021-09-20-in-class-exercise-6\handson6data\shapefile&#39; 
   using driver `ESRI Shapefile&#39;
 Simple feature collection with 88 features and 7 fields
 Geometry type: POLYGON
@@ -1514,7 +1514,7 @@ Geodetic CRS:  WGS 84</code></pre>
 <p>Next, we will import <em>Hunan_2012.csv</em> into R by using <em>read_csv()</em> of <strong>readr</strong> package. The output is R dataframe class.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>hunan2012</span> <span class='op'>&lt;-</span> <span class='fu'>read_csv</span><span class='op'>(</span><span class='st'>"data/handson6data/attribute/Hunan_2012.csv"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>hunan2012</span> <span class='op'>&lt;-</span> <span class='fu'>read_csv</span><span class='op'>(</span><span class='st'>"handson6data/attribute/Hunan_2012.csv"</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>

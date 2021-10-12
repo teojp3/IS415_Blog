@@ -53,7 +53,7 @@ for (p in packages){
 The code chunk below uses *st_read()* of **sf** package to import Hunan shapefile into R. The imported shapefile will be **simple features** Object of **sf**.
 
 ```{r}
-hunan <- st_read(dsn = "data/handson6data/shapefile", 
+hunan <- st_read(dsn = "handson6data/shapefile", 
                  layer = "Hunan")
 ```
 ## Importing .CSV file
@@ -61,7 +61,7 @@ hunan <- st_read(dsn = "data/handson6data/shapefile",
 Next, we will import *Hunan_2012.csv* into R by using *read_csv()* of **readr** package. The output is R dataframe class.
 
 ```{r}
-hunan2012 <- read_csv("data/handson6data/attribute/Hunan_2012.csv")
+hunan2012 <- read_csv("handson6data/attribute/Hunan_2012.csv")
 ```
 ## Perform relational join
 
