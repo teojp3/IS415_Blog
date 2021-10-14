@@ -1,0 +1,156 @@
+---
+title: "Assessment of Project Data"
+description: |
+  Testing if data sets chosen for the group project are appropriate and working well!
+author:
+  - name: Teo Jun Peng
+    url: https://teojp3-is415.netlify.app/
+date: 2021-10-13
+output:
+  distill::distill_article:
+      self_contained: false
+      toc: true
+      toc_depth: 2
+      toc_float: true
+---
+
+```{r setup, include=FALSE, eval=TRUE, echo=TRUE, message=FALSE, error=FALSE, fig.retina=3}
+knitr::opts_chunk$set(echo = TRUE, fig.align = "center", tidy.opts=list(width.cutoff=80),tidy=TRUE)
+```
+
+# Setting up R Environment
+
+As usual, loading in the relevant R packages that are helpful in the analysis process.
+
+```{r results='hide'}
+packages = c('readr','sp', 'sf', 'rgdal', 'spNetwork', 'tmap', 'FNN', 'spatstat')
+  for (p in packages)
+  {
+    if(!require(p, character.only = T)){
+    install.packages(p)
+  }
+  library(p,character.only = T)
+}
+```
+
+# Data Sources
+
+The following data will be used and tested:
+
+- [Drinking Fountains (Melbourne, Australia)](https://data.melbourne.vic.gov.au/City-Council/Drinking-fountains/h4ih-tzqs)
+- [Public Toilets (Melbourne, Australia)](https://data.melbourne.vic.gov.au/City-Council/Public-toilets/ru3z-44we)
+- [Green Spaces (Melbourne, Australia)](https://data.melbourne.vic.gov.au/People/Landmarks-and-places-of-interest-including-schools/j5vt-ppat)
+- [Sports Facilities (Melbourne, Australia)](https://data.melbourne.vic.gov.au/People/Landmarks-and-places-of-interest-including-schools/j5vt-ppat)
+- [Melbourne's Municipal Boundary](https://data.melbourne.vic.gov.au/Property/Municipal-boundary/ck33-yh8z)
+
+
+# Importing in Data
+
+## Create owin object of Study Area's boundary
+
+Our chosen area of study is the central city area of **Melbourne located in Victoria, Australia.** The area is also known as **The City of Melbourne**, as officially named by their local government authority. 
+
+An owin object will be created just in case we need to utilize data sets that expands beyond our study area.
+
+```{r eval=FALSE}
+melbourne <- st_read(dsn = "data/Melbourne", layer = "MelbourneBoundary") %>%
+  st_transform(crs = 28355)
+
+melbourne_sp = as(as_Spatial(melbourne), "SpatialPolygons")
+
+melbourne_owin = as(melbourne_sp, "owin")
+```
+
+## Importing in Study Factors
+
+### Network Data Set
+
+We decided to use the Cycling Network as the network data as we wanted to visualise the analysis from a cyclist's point of view. The cycling network data set is taken from the [official website of the municipality of Melbourne](https://www.melbourne.vic.gov.au/Pages/home.aspx).
+
+```{r}
+network <- readOGR(dsn="data/BicycleNetwork",
+                   layer="BicycleNetwork",
+                   verbose = FALSE)
+
+network <- spTransform(network,CRS("+init=epsg:28355"))
+
+```
+
+## Study Factors
+
+For this study that illustrates an example of Network-Constrained Point Patterns Analysis, we would like to uncover whether the **drinking fountains in Melbourne, Australia** are distributed randomly **along the cycling network** and if not, what are the factors that affect their locations.
+
+### Main Data: Drinking Fountains
+
+The drinking fountain data set is also taken from the official website of the municipality of Melbourne.
+
+```{r}
+fountain <- read_csv("data/Drinking_fountains.csv")
+
+fountain <- st_as_sf(fountain, coords = c("lon", "lat"), crs = 4326) %>%
+    st_transform(crs = 28355)
+```
+
+### Cross K Factors
+
+We will be using *three factors* to test out their correlation and relationship with the location of drinking fountains. The three factors are: **1) Public Toilets, 2) Green Spaces, 3) Sport Facilities.**
+
+Luckily, the various data sets are also available on the official website of the municipality of Melbourne, making it easier to conduct the study.
+
+```{r}
+toilet <- read_csv("data/Public_toilets.csv")
+
+toilet <- st_as_sf(toilet, coords = c("lon", "lat"), crs = 4326) %>%
+    st_transform(crs = 28355)
+
+sports <- read_csv("data/SportsFacility.csv")
+
+sports <- st_as_sf(sports, coords = c("lon", "lat"), crs = 4326) %>%
+    st_transform(crs = 28355)
+
+green <- read_csv("data/GreenSpaces.csv")
+
+green <- st_as_sf(green, coords = c("lon", "lat"), crs = 4326) %>%
+    st_transform(crs = 28355)
+```
+
+# Initial EDA and Mapping
+
+The locations of the various factors are:
+
+* Drinking Fountains (Blue)
+
+* Public Toilets (Red)
+
+* Green Spaces (Green)
+
+* Sports Facilities (Orange)
+
+```{r}
+tmap_mode('view')
+tm_shape(toilet) +
+  tm_dots(col = 'red') +
+tm_shape(fountain) +
+  tm_dots(col = 'blue') +
+tm_shape(network) +
+  tm_lines() +
+tm_shape(green) +
+  tm_dots(col='green') +
+tm_shape(sports) +
+  tm_dots(col='orange')
+```
+
+So far so good! The data sets used looks quite promising, and we shall test out Kernel Density with them later on in the assessment :) .
+
+
+
+
+
+
+
+
+
+
+
+
+
