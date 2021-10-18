@@ -36,6 +36,9 @@ Before we get started, it is important for us to install the necessary R package
 
 The R packages needed for this exercise are as follows:
 
+* R package for building OLS and performing diagnostics tests
+  + **olsrr**
+
 * Geospatial statistical modelling package
   + **GWmodel**
   
@@ -134,7 +137,7 @@ summary(condo_resale)
 
 ## Converting aspatial data frame into a sf object
 
-Currently, the condo_resale data frame is aspatial. We will convert it to a sf object. The code chunk below converts condo_resale data frame into a simple feature data frame by using *st_as_sf()* of **sf** package.
+Currently, the condo_resale data frame is aspatial. We will convert it to a *sf* object. The code chunk below converts condo_resale data frame into a simple feature data frame by using *st_as_sf()* of **sf** package.
 
 *st_transform()* of **sf** package will be used to convert the coordinates from wgs84 (i.e. crs:4326) to svy21 (i.e. crs=3414).
 
@@ -302,7 +305,7 @@ corrplot(cor(condo_resale[, 5:23]), diag = FALSE, order = "AOE",
          tl.pos = "td", tl.cex = 0.5, method = "number", type = "upper")
 ```
 
-Matrix reorder is very important for mining the hiden structure and patter in the matrix. There are **four methods** in corrplot (parameter order), named “AOE”, “FPC”, “hclust”, “alphabet”. In the code chunk above, alphabet order is used. It orders the variables alphabetically.
+Matrix reorder is very important for mining the hidden structure and pattern in the matrix. There are **four methods** in corrplot (parameter order), named “AOE”, “FPC”, “hclust”, “alphabet”. In the code chunk above, alphabet order is used. It orders the variables alphabetically.
 
 From the scatterplot matrix, it is clear that **Freehold** is highly correlated to **LEASE_99YEAR**. In view of this, it is wiser to only include either one of them in the subsequent model building. As a result, **LEASE_99YEAR** is excluded in the subsequent model building.
 
