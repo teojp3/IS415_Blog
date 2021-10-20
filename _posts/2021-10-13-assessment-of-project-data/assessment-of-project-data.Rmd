@@ -76,7 +76,7 @@ network <- spTransform(network,CRS("+init=epsg:28355"))
 
 ```
 
-## Study Factors
+### Study Factors
 
 For this study that illustrates an example of Network-Constrained Point Patterns Analysis, we would like to uncover whether the **drinking fountains in Melbourne, Australia** are distributed randomly **along the cycling network** and if not, what are the factors that affect their locations.
 
@@ -141,6 +141,125 @@ tm_shape(sports) +
 ```
 
 So far so good! The data sets used looks quite promising, and we shall test out Kernel Density with them later on in the assessment :) .
+
+# Network Constrained KDE (NetKDE) Analysis
+
+We will perform NetKDE analysis by using appropriate functions provided in **spNetwork** package.
+
+## Preparing the lixels objects
+
+```{r}
+lixels <- lixelize_lines(network,700,mindist = 350)
+```
+
+What can we learned from the code chunk above:
+
+* The length of a lixel, lx_length is set to 700m, and
+
+* The minimum length of a lixel, mindist is set to 350m.
+
+## Generating line centre points
+
+Next, lines_center() of spNetwork will be used to generate a SpatialPointsDataFrame (i.e. samples) with line centre points as shown in the code chunk below.
+
+```{r}
+samples <- lines_center(lixels)
+```
+
+## Data Conversion
+
+Additional changes to the data were made so as to allow the function run properly.
+
+```{r}
+network <- sp::disaggregate(network)
+fountain <- as_Spatial(fountain)
+green <- as_Spatial(green)
+sports <- as_Spatial(sports)
+toilet <- as_Spatial(toilet)
+```
+
+## Performing NetKDE
+
+```{r}
+densities <- nkde(network, 
+                  events = fountain,
+                  w = rep(1,nrow(fountain)),
+                  samples = samples,
+                  kernel_name = "quartic",
+                  bw = 300, 
+                  div= "bw", 
+                  method = "discontinuous", 
+                  digits = 1, 
+                  tol = 1,
+                  grid_shape = c(1,1), 
+                  max_depth = 8,
+                  agg = 5, #we aggregate events within a 5m radius (faster calculation)
+                  sparse = TRUE,
+                  verbose = FALSE)
+```
+
+*kernel_name* argument indicates that quartic kernel is used. Are possible kernel methods supported by spNetwork are: triangle, gaussian, scaled gaussian, tricube, cosine ,triweight, epanechnikov or uniform.
+
+*method* argument indicates that simple method is used to calculate the NKDE. Currently, spNetwork support three popular methods, they are: simple, discontinuous, continuous.
+
+
+## Visualising NetKDE
+
+Before we can visualise the NetKDE values, the code chunk below will be used to insert the computed density values (i.e. densities) into samples and lixels objects as density field.
+
+The density values will also be rescale from metre to kilometre, as the projection system uses Metre as the unit of measurement.
+
+```{r}
+samples$density <- densities
+lixels$density <- densities
+
+samples$density <- samples$density*1000
+lixels$density <- lixels$density*1000
+```
+
+```{r}
+tmap_mode('view')
+tm_shape(lixels)+
+  tm_lines(col="density")+
+tm_shape(fountain)+
+  tm_dots()
+```
+
+# Second Order Analysis
+
+## Network Constrained K-Function Analysis
+
+In this section, we are going to perform complete spatial randomness (CSR) test by using *kfunctions()* of **spNetwork** package. The null hypothesis is defined as:
+
+**Ho: The observed spatial point events (i.e distribution of drinking fountains) are uniformly distributed over the cycling network in The City of Melbourne located in Victoria, Australia.**
+
+```{r eval=FALSE}
+kfun_fountain <- kfunctions(network, 
+                           fountain,
+                           start = 0, 
+                           end = 1000, 
+                           step = 50, 
+                           width = 50, 
+                           nsim = 50, 
+                           resolution = 50,
+                           verbose = FALSE, 
+                           conf_int = 0.05)
+```
+
+# Disruptive Conclusion
+
+Unfortunately, we are having issues working with these chosen data sets :(  It doesn't serve its purpose as a good illustration of what network constrained analysis should be like.
+
+Some of the network are identified as high density even though they do not contain multiple point patterns along its network, therefore the insights are very inaccurate.
+
+Hence, we would be testing out other alternative data sets instead.
+
+See you in the next round of assessment of project data!
+
+
+
+
+
 
 
 
