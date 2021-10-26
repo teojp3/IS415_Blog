@@ -117,7 +117,7 @@ The output shows that there are several invalid features being detected.
 We will fix them using the code chunk below.
 
 ```{r}
-st_make_valid(AusSF)
+AusSF <- st_make_valid(AusSF)
 ```
 And lets do the validity check again.
 
