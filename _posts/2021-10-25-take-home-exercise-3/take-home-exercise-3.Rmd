@@ -1,0 +1,947 @@
+---
+title: "Take Home Exercise 3"
+description: |
+    A study on the resale prices of public housing in Singapore, through the use of Hedonic Pricing Models.
+author:
+  - name: Teo Jun Peng
+    url: https://teojp3-is415.netlify.app/
+date: 2021-10-25
+output:
+  distill::distill_article:
+      self_contained: false
+      toc: true
+      toc_depth: 2
+      toc_float: true
+---
+
+```{r setup, include=FALSE, eval=TRUE, echo=TRUE, message=FALSE, error=FALSE, fig.retina=3}
+knitr::opts_chunk$set(echo = TRUE, fig.align = "center", tidy.opts=list(width.cutoff=80),tidy=TRUE)
+```
+
+# 1. Introduction
+
+Housing is an essential component of household wealth worldwide, with the price of housing properties being objectively determined by many factors. Some of these factors are global in nature, such as the general economy or inflation rate of a country.
+
+Alternatively, the affecting factors can be further segmented into structural and locational factors. Structural factors are variables relating to the properties themselves such as the size, fitting, and tenure of the property. Meanwhile, locational factors are variables relating to the surrounding neighbourhood of the properties such as proximity to facilities like childcare centres, public transport services and shopping centres.
+
+We will be conducting this investigation via a local case-study context. In Singapore, housing prices are infamous for being expensive, [ranking only behind Hong Kong which is the world's most expensive housing market.](https://www.cbre.com.sg/about/media-centre/singapore-remains-the-2nd-most-expensive-housing-market-in-the-world-after-hong-kong)  
+
+<p> Therefore, we will be trying to find out exactly **which factors actually affects the pricing of public housing**, is it because of Singapore's highly-developed economy? Or is it more of the local structural and locational factors that affects the pricing more? &#129488; </p>
+
+<p>  Join me in this study to **uncover the truth behind what constitutes or justifies a high property price in Singapore** &#128200; </p>
+
+## 1.1 Objectives and Methods
+
+In this study, we will be building **Hedonic Pricing Models** to explain the relevant factors that affects resale prices of public housing in Singapore. 
+
+The **Geographical Weighted Regression (GWR)** method will be employed for calibrating this Hedonic Pricing Model.
+
+## 1.2 The Data
+
+We will be using the `Resale Flat Prices` data set from Data.gov.sg and focusing on:
+
+- Transaction Prices of **Four-room Flats**;
+- Within the transaction period of **1st January 2019 to 30th September 2020**
+
+We will also be using the following data sets to evaluate the structural/locational factors:
+
+- [Master Plan 2014 Subzone Boundary (Web) from Data.gov.sg](https://data.gov.sg/dataset/master-plan-2014-subzone-boundary-web)
+
+
+# 2. Setting up R Enviroment
+
+Before we get started, it is important for us to install/launch the necessary R packages into R environment.
+
+The R packages we will be using are:
+
+- R package for building OLS and performing diagnostics tests
+    - [**olsrr**](https://olsrr.rsquaredacademy.com/index.html)
+- R package for calibrating geographical weighted family of models
+    - [**GWmodel**](https://cran.r-project.org/web/packages/GWmodel/index.html)
+- R package for multivariate data visualisation and analysis
+    - [**corrplot**](https://cran.r-project.org/web/packages/corrplot/vignettes/corrplot-intro.html)
+- Spatial data handling
+    - **sf**
+- Attribute data handling
+    - **tidyverse**, especially **readr**, **ggplot2** and **dplyr**
+- Choropleth mapping  
+    - **tmap**
+    
+```{r}
+packages = c('olsrr', 'corrplot', 'ggpubr', 'sf', 'spdep', 'GWmodel', 'tmap', 'tidyverse')
+for (p in packages){
+  if(!require(p, character.only = T)){
+    install.packages(p)
+  }
+  library(p,character.only = T)
+}
+```
+
+The above code chunk will load the respective R packages into our R environment.
+
+# 3. Geospatial Data Wrangling
+
+## 3.1 Importing in the geospatial data
+
+We will be using the `URA Master Plan 2014's planning subzone boundaries` data set, so as to compare the resale prices across the various town districts (e.g. CBD area vs Jurong East)
+
+The code chunk below is used to import *MP_SUBZONE_WEB_PL* shapefile by using *st_read()* of **sf** packages.
+
+```{r}
+mpsz = st_read(dsn = "data/geospatial", layer = "MP14_SUBZONE_WEB_PL")
+```
+*mpsz* will be stored as a simple feature object and the geometry type will be *multipolygon*.
+
+## 3.2 Update CRS projection
+
+The code chunk below updates the newly imported *mpsz* with the correct EPSG code (i.e. 3414).
+
+```{r}
+mpsz_svy21 <- st_transform(mpsz, 3414)
+```
+
+We will then verify the CRS is projected correctly.
+
+```{r}
+st_crs(mpsz_svy21)
+```
+Voila! The EPSG is shown to be **3414** now.
+
+Next, we will now check the extent of *mpsz_svy21* by using *st_bbox()* of **sf** package.
+
+```{r}
+st_bbox(mpsz_svy21) #view extent
+```
+# 4. Aspatial Data Wrangling
+
+## 3.1 Importing in the aspatial data
+
+We will use *read_csv()* function of **readr** package to import `Resale Flat Prices` into R as a tibble data frame called *flat_resale*.
+
+```{r}
+flat_resale = read_csv("data/aspatial/resale-flat-prices(jan-2017-and-up).csv")
+```
+Next, we will do a check on the data structure using *glimpse()* to make sure the import was done correctly. 
+
+```{r}
+glimpse(flat_resale)
+```
+And great, the data imported seems fine. We shall proceed on.
+
+## 3.2 Subsetting the data 
+
+The following code chunk will use **Regular Expression (i.e. gsub)** and **String Concatenation (i.e. paste function)** concepts to convert `month` column to **date data type**.
+
+```{r}
+trim <- function (x) gsub("^\\s+|\\s+$", "", x)
+flat_resale$month <- trim(flat_resale$month)
+
+flat_resale$month <- paste(flat_resale$month, "-01", sep="")
+flat_resale$month <- as.Date(flat_resale$month, format = '%Y-%m-%d')
+```
+
+With the `month` column in date data type, we then can subset our dataframe within the chosen **Time Period (Jan 2019 to Sept 2020)** as well as only having only records of the transaction prices of **4-Room Flats**.
+
+```{r}
+# Within Time Period
+flat_resale_subset <- flat_resale[flat_resale$month >= "2019-01-01" & flat_resale$month <= "2020-09-01", ]
+
+# 4-Room Flat only
+flat_resale_subset <- flat_resale_subset[flat_resale_subset$flat_type == "4 ROOM", ]
+```
+
+## 3.3 Geocoding the data records
+
+Our dataframe does not have the coordinates required for our geospatial analysis. Therefore, we will be doing **geocoding** using the following steps.
+
+Firstly, we will combine the columns `block` and `street_name` into a full address column named `address` (i.e. 406 + Ang Mo Kio Ave 10 = 406 Ang Mo Kio Ave 10) using *paste()* function. This process is essential as we will need the full address for the **OneMapSG Search API** to work properly later on.
+
+```{r}
+flat_resale_subset$address <- paste(flat_resale_subset$block, flat_resale_subset$street_name, sep=" ")
+```
+
+Various libraries/packages are imported in for this geocoding process:
+
+- **OneMapSGapi** to use its Search API
+- **httr** for requesting the API
+- **dplyr** for *lapply()* function
+- **jsonlite** for working with JSON 
+
+### 3.3.1 Creating a custom function for requesting Search API
+
+A custom function `getLatLng` is created to call the Search API, and the function *lapply()* is used to pass in the respective addresses as the search queries. The search results is then saved into variables `X` and `Y`, in text form instead of its raw JSON form.
+
+```{r eval=FALSE}
+library(onemapsgapi)
+library(httr)
+library(dplyr)
+library(jsonlite)
+
+getLatLng <- function(object) {
+  base_url <- "https://developers.onemap.sg/commonapi/search?"
+
+  my_results <- httr::GET(base_url, query = list(searchVal = object, returnGeom = "Y", getAddrDetails = "Y"))
+  
+  my_content <- httr::content(my_results, as='text')
+  content_from_json <- jsonlite::fromJSON(my_content)
+}
+
+X <- lapply(flat_resale_subset$address, getLatLng)
+
+Y <- lapply(X, `[`, "results")
+
+# Need run twice cause its list in a list
+Z <- do.call(rbind, Y)
+Z <- do.call(rbind, Z)
+```
+
+![Screenshot of X](jsonresults.png)
+*lapply()* is used again to get only the *results* portion from the lists in X, as the important information are found in *results* (refer to above image).
+
+Finally, we will use *do.call(rbind)* to convert the list of lists in `Y` into a proper dataframe. The function is ran twice because there are nested lists in `Y`. 
+
+```{r include=FALSE}
+Z <- read_rds("data/rds/Z.rds")
+```
+
+### 3.3.2 Additional data cleaning
+
+We will then further clean up the dataframe using the below code chunk. 
+
+Essentially, we are subsetting only the necessary columns and removing non-essential duplicates in the dataframe `geo_df`.
+
+```{r}
+geo_df <- select(Z, BLK_NO, ROAD_NAME, BUILDING, ADDRESS, POSTAL, X, Y, LATITUDE, LONGITUDE)
+
+geo_df$SEARCH <- paste(geo_df$BLK_NO, geo_df$ROAD_NAME)
+geo_df <- select(geo_df, SEARCH, ADDRESS, POSTAL, X, Y, LATITUDE, LONGITUDE)
+
+geo_df <- geo_df[!duplicated(geo_df$SEARCH),]
+```
+
+### 3.3.3 Dealing with inconsistency in Keys
+
+Unexpectedly, I realised an issue when trying to combine `geo_df` with `flat_resale_subset`. The primary keys for joining the 2 dataframes together are slightly different (refer to image below). The addresses were **initially passed into the API using the short form addresses** as given by the original data set, however the **full addresses are passed back** into `geo_df` due to the inherent nature of the API.
+
+![Screenshot of inconsistent keys](keys.png)
+Therefore, there **wasn't a common key identifier** to join `flat_resale_subset` and `geo_df` together correctly.
+
+The way to move on was to **change the actual names of the road lexicons (Avenues, Drive etc) to its short forms (Ave, Dr etc)**, or vice versa. I decided to stick with the former so as to line up with the original data set. 
+
+The following code chunk is used to change the road lexicons to its respective shorter abbreviations.
+
+```{r}
+geo_df$CLEAN <- str_replace_all(geo_df$SEARCH, "AVENUE", "AVE")
+geo_df$CLEAN <- str_replace_all(geo_df$CLEAN, "ROAD", "RD")
+geo_df$CLEAN <- str_replace_all(geo_df$CLEAN, "SOUTH", "STH")
+geo_df$CLEAN <- str_replace_all(geo_df$CLEAN, "NORTH", "NTH")
+geo_df$CLEAN <- str_replace_all(geo_df$CLEAN, "STREET", "ST")
+geo_df$CLEAN <- str_replace_all(geo_df$CLEAN, "CENTRAL", "CTRL")
+geo_df$CLEAN <- str_replace_all(geo_df$CLEAN, "BUKIT", "BT")
+geo_df$CLEAN <- str_replace_all(geo_df$CLEAN, "DRIVE", "DR")
+geo_df$CLEAN <- str_replace_all(geo_df$CLEAN, "UPPER", "UPP")
+geo_df$CLEAN <- str_replace_all(geo_df$CLEAN, "TANJONG", "TG")
+geo_df$CLEAN <- str_replace_all(geo_df$CLEAN, "CRESCENT", "CRES")
+geo_df$CLEAN <- str_replace_all(geo_df$CLEAN, "CLOSE", "CL")
+geo_df$CLEAN <- str_replace_all(geo_df$CLEAN, "LORONG", "LOR")
+geo_df$CLEAN <- str_replace_all(geo_df$CLEAN, "JALAN", "JLN")
+geo_df$CLEAN <- str_replace_all(geo_df$CLEAN, "COMMONWEALTH", "C'WEALTH")
+geo_df$CLEAN <- str_replace_all(geo_df$CLEAN, "PLACE", "PL")
+geo_df$CLEAN <- str_replace_all(geo_df$CLEAN, "HEIGHTS", "HTS")
+geo_df$CLEAN <- str_replace_all(geo_df$CLEAN, "GARDENS", "GDNS")
+geo_df$CLEAN <- str_replace_all(geo_df$CLEAN, "TERRACE", "TER")
+geo_df$CLEAN <- str_replace_all(geo_df$CLEAN, "PARK", "PK")
+geo_df$CLEAN <- str_replace_all(geo_df$CLEAN, "KAMPONG", "KG")
+```
+
+After that was done, we can now join the 2 dataframes into one, named `flat_with_geo`.
+
+```{r}
+flat_with_geo <- left_join(flat_resale_subset, geo_df, by = c("address" = "CLEAN"))
+```
+
+A check was then made to see if there are any NA rows, in the case of the Search API being unable to detect their correct addresses/locations. 
+
+```{r}
+sum(is.na(flat_with_geo$SEARCH))
+```
+Unfortunately, we have **28 records** where the API had issues locating their Coordinates. **But on the brighter side, its only a small minority, with 28 NA rows out of ~15k data points.**
+
+Using the below code chunk, we will then **omit them from the dataframe** since they do not have their coordinates tagged to them.
+
+```{r}
+flat_with_geo <- na.omit(flat_with_geo)
+
+flat_sf <- flat_with_geo
+```
+
+## 3.4 Getting the respective locational factors 
+
+The following location factors will be added to `flat_sf` for our analysis:
+
+- Proximity to MRT Station
+- Proximity to 1st Tier Primary School
+- Proximity to Supermarket
+- Proximity to CBD
+- Number of Bus Stops within 350m
+- Number of Childcare Centres within 350m
+
+### 3.4.1 Proximity to MRT
+
+Importing in the data for the point locations of MRT Stations, which can be downloaded from [Land Transport Authority Datamall]('https://datamall.lta.gov.sg/content/datamall/en.html').
+
+```{r}
+mrt_sf <- st_read(dsn = "data/geospatial/MRT", 
+                layer = "MRTLRTStnPtt")
+```
+![](latlon.png)
+
+Next, we will **convert the geometry coordinates into latitude and longitude coordinates** as shown by the screenshot above. The latitude and longitude will be added as separate columns.
+
+We will use the following code chunk for the conversion process.
+
+```{r}
+mrt_sf$geometry2 <- st_transform(select(mrt_sf, geometry), 4326)
+
+mrt_sf2 <- do.call(rbind, st_geometry(mrt_sf$geometry2)) %>% 
+    as_tibble() %>% setNames(c("lon","lat"))
+
+mrt_sf$lon <- mrt_sf2$lon
+mrt_sf$lat <- mrt_sf2$lat
+
+mrt_sf <- mrt_sf[,c("OBJECTID","STN_NAME","STN_NO","lon","lat","geometry")]
+```
+
+```{r}
+head(mrt_sf)
+```
+
+Voila! Now we won't run into errors later on.
+
+We will also convert the **LONGITUDE and LATITUDE** columns for `flat_with_geo` to *numeric* data type as they are currently in *character* data type, which is essential for running the **Origin-Destination Matrix** later on.
+
+```{r}
+flat_with_geo$LONGITUDE <- as.numeric(flat_with_geo$LONGITUDE)
+flat_with_geo$LATITUDE <- as.numeric(flat_with_geo$LATITUDE)
+```
+
+The **regeos**, **data.table** and **geosphere** R packages will be imported and used to run the Origin-Destination Matrix, which will gives us the distance of **proximity to the nearest MRT Station** for each respective 4-room flat unit. 
+
+Firstly, the Origin-Destination Matrix `odmatrix_mrt` is created using *CJ()* function from the **data.table** package, with the column names being updated using *names()* function of Base R. With `odmatrix_mrt`, it helps us to get **all combinations of Origin and Destination pairs.**
+
+```{r}
+library(rgeos)
+library(data.table)
+library(geosphere)
+
+# Get all combinations of Origin and Destination Pairs
+odmatrix_mrt <- CJ(flat_with_geo$ADDRESS, mrt_sf$STN_NAME)
+names(odmatrix_mrt) <- c('Origin', 'Destination') 
+```
+
+Next, we will create **data.table** versions of `flat_with_geo` and `mrt_sf` for use in the process.
+
+```{r}
+# Changing to Data.Table type if not errors will occur later
+flat_DT <- setDT(flat_with_geo)
+mrt_DT <- setDT(mrt_sf)
+```
+
+The **coordinates of the Origins and Destinations will also be added in** using the following code chunk.
+
+```{r}
+# Add coordinates of Origins
+odmatrix_mrt$lat_orig <- flat_DT$LATITUDE[match(odmatrix_mrt$Origin, flat_DT$ADDRESS)]
+odmatrix_mrt$long_orig <- flat_DT$LONGITUDE[match(odmatrix_mrt$Origin, flat_DT$ADDRESS)]
+
+# Add coordinates of Destinations
+odmatrix_mrt$lat_dest <- mrt_DT$lat[match(odmatrix_mrt$Destination, mrt_DT$STN_NAME)]
+odmatrix_mrt$long_dest <- mrt_DT$lon[match(odmatrix_mrt$Destination, mrt_DT$STN_NAME)]
+```
+
+Finally, we can calculate the distance between every Origin-Destination pair using *distHaversine()* function from **geosphere** package and then get the **nearest destinations for each respective origin** later on.
+
+```{r}
+# Calculate distances
+odmatrix_mrt[ , dist := distHaversine(matrix(c(long_orig, lat_orig), ncol = 2),
+                                    matrix(c(long_dest, lat_dest), ncol = 2))]
+
+# And get the nearest destinations for each origin
+nearest_mrt <- odmatrix_mrt[, .(Destination = Destination[which.min(dist)],
+                    dist = min(dist)), by = Origin]
+```
+
+```{r}
+head(nearest_mrt)
+```
+
+As shown by the output above, every flat unit will have the nearest MRT Station and the distance given in `nearest_mrt` dataframe, which will later be added into `flat_with_geo` dataframe as the **proximity to MRT Station**.
+
+### 3.4.2 Proximity to 1st Tier Primary Schools
+
+The second locational factor to be added is `Proximity to 1st Tier Primary Schools`.
+
+Data and ranking of the primary schools is taken from the [SmileTutor website](https://smiletutor.sg/primary-school-ranking-choose-the-best-primary-schools-in-singapore/). 
+
+The top 25 primary schools will be used for this study.
+
+![](prischool-ss.png)
+
+However the data does not have location attributes as shown in the screenshot above, so we will **use the OneMapSG Search API function** that we've created earlier on to get the location details.
+
+The following code chunk imports in the data.
+
+```{r}
+pri_school = read_csv("data/aspatial/top-25-primary-schools.csv")
+```
+
+We will then use the OneMapSG Search API `getLatLng` function to get the location attributes for the schools.
+
+```{r eval=FALSE}
+getLatLng <- function(object) {
+  base_url <- "https://developers.onemap.sg/commonapi/search?"
+
+  my_results <- httr::GET(base_url, query = list(searchVal = object, returnGeom = "Y", getAddrDetails = "Y"))
+  
+  my_content <- httr::content(my_results, as='text')
+  content_from_json <- jsonlite::fromJSON(my_content)
+}
+
+X <- lapply(pri_school$`School Name`, getLatLng)
+
+Y <- lapply(X, `[`, "results")
+
+# Need run twice cause its list in a list
+school <- do.call(rbind, Y)
+school <- do.call(rbind, school)
+
+# Change rows to columns
+school2 <- as.data.frame(t(school))
+school <- as.data.frame(t(school2))
+```
+
+```{r include=FALSE}
+school <- read_rds("data/rds/school.rds")
+```
+
+Changing the Lat Lon data types to numeric data type.
+
+```{r}
+school$LONGITUDE <- as.numeric(school$LONGITUDE)
+school$LATITUDE <- as.numeric(school$LATITUDE)
+```
+
+The same Origin-Destination Matrix process as explained earlier on will be ran again, using the following code chunk.
+
+```{r}
+# Get all combinations of Origin and Destination Pairs
+odmatrix_school <- CJ(flat_with_geo$ADDRESS, school$BUILDING)
+names(odmatrix_school) <- c('Origin', 'Destination') 
+
+# Changing to Data.Table type if not errors will occur later
+flat_DT <- setDT(flat_with_geo)
+school_DT <- setDT(school)
+
+# Add coordinates of Origins
+odmatrix_school$lat_orig <- flat_DT$LATITUDE[match(odmatrix_school$Origin, flat_DT$ADDRESS)]
+odmatrix_school$long_orig <- flat_DT$LONGITUDE[match(odmatrix_school$Origin, flat_DT$ADDRESS)]
+
+# Add coordinates of Destinations
+odmatrix_school$lat_dest <- school_DT$LATITUDE[match(odmatrix_school$Destination, school_DT$BUILDING)]
+odmatrix_school$long_dest <- school_DT$LONGITUDE[match(odmatrix_school$Destination, school_DT$BUILDING)]
+
+# Calculate distances
+odmatrix_school[ , dist := distHaversine(matrix(c(long_orig, lat_orig), ncol = 2),
+                                    matrix(c(long_dest, lat_dest), ncol = 2))]
+
+# And get the nearest destinations for each origin
+nearest_school <- odmatrix_school[, .(Destination = Destination[which.min(dist)],
+                    dist = min(dist)), by = Origin]
+```
+
+```{r}
+head(nearest_school)
+```
+
+As shown by the output above, every flat unit will have the nearest 1st Tier Primary School and the distance given in `nearest_school` dataframe, which will later be added into `flat_with_geo` dataframe as the **proximity to 1st Tier Primary School**.
+
+### 3.4.3 Proximity to Supermarket
+
+The same process as explained by the earlier 2 factors will also be applied to the locations of **Supermarkets.**
+
+```{r}
+supermarket <- read_csv("data/aspatial/list-of-supermarket-licences.csv")
+```
+
+We will use the `getLatLng` function to get the locational attributes of the supermarkets.
+
+One good thing about this dataset is that it has **postal codes** so the addresses will be easier to find.
+
+```{r eval=FALSE}
+getLatLng <- function(object) {
+  base_url <- "https://developers.onemap.sg/commonapi/search?"
+
+  my_results <- httr::GET(base_url, query = list(searchVal = object, returnGeom = "Y", getAddrDetails = "Y"))
+  
+  my_content <- httr::content(my_results, as='text')
+  content_from_json <- jsonlite::fromJSON(my_content)
+}
+
+X <- lapply(supermarket$`postal_code`, getLatLng)
+
+Y <- lapply(X, `[`, "results")
+
+# Need run twice cause its list in a list
+supermarket <- do.call(rbind, Y)
+supermarket <- do.call(rbind, supermarket)
+
+# Change rows to columns
+supermarket2 <- as.data.frame(t(supermarket))
+supermarket <- as.data.frame(t(supermarket2))
+```
+
+```{r include=FALSE}
+supermarket <- read_rds("data/rds/supermarket.rds")
+```
+
+Same Origin-Destination Matrix process is used as shown earlier on, using the following code chunk.
+
+```{r}
+supermarket$LONGITUDE <- as.numeric(supermarket$LONGITUDE)
+supermarket$LATITUDE <- as.numeric(supermarket$LATITUDE)
+```
+
+```{r}
+# Get all combinations of Origin and Destination Pairs
+odmatrix_supermarket <- CJ(flat_with_geo$ADDRESS, supermarket$SEARCHVAL)
+names(odmatrix_supermarket) <- c('Origin', 'Destination') # update names of columns
+
+# Changing to Data.Table type if not errors will occur later
+flat_DT <- setDT(flat_with_geo)
+supermarket_DT <- setDT(supermarket)
+
+# Add coordinates of Origins
+odmatrix_supermarket$lat_orig <- flat_DT$LATITUDE[match(odmatrix_supermarket$Origin, flat_DT$ADDRESS)]
+odmatrix_supermarket$long_orig <- flat_DT$LONGITUDE[match(odmatrix_supermarket$Origin, flat_DT$ADDRESS)]
+
+# Add coordinates of Destinations
+odmatrix_supermarket$lat_dest <- supermarket_DT$LATITUDE[match(odmatrix_supermarket$Destination, supermarket_DT$SEARCHVAL)]
+odmatrix_supermarket$long_dest <- supermarket_DT$LONGITUDE[match(odmatrix_supermarket$Destination, supermarket_DT$SEARCHVAL)]
+
+# Calculate distances
+odmatrix_supermarket[ , dist := distHaversine(matrix(c(long_orig, lat_orig), ncol = 2),
+                                    matrix(c(long_dest, lat_dest), ncol = 2))]
+
+# And get the nearest destinations for each origin
+nearest_supermarket <- odmatrix_supermarket[, .(Destination = Destination[which.min(dist)],
+                    dist = min(dist)), by = Origin]
+```
+
+```{r}
+head(nearest_supermarket)
+```
+
+As shown by the output above, every flat unit will have the nearest supermarket and the distance given in `nearest_supermarker` dataframe, which will later be added into `flat_with_geo` dataframe as the **proximity to Supermarket**.
+
+### 3.4.4 Proximity to CBD
+
+The same process as explained by the earlier 3 factors will also be applied to the location of the **Central Business District of Singapore (CBD)**.
+
+According to **Central Area, Singapore** wikipedia page, the **official coordinates of the CBD are 1°17′30″N 103°51′00″E.**
+
+This converts to **1.291667, 103.85** when shown in decimal format, therefore we will use these coordinates for our Origin-Destination Matrix.
+
+```{r}
+CBD <- data.frame("ADDRESS" = character(0), "LATITUDE" = numeric(0), "LONGITUDE" = numeric(0))
+CBD <- CBD %>% add_row(ADDRESS = "Central Business District", LATITUDE = 1.291667, LONGITUDE = 103.85)
+
+CBD$LONGITUDE <- as.numeric(CBD$LONGITUDE)
+CBD$LATITUDE <- as.numeric(CBD$LATITUDE)
+```
+
+Same Origin-Destination Matrix process is used as shown earlier on, using the following code chunk.
+
+```{r}
+# Get all combinations of Origin and Destination Pairs
+odmatrix_CBD <- CJ(flat_with_geo$ADDRESS, CBD$ADDRESS)
+names(odmatrix_CBD) <- c('Origin', 'Destination') 
+
+# Changing to Data.Table type if not errors will occur later
+flat_DT <- setDT(flat_with_geo)
+CBD_DT <- setDT(CBD)
+
+# Add coordinates of Origins
+odmatrix_CBD$lat_orig <- flat_DT$LATITUDE[match(odmatrix_CBD$Origin, flat_DT$ADDRESS)]
+odmatrix_CBD$long_orig <- flat_DT$LONGITUDE[match(odmatrix_CBD$Origin, flat_DT$ADDRESS)]
+
+# Add coordinates of Destinations
+odmatrix_CBD$lat_dest <- CBD_DT$LATITUDE[match(odmatrix_CBD$Destination, CBD_DT$ADDRESS)]
+odmatrix_CBD$long_dest <- CBD_DT$LONGITUDE[match(odmatrix_CBD$Destination, CBD_DT$ADDRESS)]
+
+# Calculate distances
+odmatrix_CBD[ , dist := distHaversine(matrix(c(long_orig, lat_orig), ncol = 2),
+                                    matrix(c(long_dest, lat_dest), ncol = 2))]
+
+# And get the nearest destinations for each origin
+nearest_CBD <- odmatrix_CBD[, .(Destination = Destination[which.min(dist)],
+                    dist = min(dist)), by = Origin]
+```
+
+```{r}
+head(nearest_CBD)
+```
+
+As shown by the output above, every flat unit will have their distance to the **CBD Area** given in the dataframe, which will later be added into `flat_with_geo` dataframe as the **proximity to CBD**.
+
+### 3.4.5 Number of Bus Stops within 350M
+
+The next locational factor will be slightly different as compared to the earlier 4, but the process is similar. The point location dataset of Bus Stops can be downloaded from [Land Transport Authority Datamall]('https://datamall.lta.gov.sg/content/datamall/en.html').
+
+```{r}
+BusStop <- st_read(dsn = "data/geospatial/BusStop", 
+                layer = "BusStop")
+```
+
+Same as the MRT Stations, we will **convert the geometry coordinates into latitude and longitude coordinates**. 
+
+```{r}
+BusStop$geometry2 <- st_transform(select(BusStop, geometry), 4326)
+
+BusStop2 <- do.call(rbind, st_geometry(BusStop$geometry2)) %>% 
+    as_tibble() %>% setNames(c("lon","lat"))
+
+BusStop$lon <- BusStop2$lon
+BusStop$lat <- BusStop2$lat
+```
+
+<p> And running the same old Origin-Destination Matrix again &#128514; </p>
+
+```{r eval=FALSE}
+# Get all combinations of Origin and Destination Pairs
+odmatrix_bus <- CJ(flat_with_geo$ADDRESS, BusStop$BUS_STOP_N)
+names(odmatrix_bus) <- c('Origin', 'Destination') # update names of columns
+
+# Changing to Data.Table type if not errors will occur later
+flat_DT <- setDT(flat_with_geo)
+bus_DT <- setDT(BusStop)
+
+# Add coordinates of Origins
+odmatrix_bus$lat_orig <- flat_DT$LATITUDE[match(odmatrix_bus$Origin, flat_DT$ADDRESS)]
+odmatrix_bus$long_orig <- flat_DT$LONGITUDE[match(odmatrix_bus$Origin, flat_DT$ADDRESS)]
+
+# Add coordinates of Destinations
+odmatrix_bus$lat_dest <- bus_DT$lat[match(odmatrix_bus$Destination, BusStop$BUS_STOP_N)]
+odmatrix_bus$long_dest <- bus_DT$lon[match(odmatrix_bus$Destination, BusStop$BUS_STOP_N)]
+
+# Calculate distances
+odmatrix_bus[ , dist := distHaversine(matrix(c(long_orig, lat_orig), ncol = 2),
+                                    matrix(c(long_dest, lat_dest), ncol = 2))]
+```
+
+However theres a twist for the last step, we will be **subsetting distances less than 350m and counting them**later on.
+
+```{r eval=FALSE}
+# Subsetting only distances less than 350m
+nearest_bus <- subset(odmatrix_bus, dist <= 350)
+```
+
+```{r include=FALSE}
+# odmatrix_bus <- write_rds(odmatrix_bus, "data/rds/odmatrix_bus.rds")
+# nearest_bus <- write_rds(nearest_bus, "data/rds/proximity_bus.rds")
+```
+
+```{r include=FALSE}
+# odmatrix_bus <- read_rds("data/rds/odmatrix_bus.rds")
+nearest_bus <- read_rds("data/rds/proximity_bus.rds")
+```
+
+```{r}
+head(nearest_bus)
+```
+
+As shown above, this is what `nearest_bus` looks like, with **only records with distances less than 350M kept.**
+
+Next, we will **remove duplicates** and **count the number of records left for each flat unit** using the following code chunk.
+
+```{r}
+library(dplyr)
+
+nearest_bus <- nearest_bus %>%
+               distinct(Destination, .keep_all = TRUE)
+
+nearest_bus <- nearest_bus %>%
+               group_by(Origin) %>%
+               mutate(count = n())
+
+head(nearest_bus)
+```
+
+As shown above, this is what `nearest_bus` looks like, with **with a `count` column that shows the number of bus stops within 350m** of a resale flat unit.
+
+### 3.4.6 Number of Childcare Centres within 350M
+
+For childcare centres locations, we will use the OneMapSG API to get the childcare data, as shown in the following code chunk.
+
+```{r eval = FALSE}
+library(onemapsgapi)
+
+childcare <- get_theme('eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjc5NTgsInVzZXJfaWQiOjc5NTgsImVtYWlsIjoianVucGVuZy50ZW8uMjAxOUBzbXUuZWR1LnNnIiwiZm9yZXZlciI6ZmFsc2UsImlzcyI6Imh0dHA6XC9cL29tMi5kZmUub25lbWFwLnNnXC9hcGlcL3YyXC91c2VyXC9zZXNzaW9uIiwiaWF0IjoxNjM1OTIzMTk5LCJleHAiOjE2MzYzNTUxOTksIm5iZiI6MTYzNTkyMzE5OSwianRpIjoiMjZlNGNkOWE5NzJiZDNiODU4OTczMWUyZTY2YWYzZDQifQ.HeD3nTXY94BQXhSauURz93nvsjj8aTmbzxv2taswOOk', 'childcare')
+```
+
+```{r include=FALSE}
+childcare <- read_rds("data/rds/childcare.rds")
+```
+
+<p> And next you should already know it by now, running the same old Origin-Destination Matrix again &#128514; </p> 
+
+```{r}
+childcare$Lng <- as.numeric(childcare$Lng)
+childcare$Lat <- as.numeric(childcare$Lat)
+```
+
+```{r eval=FALSE}
+# Get all combinations of Origin and Destination Pairs
+odmatrix_childcare <- CJ(flat_with_geo$ADDRESS, childcare$NAME)
+names(odmatrix_childcare) <- c('Origin', 'Destination') # update names of columns
+
+# Changing to Data.Table type if not errors will occur later
+flat_DT <- setDT(flat_with_geo)
+childcare_DT <- setDT(childcare)
+
+# Add coordinates of Origins
+odmatrix_childcare$lat_orig <- flat_DT$LATITUDE[match(odmatrix_childcare$Origin, flat_DT$ADDRESS)]
+odmatrix_childcare$long_orig <- flat_DT$LONGITUDE[match(odmatrix_childcare$Origin, flat_DT$ADDRESS)]
+
+# Add coordinates of Destinations
+odmatrix_childcare$lat_dest <- childcare_DT$Lat[match(odmatrix_childcare$Destination, childcare$NAME)]
+odmatrix_childcare$long_dest <- childcare_DT$Lng[match(odmatrix_childcare$Destination, childcare$NAME)]
+
+# Calculate distances
+odmatrix_childcare[ , dist := distHaversine(matrix(c(long_orig, lat_orig), ncol = 2),
+                                    matrix(c(long_dest, lat_dest), ncol = 2))]
+
+# And get the nearest destinations for each origin
+nearest_childcare <- subset(odmatrix_childcare, dist <= 350)
+```
+
+```{r include=FALSE}
+# nearest_childcare <- write_rds(nearest_childcare, "data/rds/nearest_childcare.rds")
+```
+
+```{r include=FALSE}
+nearest_childcare <- read_rds("data/rds/nearest_childcare.rds")
+```
+
+Next, we will **remove duplicates** and **count the number of records left for each flat unit** using the following code chunk.
+
+```{r}
+library(dplyr)
+
+nearest_childcare <- nearest_childcare %>%
+               distinct(Destination, .keep_all = TRUE)
+
+nearest_childcare <- nearest_childcare %>%
+                     group_by(Origin) %>%
+                     mutate(count = n())
+
+head(nearest_childcare)
+```
+
+As shown above, this is what `nearest_childcare` looks like, with **with a `count` column that shows the number of childcare centres within 350m** of a resale flat unit.
+
+## 3.5 Adding the locational factors to flat_with_geo
+
+Now, we will add the respective locational factors into `flat_with_geo` dataframe.
+
+First, we need to change unit of measurement from metres to kilometres using the following code chunk.
+
+```{r}
+nearest_mrt$dist <- (nearest_mrt$dist / 1000)
+nearest_school$dist <- (nearest_school$dist / 1000)
+nearest_supermarket$dist <- (nearest_supermarket$dist / 1000)
+nearest_CBD$dist <- (nearest_CBD$dist / 1000)
+```
+
+Then, we will Change the column names to how they are classified (Proximity to MRT etc). 
+
+```{r}
+names(nearest_mrt)[names(nearest_mrt) == "dist"] <- "Proximity to MRT"
+names(nearest_school)[names(nearest_school) == "dist"] <- "Proximity to 1st Tier Primary School"
+names(nearest_supermarket)[names(nearest_supermarket) == "dist"] <- "Proximity to Supermarket"
+names(nearest_CBD)[names(nearest_CBD) == "dist"] <- "Proximity to CBD"
+names(nearest_bus)[names(nearest_bus) == "count"] <- "No. of Bus Stops within 350m"
+names(nearest_childcare)[names(nearest_childcare) == "count"] <- "No. of Childcare Centres within 350m"
+```
+
+```{r include=FALSE}
+flat_with_geo <- flat_sf
+```
+
+Then we will add the respective fields into `flat_with_geo` using *left_join()*.
+
+```{r}
+flat_with_geo <- left_join(flat_with_geo, nearest_mrt, by = c("ADDRESS" = "Origin"))
+flat_with_geo <- left_join(flat_with_geo, nearest_school, by = c("ADDRESS" = "Origin"))
+flat_with_geo <- left_join(flat_with_geo, nearest_supermarket, by = c("ADDRESS" = "Origin"))
+flat_with_geo <- left_join(flat_with_geo, nearest_CBD, by = c("ADDRESS" = "Origin"))
+flat_with_geo <- left_join(flat_with_geo, nearest_bus, by = c("ADDRESS" = "Origin"))
+flat_with_geo <- left_join(flat_with_geo, nearest_childcare, by = c("ADDRESS" = "Origin"))
+```
+
+Next, we will **subset only the essential columns** and change all **column names into uppercase.**
+
+```{r}
+flat_with_geo <- flat_with_geo[c("month", "ADDRESS", "LATITUDE", "LONGITUDE", "POSTAL", "resale_price", "storey_range","floor_area_sqm", "remaining_lease", "Proximity to MRT", "Proximity to 1st Tier Primary School", "Proximity to Supermarket", "Proximity to CBD", "No. of Bus Stops within 350m", "No. of Childcare Centres within 350m")]
+names(flat_with_geo) <- toupper(names(flat_with_geo))
+```
+
+And then **replace all NA fields with "0" value**, as this would only apply to `No. of Bus Stops within 350` and `No. of Childcare Centres within 350m`.
+
+Having a value of 0 means that there are no facility within the stated distance of 350m. 
+
+```{r}
+flat_with_geo[is.na(flat_with_geo)] <- 0
+```
+
+```{r}
+glimpse(flat_with_geo)
+```
+
+Finally, we have the completed data set as shown by the output above. 
+
+Great! It took a really long time to reach this step, let us now move on.
+
+
+## 3.6 Converting aspatial data frame into a sf object
+
+Currently, `flat_with_geo` data frame is aspatial. We will convert it to a sf object. 
+
+The code chunk below converts `flat_with_geo` into a simple feature data frame by using *st_as_sf()* of **sf** package, then *st_transform()* is used to convert the coordinates from WGS84 (crs=4326) to SVY21 (crs=3414).
+
+```{r}
+flat_resale.sf <- st_as_sf(flat_with_geo,
+                            coords = c("LONGITUDE", "LATITUDE"),
+                            crs=4326) %>%
+                  st_transform(crs=3414)
+
+head(flat_resale.sf)
+```
+# 4. Exploratory Data Analysis
+
+## 4.1 Statistical Graphics
+
+We will plot the distribution of **resale_price** by using **ggplot** using the code chunk below.
+
+```{r}
+ggplot(flat_resale.sf, aes(x=`RESALE_PRICE`)) +
+  geom_histogram(bins=20, color="black", fill="light blue")
+```
+The figure above reveals a relatively right skewed distribution. This means that more public housing units were transacted at relative lower prices.
+
+Statistically, the skewed distribution can be normalised by using log transformation, if needed to. The code chunk below is used to derive a new variable called **log_resale_price** by using a log transformation on the variable **resale_price**. 
+
+The transformation is performed using *mutate()* of **dplyr** package.
+
+```{r}
+flat_resale.sf <- flat_resale.sf %>%
+  mutate(`LOG_RESALE_PRICE` = log(RESALE_PRICE))
+```
+
+We will then plot the distribution of **log_resale_price** using the below code chunk.
+
+```{r}
+ggplot(data=flat_resale.sf, aes(x=`LOG_RESALE_PRICE`)) +
+  geom_histogram(bins=20, color="black", fill="light blue")
+```
+The distribution became less skewed after the transformation.
+
+## 4.2 Drawing Statistical Point Map
+
+Lastly, we want to reveal the geospatial distribution of public housing resale prices in Singapore. 
+
+The map will be prepared by using **tmap** package with their interactive mode.
+
+```{r fig.width=12, fig.height=8}
+tmap_mode("view")
+
+tm_shape(mpsz_svy21)+
+  tm_polygons() +
+tm_shape(flat_resale.sf) +  
+  tm_dots(col = "RESALE_PRICE",
+          alpha = 0.6,
+          style="quantile") +
+  tm_view(set.zoom.limits = c(11,14))
+```
+
+# 5. Hedonic Pricing Modelling 
+
+We will now build hedonic pricing models for public housing resale units using *lm()* of Base R.
+
+## 5.1 Simple Linear Regression Method
+
+Firstly, we will test out a simple linear regression model by using the most anticipated independent variable, which is the square area of the unit `FLOOR_AREA_SQM`. 
+
+This is because most people would think its logical the bigger the property, the higher its resale price right? Therefore, let's build a model and find out.
+
+`RESALE_PRICE` will be the dependent variable while `FLOOR_AREA_SQM` will be the independent variable in the model.
+
+```{r}
+flat.slr <- lm(formula=RESALE_PRICE ~ FLOOR_AREA_SQM, data = flat_resale.sf)
+```
+
+*lm()* returns an object of class “lm” or for multiple responses of class c(“mlm”, “lm”).
+
+We will then use the functions *summary()* and *anova()* to obtain and print a summary and analysis of the results. 
+
+```{r}
+summary(flat.slr)
+```
+The output report reveals that the SELLING_PRICE can be explained by using the formula:
+
+*RESALE_PRICE = 556616 + -1190(FLOOR_AREA_SQM)*
+
+The R-squared of 0.004699 reveals that the simple regression model built is only able to explain a very small portion of the resale prices.
+
+However, since p-value is much smaller than 0.0001, we will reject the null hypothesis that mean is a good estimator of RESALE_PRICE. This will allow us to infer that the simple linear regression model above is a relatively good estimator of RESALE_PRICE.
+
+The **Coefficients:** section of the report reveals that the p-values of both the estimates of the Intercept and FLOOR_AREA_SQM are smaller than 0.001. In view of this, the null hypothesis of the B0 and B1 are equal to 0 will be rejected. As a result, we will be able to infer that the B0 and B1 are good parameter estimates.
+
+To visualise the best fit curve on a scatterplot, we can then incorporate *lm()* as a method function in ggplot’s geometry as shown in the code chunk below.
+
+```{r}
+ggplot(data=flat_resale.sf,  
+       aes(x=`FLOOR_AREA_SQM`, y=`RESALE_PRICE`)) +
+  geom_point() +
+  geom_smooth(method = lm)
+```
+
+Unexpectedly, the figure above actually reveals that the model is poorly fitted as there is high variability, and the values of FLOOR_AREA_SQM hardly fits into a straight line. 
+
+Therefore we shall conclude that **FLOOR_AREA_SQM is not a good indicator of predicting the RESALE_PRICE.**
+
+## 5.2 Multiple Linear Regression Method
+
+### Visualising the relationships of the respective independent variables
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# References
+
+- [How to get API data with R](https://www.youtube.com/watch?v=tlaJf0CHbFE&t=370s&ab_channel=IDGTECHtalk)
+- [Passing many values to an API using R](https://stackoverflow.com/questions/61534474/passing-many-values-to-an-api-using-r)
+- [OneMapSG Search API Documentation](https://www.onemap.gov.sg/docs/#search)
+- [How to find nearest using Origin-Destination Matrix](https://stackoverflow.com/questions/44608687/how-to-find-the-nearest-distance-between-two-different-data-frames)
+
+
+
