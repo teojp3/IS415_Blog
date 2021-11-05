@@ -957,7 +957,7 @@ According to this [article by Clairvoyant](https://blog.clairvoyantsoft.com/corr
 
 Since no coefficient values exceed the threshold as seen in the scatterplot matrix, we will use all independent variables in the modelling building.
 
-### 7.2.2 Building a hedonic pricing model using multiple linear regression method
+### 6.2.2 Building a hedonic pricing model using multiple linear regression method
 
 The code chunk below using *lm()* to calibrate the multiple linear regression model.
 
@@ -1144,7 +1144,7 @@ The output result shows that **251 is the recommended data point to be used**.
 
 Hence, we will then calculate the local regression using all the data points within this recommended bandwidth.
 
-### 6.2.2 Computing the adaptive bandwidth gwr model
+### 7.2.2 Computing the adaptive bandwidth gwr model
 
 Now, we can go ahead with calibrating the gwr-based hedonic pricing model by using **adaptive bandwidth and gaussian kernel** as shown in the code chunk below.
 
