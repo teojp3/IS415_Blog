@@ -957,7 +957,7 @@ According to this [article by Clairvoyant](https://blog.clairvoyantsoft.com/corr
 
 Since no coefficient values exceed the threshold as seen in the scatterplot matrix, we will use all independent variables in the modelling building.
 
-### 6.2.2 Building a hedonic pricing model using multiple linear regression method
+### 7.2.2 Building a hedonic pricing model using multiple linear regression method
 
 The code chunk below using *lm()* to calibrate the multiple linear regression model.
 
@@ -985,7 +985,7 @@ The *ols_vif_tol()* function of **olsrr** package will be used, however there ar
 ols_vif_tol(flat.mlr1)
 ```
 
-### 5.2.4 Test for Non-Linearity
+### 6.2.4 Test for Non-Linearity
 
 It is important to test whether linearity and additivity exists in the relationship between dependent and independent variables.
 
@@ -1119,7 +1119,7 @@ The report shows that the **adjusted r-square of the gwr is 0.975144 which is si
 
 ## 7.2 Building Adaptive Bandwidth GWR Model
 
-### 7.2.1 Computing the adaptive bandwidth
+### 7.2.1 Computing adaptive bandwidth
 
 Similar to the earlier section, we will first use *bw.ger()* to determine the recommended data point to use.
 
