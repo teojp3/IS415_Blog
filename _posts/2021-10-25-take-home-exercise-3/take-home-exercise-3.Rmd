@@ -5,12 +5,12 @@ description: |
 author:
   - name: Teo Jun Peng
     url: https://teojp3-is415.netlify.app/
-date: 2021-10-25
+date: 2021-11-06
 output:
   distill::distill_article:
       self_contained: false
       toc: true
-      toc_depth: 2
+      toc_depth: 3
       toc_float: true
 ---
 
@@ -114,7 +114,7 @@ st_bbox(mpsz_svy21) #view extent
 ```
 # 4. Aspatial Data Wrangling
 
-## 3.1 Importing in the aspatial data
+## 4.1 Importing in the aspatial data
 
 We will use *read_csv()* function of **readr** package to import `Resale Flat Prices` into R as a tibble data frame called *flat_resale*.
 
@@ -128,7 +128,7 @@ glimpse(flat_resale)
 ```
 And great, the data imported seems fine. We shall proceed on.
 
-## 3.2 Subsetting the data 
+## 4.2 Subsetting the data 
 
 The following code chunk will use **Regular Expression (i.e. gsub)** and **String Concatenation (i.e. paste function)** concepts to convert `month` column to **date data type**.
 
@@ -150,7 +150,7 @@ flat_resale_subset <- flat_resale[flat_resale$month >= "2019-01-01" & flat_resal
 flat_resale_subset <- flat_resale_subset[flat_resale_subset$flat_type == "4 ROOM", ]
 ```
 
-## 3.3 Geocoding the data records
+## 4.3 Geocoding the data records
 
 Our dataframe does not have the coordinates required for our geospatial analysis. Therefore, we will be doing **geocoding** using the following steps.
 
@@ -167,7 +167,7 @@ Various libraries/packages are imported in for this geocoding process:
 - **dplyr** for *lapply()* function
 - **jsonlite** for working with JSON 
 
-### 3.3.1 Creating a custom function for requesting Search API
+### 4.3.1 Creating a custom function for requesting Search API
 
 A custom function `getLatLng` is created to call the Search API, and the function *lapply()* is used to pass in the respective addresses as the search queries. The search results is then saved into variables `X` and `Y`, in text form instead of its raw JSON form.
 
@@ -204,7 +204,7 @@ Finally, we will use *do.call(rbind)* to convert the list of lists in `Y` into a
 Z <- read_rds("data/rds/Z.rds")
 ```
 
-### 3.3.2 Additional data cleaning
+### 4.3.2 Additional data cleaning
 
 We will then further clean up the dataframe using the below code chunk. 
 
@@ -219,7 +219,7 @@ geo_df <- select(geo_df, SEARCH, ADDRESS, POSTAL, X, Y, LATITUDE, LONGITUDE)
 geo_df <- geo_df[!duplicated(geo_df$SEARCH),]
 ```
 
-### 3.3.3 Dealing with inconsistency in Keys
+### 4.3.3 Dealing with inconsistency in Keys
 
 Unexpectedly, I realised an issue when trying to combine `geo_df` with `flat_resale_subset`. The primary keys for joining the 2 dataframes together are slightly different (refer to image below). The addresses were **initially passed into the API using the short form addresses** as given by the original data set, however the **full addresses are passed back** into `geo_df` due to the inherent nature of the API.
 
@@ -275,7 +275,7 @@ flat_with_geo <- na.omit(flat_with_geo)
 flat_sf <- flat_with_geo
 ```
 
-## 3.4 Getting the respective locational factors 
+## 4.4 Getting the respective locational factors 
 
 The following location factors will be added to `flat_sf` for our analysis:
 
@@ -286,7 +286,7 @@ The following location factors will be added to `flat_sf` for our analysis:
 - Number of Bus Stops within 350m
 - Number of Childcare Centres within 350m
 
-### 3.4.1 Proximity to MRT
+### 4.4.1 Proximity to MRT
 
 Importing in the data for the point locations of MRT Stations, which can be downloaded from [Land Transport Authority Datamall]('https://datamall.lta.gov.sg/content/datamall/en.html').
 
@@ -377,7 +377,7 @@ head(nearest_mrt)
 
 As shown by the output above, every flat unit will have the nearest MRT Station and the distance given in `nearest_mrt` dataframe, which will later be added into `flat_with_geo` dataframe as the **proximity to MRT Station**.
 
-### 3.4.2 Proximity to 1st Tier Primary Schools
+### 4.4.2 Proximity to 1st Tier Primary Schools
 
 The second locational factor to be added is `Proximity to 1st Tier Primary Schools`.
 
@@ -465,7 +465,7 @@ head(nearest_school)
 
 As shown by the output above, every flat unit will have the nearest 1st Tier Primary School and the distance given in `nearest_school` dataframe, which will later be added into `flat_with_geo` dataframe as the **proximity to 1st Tier Primary School**.
 
-### 3.4.3 Proximity to Supermarket
+### 4.4.3 Proximity to Supermarket
 
 The same process as explained by the earlier 2 factors will also be applied to the locations of **Supermarkets.**
 
@@ -543,7 +543,7 @@ head(nearest_supermarket)
 
 As shown by the output above, every flat unit will have the nearest supermarket and the distance given in `nearest_supermarker` dataframe, which will later be added into `flat_with_geo` dataframe as the **proximity to Supermarket**.
 
-### 3.4.4 Proximity to CBD
+### 4.4.4 Proximity to CBD
 
 The same process as explained by the earlier 3 factors will also be applied to the location of the **Central Business District of Singapore (CBD)**.
 
@@ -593,7 +593,7 @@ head(nearest_CBD)
 
 As shown by the output above, every flat unit will have their distance to the **CBD Area** given in the dataframe, which will later be added into `flat_with_geo` dataframe as the **proximity to CBD**.
 
-### 3.4.5 Number of Bus Stops within 350M
+### 4.4.5 Number of Bus Stops within 350M
 
 The next locational factor will be slightly different as compared to the earlier 4, but the process is similar. The point location dataset of Bus Stops can be downloaded from [Land Transport Authority Datamall]('https://datamall.lta.gov.sg/content/datamall/en.html').
 
@@ -678,7 +678,7 @@ head(nearest_bus)
 
 As shown above, this is what `nearest_bus` looks like, with **with a `count` column that shows the number of bus stops within 350m** of a resale flat unit.
 
-### 3.4.6 Number of Childcare Centres within 350M
+### 4.4.6 Number of Childcare Centres within 350M
 
 For childcare centres locations, we will use the OneMapSG API to get the childcare data, as shown in the following code chunk.
 
@@ -749,7 +749,7 @@ head(nearest_childcare)
 
 As shown above, this is what `nearest_childcare` looks like, with **with a `count` column that shows the number of childcare centres within 350m** of a resale flat unit.
 
-## 3.5 Adding the locational factors to flat_with_geo
+## 4.5 Adding the locational factors to flat_with_geo
 
 Now, we will add the respective locational factors into `flat_with_geo` dataframe.
 
@@ -829,7 +829,7 @@ Finally, we have the completed data set as shown by the output above.
 Great! It took a really long time to reach this step, let us now move on.
 
 
-## 3.6 Converting aspatial data frame into a sf object
+## 4.6 Converting aspatial data frame into a sf object
 
 Currently, `flat_with_geo` data frame is aspatial. We will convert it to a sf object. 
 
@@ -843,9 +843,9 @@ flat_resale.sf <- st_as_sf(flat_with_geo,
 
 head(flat_resale.sf)
 ```
-# 4. Exploratory Data Analysis
+# 5. Exploratory Data Analysis
 
-## 4.1 Statistical Graphics
+## 5.1 Statistical Graphics
 
 We will plot the distribution of **resale_price** by using **ggplot** using the code chunk below.
 
@@ -872,7 +872,7 @@ ggplot(data=flat_resale.sf, aes(x=`LOG_RESALE_PRICE`)) +
 ```
 The distribution became less skewed after the transformation, however this is just an example. For this study we will still be using `RESALE_PRICE` in the later steps.
 
-## 4.2 Drawing Statistical Point Map
+## 5.2 Drawing Statistical Point Map
 
 Lastly, we want to reveal the geospatial distribution of public housing resale prices in Singapore. 
 
@@ -890,11 +890,11 @@ tm_shape(flat_resale.sf) +
   tm_view(set.zoom.limits = c(11,14))
 ```
 
-# 5. Hedonic Pricing Modelling 
+# 6. Hedonic Pricing Modelling 
 
 We will now build hedonic pricing models for public housing resale units using *lm()* of Base R.
 
-## 5.1 Simple Linear Regression Method
+## 6.1 Simple Linear Regression Method
 
 Firstly, we will test out a simple linear regression model by using the most anticipated independent variable, which is the square area of the unit `FLOOR_AREA_SQM`. 
 
@@ -936,9 +936,9 @@ Unexpectedly, the figure above actually reveals that the model is poorly fitted 
 
 Therefore we shall conclude that **FLOOR_AREA_SQM is not a good indicator of predicting the RESALE_PRICE.**
 
-## 5.2 Multiple Linear Regression Method
+## 6.2 Multiple Linear Regression Method
 
-### 5.2.1 Visualising the relationships of the respective independent variables
+### 6.2.1 Visualising the relationships of the respective independent variables
 
 Instead of doing multiple simple regression models with the various independent variables, we will build a Multiple Regression model instead, which is more time efficient. 
 
@@ -957,7 +957,7 @@ According to this [article by Clairvoyant](https://blog.clairvoyantsoft.com/corr
 
 Since no coefficient values exceed the threshold as seen in the scatterplot matrix, we will use all independent variables in the modelling building.
 
-### 5.2.2 Building a hedonic pricing model using multiple linear regression method
+### 6.2.2 Building a hedonic pricing model using multiple linear regression method
 
 The code chunk below using *lm()* to calibrate the multiple linear regression model.
 
@@ -975,7 +975,7 @@ flat.mlr1 <- lm(formula = RESALE_PRICE ~ STOREY_RANGE + FLOOR_AREA_SQM + REMAINI
 
 ols_regress(flat.mlr1)
 ```
-### 5.2.3 Additional check for multicollinearity 
+### 6.2.3 Additional check for multicollinearity 
 
 Another alternative method will be used to ensure there are no multicollinearity between the independent variables.
 
@@ -996,7 +996,7 @@ ols_plot_resid_fit(flat.mlr1)
 ```
 The figure above reveals that most of the data points are relatively scattered around the 0 line, hence it is **safe to conclude that the relationship between the dependent variable and the respective independent variables are linear.**
 
-### 5.2.5 Test for Normality Assumption
+### 6.2.5 Test for Normality Assumption
 
 Lastly, we will do a Normality Assumption Test using *ols_plot_reside_hist()* function.
 
@@ -1005,8 +1005,7 @@ ols_plot_resid_hist(flat.mlr1)
 ```
 The figure reveals that the residual of the multiple linear regression model (i.e. flat.mlr1) resembles a normal distribution.
 
-### 5.2.6 Testing for Spatial Autocorrelation
-
+### 6.2.6 Testing for Spatial Autocorrelation
 The hedonic model we are building uses geographically referenced attributes, hence it is also important for us to visual the residual of the hedonic pricing model.
 
 In order to perform spatial autocorrelation test, we will need to convert `flat_resale.sf` into a SpatialPointsDataFrame.
@@ -1070,13 +1069,13 @@ The Global Moran’s I test for residual spatial autocorrelation shows that it�
 
 Since the Observed Global Moran I = 0.4672783 which is greater than 0, **we can infer that the residuals resembles cluster distribution.**
 
-# 6. Building Hedonic Pricing Models using GWmodel
+# 7. Building Hedonic Pricing Models using GWmodel
 
 We will build Hedonic Pricing Models using **both the fixed and adaptive bandwidth** schemes.
 
-## 6.1 Building Fixed Bandwidth GWR Model
+## 7.1 Building Fixed Bandwidth GWR Model
 
-### 6.1.1 Computing fixed bandwith
+### 7.1.1 Computing fixed bandwith
 
 The code chunk below uses the function *bw.gwr()* of GWModel package to determine the optimal fixed bandwidth to use in the model. 
 
@@ -1102,7 +1101,7 @@ The output result shows that the **recommended bandwidth is around 242.41 metres
 
 Hence, we will then calculate the local regression using all the data points within this recommended bandwidth.
 
-### 6.1.2 GWModel method - fixed bandwith
+### 7.1.2 GWModel method - fixed bandwith
 
 Now we can calibrate the GWR model using fixed bandwidth and gaussian kernel.
 
@@ -1118,9 +1117,9 @@ gwr.fixed
 
 The report shows that the **adjusted r-square of the gwr is 0.975144 which is significantly better than the global multiple linear regression model of 0.7179 .**
 
-## 6.2 Building Adaptive Bandwidth GWR Model
+## 7.2 Building Adaptive Bandwidth GWR Model
 
-### 6.2.1 Computing the adaptive bandwidth
+### 7.2.1 Computing the adaptive bandwidth
 
 Similar to the earlier section, we will first use *bw.ger()* to determine the recommended data point to use.
 
@@ -1160,7 +1159,7 @@ gwr.adaptive
 ```
 The report shows that the **adjusted r-square of the gwr is 0.94727 which is significantly better than the global multiple linear regression model of 0.7179 .**
 
-# 7. Visualising GWR Output
+# 8. Visualising GWR Output
 
 In addition to regression residuals, the output feature class table includes fields for: 
 
@@ -1176,7 +1175,7 @@ In addition to regression residuals, the output feature class table includes fie
 
 They are all stored in a SpatialPointsDataFrame or SpatialPolygonsDataFrame object integrated with fit.points, GWR coefficient estimates, y value, predicted values, coefficient standard errors and t-values in its “data” slot in an object called **SDF** of the output list.
 
-## 7.1 Converting SDF into sf data frame
+## 8.1 Converting SDF into sf data frame
 
 To visualise the fields in SDF, we need to first convert it into sf dataframe by using the code chunk below.
 
@@ -1198,7 +1197,7 @@ glimpse(flat_resale.sf.adaptive)
 summary(gwr.adaptive$SDF$yhat)
 ```
 
-## 7.2 Visualising local R2
+## 8.2 Visualising local R2
 
 We will create an interactive map to **visualise the local R2** results.
 
@@ -1222,7 +1221,7 @@ For the remaining areas, **the relationships between the factors and the `RESALE
 
 In essence, the model is performing well as a whole, as the values are relatively high. 
 
-## 7.3 Visualising Coefficient Standard Error (Intercept_SE)
+## 8.3 Visualising Coefficient Standard Error (Intercept_SE)
 
 ```{r fig.width=12, fig.height=8}
 tmap_mode("view")
@@ -1242,7 +1241,7 @@ As seen in the output above, all of the values fall in the **0 mln to 20 mln** r
 
 That's great!
 
-# 8. Conclusion
+# 9. Conclusion
 
 Finally, we have reached the end of the study, let us do a brief summary again.
 
@@ -1258,9 +1257,9 @@ In this study, the following affecting factors were studied and analysed:
 - Number of Bus Stops within 350m
 - Number of Childcare Centres within 350m
 
-As seen in the above analyses, the majority of the factors was found to affect the resale prices of housing units, only `PROXIMITY TO SUPERMARKET` AND `NO. OF CHILDCARE CENTRES WITHIN 350M` does not. 
+As seen in the above analyses, the majority of the factors was found to affect the resale prices of housing units, only **PROXIMITY TO SUPERMARKET** and **NO. OF CHILDCARE CENTRES WITHIN 350M** does not. 
 
-Therefore, the confirmed list of factors that does affect the resale prices of housing units are:
+**Therefore, the confirmed list of factors that does affect the resale prices of housing units are:**
 
 - Storey Range
 - Floor Area (Sqm)
@@ -1272,9 +1271,9 @@ Therefore, the confirmed list of factors that does affect the resale prices of h
 
 <p> As such, now you know what factors to look out for when searching for a resale unit that is within your budget &#128516;<p/>
 
-Thank you for looking through this study and all the best in your property search!
+Thank you for looking through this study and hope this helps in your future property search!
 
-# References
+# 10. References
 
 - [How to get API data with R](https://www.youtube.com/watch?v=tlaJf0CHbFE&t=370s&ab_channel=IDGTECHtalk)
 - [Passing many values to an API using R](https://stackoverflow.com/questions/61534474/passing-many-values-to-an-api-using-r)
