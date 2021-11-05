@@ -801,6 +801,23 @@ Having a value of 0 means that there are no facility within the stated distance 
 
 ```{r}
 flat_with_geo[is.na(flat_with_geo)] <- 0
+
+flat_with_geo$`NO. OF BUS STOPS WITHIN 350M` <- as.numeric(flat_with_geo$`NO. OF BUS STOPS WITHIN 350M`)
+flat_with_geo$`NO. OF CHILDCARE CENTRES WITHIN 350M` <- as.numeric(flat_with_geo$`NO. OF CHILDCARE CENTRES WITHIN 350M`)
+```
+
+We will also change the columns `STOREY_RANGE` and `REMAINING_LEASE` to their numeric counterparts through the code chunk below.
+
+For `STOREY_RANGE`, I will use the lower limit (e.g. 01 TO 02, 01 will be used instead).
+
+For `REMAINING_LEASE`, only the year will be retained (e.g. 61 years 06 months -> 61).
+
+```{r}
+flat_with_geo$STOREY_RANGE <- gsub(" .*$", "", flat_with_geo$STOREY_RANGE) %>%
+                              as.numeric(flat_with_geo$STOREY_RANGE)
+
+flat_with_geo$REMAINING_LEASE <- gsub(" .*$", "", flat_with_geo$REMAINING_LEASE) %>%
+                              as.numeric(flat_with_geo$REMAINING_LEASE)
 ```
 
 ```{r}
@@ -853,7 +870,7 @@ We will then plot the distribution of **log_resale_price** using the below code 
 ggplot(data=flat_resale.sf, aes(x=`LOG_RESALE_PRICE`)) +
   geom_histogram(bins=20, color="black", fill="light blue")
 ```
-The distribution became less skewed after the transformation.
+The distribution became less skewed after the transformation, however this is just an example. For this study we will still be using `RESALE_PRICE` in the later steps.
 
 ## 4.2 Drawing Statistical Point Map
 
@@ -900,9 +917,9 @@ The output report reveals that the SELLING_PRICE can be explained by using the f
 
 *RESALE_PRICE = 556616 + -1190(FLOOR_AREA_SQM)*
 
-The R-squared of 0.004699 reveals that the simple regression model built is only able to explain a very small portion of the resale prices.
+The R-squared of 0.004657 reveals that the simple regression model built is only able to explain a very small portion of the resale prices.
 
-However, since p-value is much smaller than 0.0001, we will reject the null hypothesis that mean is a good estimator of RESALE_PRICE. This will allow us to infer that the simple linear regression model above is a relatively good estimator of RESALE_PRICE.
+However, since p-value is much smaller than 0.0001, we will reject the null hypothesis that the mean is a good estimator of RESALE_PRICE. This will allow us to infer that the simple linear regression model above is a relatively good estimator of RESALE_PRICE.
 
 The **Coefficients:** section of the report reveals that the p-values of both the estimates of the Intercept and FLOOR_AREA_SQM are smaller than 0.001. In view of this, the null hypothesis of the B0 and B1 are equal to 0 will be rejected. As a result, we will be able to infer that the B0 and B1 are good parameter estimates.
 
@@ -921,20 +938,341 @@ Therefore we shall conclude that **FLOOR_AREA_SQM is not a good indicator of pre
 
 ## 5.2 Multiple Linear Regression Method
 
-### Visualising the relationships of the respective independent variables
+### 5.2.1 Visualising the relationships of the respective independent variables
 
+Instead of doing multiple simple regression models with the various independent variables, we will build a Multiple Regression model instead, which is more time efficient. 
 
+This allows for predictions of the dependent variable `RESALE_PRICE` alongside multiple independent variables at one go.
 
+The first step is to ensure the independent variables used are not highly correlated to each other, as **multicollinearity will affect the quality of a model.** 
 
+We will use a Correlation Matrix to visualise the relationships between the independent variables, by using **corrplot** package in the code chunk below.
 
+```{r fig.width=12, fig.height=8}
+corrplot(cor(flat_with_geo[, 7:13]), diag = FALSE, order = "AOE",
+         tl.pos = "td", tl.cex = 0.5, method = "number", type = "upper")
+```
 
+According to this [article by Clairvoyant](https://blog.clairvoyantsoft.com/correlation-and-collinearity-how-they-can-make-or-break-a-model-9135fbe6936a), a data and decision engineering company, the presence of **Muliticollinearity** is indicated when the **correlation coefficient is > 0.7.** 
 
+Since no coefficient values exceed the threshold as seen in the scatterplot matrix, we will use all independent variables in the modelling building.
 
+### 5.2.2 Building a hedonic pricing model using multiple linear regression method
 
+The code chunk below using *lm()* to calibrate the multiple linear regression model.
 
+```{r}
+flat.mlr <- lm(formula = RESALE_PRICE ~ STOREY_RANGE + FLOOR_AREA_SQM + REMAINING_LEASE + `PROXIMITY TO MRT` + `PROXIMITY TO 1ST TIER PRIMARY SCHOOL` + `PROXIMITY TO SUPERMARKET` + `PROXIMITY TO CBD` + `NO. OF BUS STOPS WITHIN 350M`  + `NO. OF CHILDCARE CENTRES WITHIN 350M`, data=flat_resale.sf)
 
+summary(flat.mlr)
+```
+With reference to the report above, we can see that majority of the independent variables are statistically significant. Only `PROXIMITY TO SUPERMARKET` AND `NO. OF CHILDCARE CENTRES WITHIN 350M` is not, so we will revise the model by removing them.
 
+Let us calibrate the revised model by using the following code chunk.
 
+```{r}
+flat.mlr1 <- lm(formula = RESALE_PRICE ~ STOREY_RANGE + FLOOR_AREA_SQM + REMAINING_LEASE + `PROXIMITY TO MRT` + `PROXIMITY TO 1ST TIER PRIMARY SCHOOL` + `PROXIMITY TO CBD` + `NO. OF BUS STOPS WITHIN 350M`, data=flat_resale.sf)
+
+ols_regress(flat.mlr1)
+```
+### 5.2.3 Additional check for multicollinearity 
+
+Another alternative method will be used to ensure there are no multicollinearity between the independent variables.
+
+The *ols_vif_tol()* function of **olsrr** package will be used, however there are some errors with the function so I will just leave the code chunk here for now.
+
+```{r eval=FALSE}
+ols_vif_tol(flat.mlr1)
+```
+
+### 5.2.4 Test for Non-Linearity
+
+It is important to test whether linearity and additivity exists in the relationship between dependent and independent variables.
+
+We will use the *ols_plot_resid_fit()* of **olsrr** package to perform the linearity assumption test.
+
+```{r}
+ols_plot_resid_fit(flat.mlr1)
+```
+The figure above reveals that most of the data points are relatively scattered around the 0 line, hence it is **safe to conclude that the relationship between the dependent variable and the respective independent variables are linear.**
+
+### 5.2.5 Test for Normality Assumption
+
+Lastly, we will do a Normality Assumption Test using *ols_plot_reside_hist()* function.
+
+```{r}
+ols_plot_resid_hist(flat.mlr1)
+```
+The figure reveals that the residual of the multiple linear regression model (i.e. flat.mlr1) resembles a normal distribution.
+
+### 5.2.6 Testing for Spatial Autocorrelation
+
+The hedonic model we are building uses geographically referenced attributes, hence it is also important for us to visual the residual of the hedonic pricing model.
+
+In order to perform spatial autocorrelation test, we will need to convert `flat_resale.sf` into a SpatialPointsDataFrame.
+
+First, we will export the residual of the hedonic pricing model and save it as a data frame.
+
+```{r}
+mlr.output <- as.data.frame(flat.mlr1$residuals)
+```
+
+Next, we will join the newly created data frame with `flat_resale.sf` object.
+
+```{r}
+flat_resale.res.sf <- cbind(flat_resale.sf, 
+                        flat.mlr1$residuals) %>%
+rename(`MLR_RES` = `flat.mlr1.residuals`)
+```
+
+Next, we will convert `flat_resale.res.sf` simple feature object into a SpatialPointsDataFrame because **spdep** package can only process sp conformed spatial data objects.
+
+The code chunk below will be used to perform the data conversion process.
+
+```{r}
+flat_resale.sp <- as_Spatial(flat_resale.res.sf)
+flat_resale.sp
+```
+Next, we will use **tmap** package to visualise the distribution of the residuals on an interactive map.
+
+```{r fig.width=12, fig.height=8}
+tmap_mode("view")
+
+tm_shape(mpsz_svy21)+
+  tm_polygons(alpha = 0.4) +
+tm_shape(flat_resale.res.sf) +  
+  tm_dots(col = "MLR_RES",
+          alpha = 0.6,
+          style="quantile") +
+  tm_view(set.zoom.limits = c(11,14))
+```
+
+The figure above reveals **signs of spatial correlation.**
+
+Therefore, we will perform a **Moran's I Test**. The first step will be computing a distance-based weight matrix by using *dnearneigh()* function of **spdep** package.
+
+```{r}
+nb <- dnearneigh(coordinates(flat_resale.sp), 0, 1500, longlat = FALSE)
+summary(nb)
+```
+Next, *nb2listw()* will be used to convert the output neighbours lists (i.e. nb) into spatial weights.
+
+```{r}
+nb_lw <- nb2listw(nb, style = 'W')
+summary(nb_lw)
+```
+Next, *lm.morantest()* will be used to perform Moran’s I test for residual spatial autocorrelation.
+
+```{r}
+lm.morantest(flat.mlr1, nb_lw)
+```
+The Global Moran’s I test for residual spatial autocorrelation shows that it’s **p-value is less than 0.00000000000000022** which is less than the alpha value of 0.05. Hence, **we will reject the null hypothesis that the residuals are randomly distributed.**
+
+Since the Observed Global Moran I = 0.4672783 which is greater than 0, **we can infer that the residuals resembles cluster distribution.**
+
+# 6. Building Hedonic Pricing Models using GWmodel
+
+We will build Hedonic Pricing Models using **both the fixed and adaptive bandwidth** schemes.
+
+## 6.1 Building Fixed Bandwidth GWR Model
+
+### 6.1.1 Computing fixed bandwith
+
+The code chunk below uses the function *bw.gwr()* of GWModel package to determine the optimal fixed bandwidth to use in the model. 
+
+The argument **adaptive** is set to **FALSE** as we are interested in using the fixed bandwidth scheme.
+
+```{r eval=FALSE}
+bw.fixed <- bw.gwr(formula = RESALE_PRICE ~ STOREY_RANGE + FLOOR_AREA_SQM + REMAINING_LEASE + `PROXIMITY.TO.MRT` + `PROXIMITY.TO.1ST.TIER.PRIMARY.SCHOOL` + `PROXIMITY.TO.CBD` + `NO..OF.BUS.STOPS.WITHIN.350M`  + `NO..OF.CHILDCARE.CENTRES.WITHIN.350M`, data=flat_resale.sp, approach="CV", kernel="gaussian", adaptive=FALSE, longlat=FALSE)
+```
+
+![](fixedbw.png)    
+
+```{r include=FALSE}
+# bw.fixed <- write_rds(bw.fixed, "data/rds/bw.fixed.rds")
+# gwr.fixed <- write_rds(gwr.fixed, "data/rds/gwr.fixed.rds")
+```
+
+```{r include=FALSE}
+bw.fixed <- read_rds("data/rds/bw.fixed.rds")
+gwr.fixed <- read_rds("data/rds/gwr.fixed.rds")
+```
+
+The output result shows that the **recommended bandwidth is around 242.41 metres.** 
+
+Hence, we will then calculate the local regression using all the data points within this recommended bandwidth.
+
+### 6.1.2 GWModel method - fixed bandwith
+
+Now we can calibrate the GWR model using fixed bandwidth and gaussian kernel.
+
+```{r eval=FALSE}
+gwr.fixed <- gwr.basic(formula = RESALE_PRICE ~ STOREY_RANGE + FLOOR_AREA_SQM + REMAINING_LEASE + `PROXIMITY.TO.MRT` + `PROXIMITY.TO.1ST.TIER.PRIMARY.SCHOOL` + `PROXIMITY.TO.CBD` + `NO..OF.BUS.STOPS.WITHIN.350M`  + `NO..OF.CHILDCARE.CENTRES.WITHIN.350M`, data=flat_resale.sp, bw=bw.fixed, kernel = 'gaussian', longlat = FALSE)
+```
+
+The output is saved in a list of class "gwrm", and let us see the output using the codechunk below.
+
+```{r}
+gwr.fixed
+```
+
+The report shows that the **adjusted r-square of the gwr is 0.975144 which is significantly better than the global multiple linear regression model of 0.7179 .**
+
+## 6.2 Building Adaptive Bandwidth GWR Model
+
+### 6.2.1 Computing the adaptive bandwidth
+
+Similar to the earlier section, we will first use *bw.ger()* to determine the recommended data point to use.
+
+The code chunk used look very similar to the one used to compute the fixed bandwidth except the **adaptive** argument will be changed to **TRUE.**
+
+```{r eval=FALSE}
+bw.adaptive <- bw.gwr(formula = RESALE_PRICE ~ STOREY_RANGE + FLOOR_AREA_SQM + REMAINING_LEASE + `PROXIMITY.TO.MRT` + `PROXIMITY.TO.1ST.TIER.PRIMARY.SCHOOL` + `PROXIMITY.TO.CBD` + `NO..OF.BUS.STOPS.WITHIN.350M`  + `NO..OF.CHILDCARE.CENTRES.WITHIN.350M`, data=flat_resale.sp, approach="CV", kernel="gaussian", adaptive=TRUE, longlat=FALSE)
+```
+![](adaptbw.png)
+
+```{r include=FALSE}
+# bw.adaptive <- write_rds(bw.adaptive, "data/rds/bw.adaptive.rds")
+# gwr.adaptive <- write_rds(gwr.adaptive, "data/rds/gwr.adaptive.rds")
+```
+
+```{r include=FALSE}
+bw.adaptive <- read_rds("data/rds/bw.adaptive.rds")
+gwr.adaptive <- read_rds("data/rds/gwr.adaptive.rds")
+```
+
+The output result shows that **251 is the recommended data point to be used**.
+
+Hence, we will then calculate the local regression using all the data points within this recommended bandwidth.
+
+### 6.2.2 Computing the adaptive bandwidth gwr model
+
+Now, we can go ahead with calibrating the gwr-based hedonic pricing model by using **adaptive bandwidth and gaussian kernel** as shown in the code chunk below.
+
+```{r eval=FALSE}
+gwr.adaptive <- gwr.basic(formula = RESALE_PRICE ~ STOREY_RANGE + FLOOR_AREA_SQM + REMAINING_LEASE + `PROXIMITY.TO.MRT` + `PROXIMITY.TO.1ST.TIER.PRIMARY.SCHOOL` + `PROXIMITY.TO.CBD` + `NO..OF.BUS.STOPS.WITHIN.350M`  + `NO..OF.CHILDCARE.CENTRES.WITHIN.350M`, data=flat_resale.sp, bw=bw.adaptive, kernel = 'gaussian', adaptive=TRUE, longlat = FALSE)
+```
+
+We will then look at the model output using the below code chunk.
+
+```{r}
+gwr.adaptive
+```
+The report shows that the **adjusted r-square of the gwr is 0.94727 which is significantly better than the global multiple linear regression model of 0.7179 .**
+
+# 7. Visualising GWR Output
+
+In addition to regression residuals, the output feature class table includes fields for: 
+
+- **Condition Number:** this diagnostic evaluates local collinearity. In the presence of strong local collinearity, results become unstable. Results associated with condition numbers larger than 30 may be unreliable.
+
+- **Local R2:** these values range between 0.0 and 1.0 and indicate how well the local regression model fits observed y values. Very low values indicate that the local model is performing poorly. Mapping the Local R2 values to see where GWR predicts well and where it predicts poorly may provide clues about important variables that may be missing from the regression model.
+
+- **Predicted:** these are the estimated (or fitted) y values 3. computed by GWR.
+
+- **Residuals:** to obtain the residual values, the fitted y values are subtracted from the observed y values. Standardized residuals have a mean of zero and a standard deviation of 1. A cold-to-hot rendered map of standardized residuals can be produced by using these values.
+
+- **Coefficient Standard Error:** these values measures the reliability of each coefficient estimate. Confidence in those estimates are higher when standard errors are small in relation to the actual coefficient values. Large standard errors may indicate problems with local collinearity.
+
+They are all stored in a SpatialPointsDataFrame or SpatialPolygonsDataFrame object integrated with fit.points, GWR coefficient estimates, y value, predicted values, coefficient standard errors and t-values in its “data” slot in an object called **SDF** of the output list.
+
+## 7.1 Converting SDF into sf data frame
+
+To visualise the fields in SDF, we need to first convert it into sf dataframe by using the code chunk below.
+
+```{r}
+flat_resale.sf.adaptive <- st_as_sf(gwr.adaptive$SDF) %>%
+  st_transform(crs=3414)
+
+flat_resale.sf.adaptive.svy21 <- st_transform(flat_resale.sf.adaptive, 3414)
+
+gwr.adaptive.output <- as.data.frame(gwr.adaptive$SDF)
+flat_resale.sf.adaptive <- cbind(flat_resale.res.sf, as.matrix(gwr.adaptive.output))
+```
+
+```{r}
+glimpse(flat_resale.sf.adaptive)
+```
+
+```{r}
+summary(gwr.adaptive$SDF$yhat)
+```
+
+## 7.2 Visualising local R2
+
+We will create an interactive map to **visualise the local R2** results.
+
+```{r fig.width=12, fig.height=8}
+tmap_mode("view")
+tm_shape(mpsz_svy21)+
+  tm_polygons(alpha = 0.1) +
+tm_shape(flat_resale.sf.adaptive) +  
+  tm_dots(col = "Local_R2",
+          border.col = "gray60",
+          border.lwd = 1) +
+  tm_view(set.zoom.limits = c(11,14))
+```
+Results:
+
+The local R2 values range between 0.0 to 1.0 and they indicate how well the local regression model fits observed y-values, which are the factors affecting the `RESALE_PRICE` of public housing resale flats. Very low value for the local R2 indicates that the local model is performing poorly. Hence, those with higher R squared values are of better prediction than those that are lower. **From the plot above, we can find that the local R2 values range from 0.7 to 1.0.** 
+
+The strongest intensity in orange tone (indicating higher local R2) happens in a few areas: **1) Central Region, 2) Far West and 3) North.** Thus, we can infer that those regions has areas that show that the factors analysed in the study fits the local regression model very well as compared to other regions. To conclude, **the relationships between the factors and the `RESALE_PRICE` was much better captured by the model in those areas.**
+
+For the remaining areas, **the relationships between the factors and the `RESALE_PRICE` are captured slightly weaker than the areas mentioned above. However, the model still fits relatively well as the lowest value is 0.7.**
+
+In essence, the model is performing well as a whole, as the values are relatively high. 
+
+## 7.3 Visualising Coefficient Standard Error (Intercept_SE)
+
+```{r fig.width=12, fig.height=8}
+tmap_mode("view")
+tm_shape(mpsz_svy21) + 
+  tm_polygons(alpha = 0.1) + 
+tm_shape(flat_resale.sf.adaptive) +
+  tm_dots(col="Intercept_SE", 
+          border.col="gray60",
+          border.lwd=1) +
+  tm_view(set.zoom.limits = c(11,14))
+```
+Results:
+
+These values measure the reliability of each coefficient estimate. Confidence in those estimates are higher when standard errors are small in relation to the actual coefficient values. Large standard errors may indicate problems with local collinearity.
+
+As seen in the output above, all of the values fall in the **0 mln to 20 mln** range, which is the smallest. **This means that our built model has no issues with local collinearity.**
+
+That's great!
+
+# 8. Conclusion
+
+Finally, we have reached the end of the study, let us do a brief summary again.
+
+In this study, the following affecting factors were studied and analysed:
+
+- Storey Range
+- Floor Area (Sqm)
+- Remaining Lease
+- Proximity to MRT Station
+- Proximity to 1st Tier Primary School
+- Proximity to Supermarket
+- Proximity to CBD
+- Number of Bus Stops within 350m
+- Number of Childcare Centres within 350m
+
+As seen in the above analyses, the majority of the factors was found to affect the resale prices of housing units, only `PROXIMITY TO SUPERMARKET` AND `NO. OF CHILDCARE CENTRES WITHIN 350M` does not. 
+
+Therefore, the confirmed list of factors that does affect the resale prices of housing units are:
+
+- Storey Range
+- Floor Area (Sqm)
+- Remaining Lease
+- Proximity to MRT Station
+- Proximity to 1st Tier Primary School
+- Proximity to CBD
+- Number of Bus Stops within 350m
+
+<p> As such, now you know what factors to look out for when searching for a resale unit that is within your budget &#128516;<p/>
+
+Thank you for looking through this study and all the best in your property search!
 
 # References
 
