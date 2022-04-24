@@ -1,18 +1,18 @@
-name: "Jun Peng's Workspace"
-title: "Jun Peng's Workspace"
+name: "Jun Peng's Geospatial Workspace"
+title: "Jun Peng's Geospatial Workspace"
 theme: theme.css
 description: |
-  Jun Peng's Workspace 
+  Jun Peng's Geospatial Workspace and Portfolio
 output_dir: "_site"
 navbar:
   right:
-    - text: "TAKE HOME EXERCISES"
+    - text: "ANALYSIS"
       menu:
-      - text: "Take-home Exercise 1"
+      - text: "Spatio-temporal Patterns of COVID-19 in Jakarta, Indonesia"
         href: https://teojp3-is415.netlify.app/posts/2021-08-27-take-home-exercise-1/
-      - text: "Take-home Exercise 2"
+      - text: "COVID-19's Impact on the Distribution of Airbnb Listings in Singapore"
         href: https://teojp3-is415.netlify.app/posts/2021-09-20-take-home-exercise-2/
-      - text: "Take-home Exercise 3"
+      - text: "Hedonic Pricing Models for resale prices of Public Housing in Singapore"
         href: https://teojp3-is415.netlify.app/posts/2021-10-25-take-home-exercise-3/
     - text: "ABOUT"
       href: about.html
