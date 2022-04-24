@@ -1,5 +1,5 @@
 ---
-title: "Take Home Exercise 2"
+title: "COVID-19's Impact on the Distribution of Airbnb Listings in Singapore"
 description: |
   A study on the distribution of Airbnb Listings in Singapore, and how has COVID-19 impacted them.
 author:

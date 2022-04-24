@@ -1,5 +1,5 @@
 ---
-title: "Take Home Exercise 1"
+title: "Spatio-temporal Patterns of COVID-19 in Jakarta, Indonesia"
 description: |
   Analysing and Visualising Spatio-temporal Patterns of COVID-19 in DKI Jakarta, Indonesia.
 author:

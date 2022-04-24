@@ -1,5 +1,5 @@
 ---
-title: "Take Home Exercise 3"
+title: "Hedonic Pricing Models for resale prices of Public Housing in Singapore"
 description: |
     A study on the resale prices of public housing in Singapore, through the use of Hedonic Pricing Models.
 author:
