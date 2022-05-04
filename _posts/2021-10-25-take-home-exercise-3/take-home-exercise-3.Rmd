@@ -14,7 +14,7 @@ output:
       toc_float: true
 ---
 
-```{r setup, include=FALSE, eval=TRUE, echo=TRUE, message=FALSE, error=FALSE, dpi=72, fig.retina=1}
+```{r setup, include=FALSE, eval=TRUE, echo=TRUE, message=FALSE, error=FALSE, dpi=72, fig.retina=2}
 knitr::opts_chunk$set(echo = TRUE, fig.align = "center", tidy.opts=list(width.cutoff=80),tidy=TRUE)
 ```
 

@@ -3,17 +3,17 @@
     {
       "path": "about.html",
       "title": "About this blog",
-      "description": "I am Jun Peng, currently in my third year in the School of Computing & Information Systems at Singapore Management University.\n\nWelcome to my personal workspace! The content listed on the blog will mainly be related to Geospatial Analytics, a module I'm currently taking this semester.",
+      "description": "I am Jun Peng, a student from the School of Computing & Information Systems at Singapore Management University.\n\nWelcome to my Geospatial workspace! This website consists of a collection of personal works relating to Geospatial Analytics, which is an area of Data Analytics that I'm hoping to specialise in.",
       "author": [],
       "contents": "\r\n\r\n\r\n\r\n",
-      "last_modified": "2022-04-24T15:14:52+08:00"
+      "last_modified": "2022-04-25T14:01:48+08:00"
     },
     {
       "path": "index.html",
       "title": "My Workspace",
       "author": [],
       "contents": "\r\n\r\n\r\n\r\n",
-      "last_modified": "2022-04-24T15:14:54+08:00"
+      "last_modified": "2022-04-25T14:01:49+08:00"
     }
   ],
   "collections": ["posts/posts.json"]
