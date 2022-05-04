@@ -1071,59 +1071,15 @@ Since the Observed Global Moran I = 0.4672783 which is greater than 0, **we can 
 
 # 7. Building Hedonic Pricing Models using GWmodel
 
-We will build Hedonic Pricing Models using **both the fixed and adaptive bandwidth** schemes.
+We will build Hedonic Pricing Models using **the adaptive bandwidth** schemes.
 
-## 7.1 Building Fixed Bandwidth GWR Model
+## 7.1 Building Adaptive Bandwidth GWR Model
 
-### 7.1.1 Computing fixed bandwith
+### 7.1.1 Computing adaptive bandwidth
 
-The code chunk below uses the function *bw.gwr()* of GWModel package to determine the optimal fixed bandwidth to use in the model. 
+We will first use *bw.ger()* to determine the recommended data point to use.
 
-The argument **adaptive** is set to **FALSE** as we are interested in using the fixed bandwidth scheme.
-
-```{r eval=FALSE}
-bw.fixed <- bw.gwr(formula = RESALE_PRICE ~ STOREY_RANGE + FLOOR_AREA_SQM + REMAINING_LEASE + `PROXIMITY.TO.MRT` + `PROXIMITY.TO.1ST.TIER.PRIMARY.SCHOOL` + `PROXIMITY.TO.CBD` + `NO..OF.BUS.STOPS.WITHIN.350M`  + `NO..OF.CHILDCARE.CENTRES.WITHIN.350M`, data=flat_resale.sp, approach="CV", kernel="gaussian", adaptive=FALSE, longlat=FALSE)
-```
-
-![](fixedbw.png)    
-
-```{r include=FALSE}
-# bw.fixed <- write_rds(bw.fixed, "data/rds/bw.fixed.rds")
-# gwr.fixed <- write_rds(gwr.fixed, "data/rds/gwr.fixed.rds")
-```
-
-```{r include=FALSE}
-bw.fixed <- read_rds("data/rds/bw.fixed.rds")
-gwr.fixed <- read_rds("data/rds/gwr.fixed.rds")
-```
-
-The output result shows that the **recommended bandwidth is around 242.41 metres.** 
-
-Hence, we will then calculate the local regression using all the data points within this recommended bandwidth.
-
-### 7.1.2 GWModel method - fixed bandwith
-
-Now we can calibrate the GWR model using fixed bandwidth and gaussian kernel.
-
-```{r eval=FALSE}
-gwr.fixed <- gwr.basic(formula = RESALE_PRICE ~ STOREY_RANGE + FLOOR_AREA_SQM + REMAINING_LEASE + `PROXIMITY.TO.MRT` + `PROXIMITY.TO.1ST.TIER.PRIMARY.SCHOOL` + `PROXIMITY.TO.CBD` + `NO..OF.BUS.STOPS.WITHIN.350M`  + `NO..OF.CHILDCARE.CENTRES.WITHIN.350M`, data=flat_resale.sp, bw=bw.fixed, kernel = 'gaussian', longlat = FALSE)
-```
-
-The output is saved in a list of class "gwrm", and let us see the output using the codechunk below.
-
-```{r}
-gwr.fixed
-```
-
-The report shows that the **adjusted r-square of the gwr is 0.975144 which is significantly better than the global multiple linear regression model of 0.7179 .**
-
-## 7.2 Building Adaptive Bandwidth GWR Model
-
-### 7.2.1 Computing adaptive bandwidth
-
-Similar to the earlier section, we will first use *bw.ger()* to determine the recommended data point to use.
-
-The code chunk used look very similar to the one used to compute the fixed bandwidth except the **adaptive** argument will be changed to **TRUE.**
+The **adaptive** argument will be designated as **TRUE.**
 
 ```{r eval=FALSE}
 bw.adaptive <- bw.gwr(formula = RESALE_PRICE ~ STOREY_RANGE + FLOOR_AREA_SQM + REMAINING_LEASE + `PROXIMITY.TO.MRT` + `PROXIMITY.TO.1ST.TIER.PRIMARY.SCHOOL` + `PROXIMITY.TO.CBD` + `NO..OF.BUS.STOPS.WITHIN.350M`  + `NO..OF.CHILDCARE.CENTRES.WITHIN.350M`, data=flat_resale.sp, approach="CV", kernel="gaussian", adaptive=TRUE, longlat=FALSE)
@@ -1144,7 +1100,7 @@ The output result shows that **251 is the recommended data point to be used**.
 
 Hence, we will then calculate the local regression using all the data points within this recommended bandwidth.
 
-### 7.2.2 Computing the adaptive bandwidth gwr model
+### 7.1.2 Computing the adaptive bandwidth gwr model
 
 Now, we can go ahead with calibrating the gwr-based hedonic pricing model by using **adaptive bandwidth and gaussian kernel** as shown in the code chunk below.
 
