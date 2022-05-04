@@ -2,7 +2,6 @@
 title: "About this blog"
 description: |
   I am Jun Peng, a student from the School of Computing & Information Systems at Singapore Management University.
-  
   Welcome to my Geospatial workspace! This website consists of a collection of personal works relating to Geospatial Analytics, which is an area of Data Analytics that I'm hoping to specialise in.
 ---
 
